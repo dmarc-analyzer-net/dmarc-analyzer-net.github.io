@@ -1,0 +1,21 @@
+---
+import Icon from './Icon.astro';
+
+const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+---
+<footer style="border-top:1px solid #dcebe5;">
+  <div style="max-width:1160px; margin:0 auto; padding:40px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg,#0d9488,#115e59); display:flex; align-items:center; justify-content:center;"><Icon name="shield-energy" style="font-size:15px; color:#f0fdfa;" /></span>
+      <span style="font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;">DMARC Analyzer</span>
+      <span style="font-size:13px; color:#7ba79d; margin-left:6px;">Open-source DMARC monitoring for agencies.</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:24px; font-size:13px;">
+      <a class="navlink" href="/" style="font-weight:500;">Home</a>
+      <a class="navlink" href="/features" style="font-weight:500;">Features</a>
+      <a class="navlink" href={`${GH}/tree/main/docs`} style="font-weight:500;">Docs</a>
+      <a class="navlink" href={GH} style="font-weight:500;">GitHub</a>
+      <span style="color:#7ba79d;">Apache-2.0</span>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,38 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  /** Which page is active, so its nav link gets the highlighted treatment. */
+  current?: 'home' | 'features';
+}
+const { current } = Astro.props;
+
+// Repo for the actual application (the marketing site links out to it).
+const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+---
+<header style="position:sticky; top:0; z-index:50; background:rgba(247,251,249,0.85); backdrop-filter:blur(10px); border-bottom:1px solid #dcebe5;">
+  <nav style="max-width:1160px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
+    <a href="/" style="display:flex; align-items:center; gap:10px; color:#0c1a18 !important;">
+      <span style="width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,#0d9488,#115e59); display:flex; align-items:center; justify-content:center;">
+        <Icon name="shield-energy" style="font-size:17px; color:#f0fdfa;" />
+      </span>
+      <span style="font-family:'Space Grotesk',sans-serif; font-size:16.5px; font-weight:600; letter-spacing:-0.01em;">DMARC Analyzer</span>
+    </a>
+    <div style="display:flex; align-items:center; gap:28px;">
+      {current === 'features' ? (
+        <a href="/features" style="font-size:14px; font-weight:600; color:#0d9488 !important;">Features</a>
+      ) : (
+        <a class="navlink" href="/features" style="font-size:14px; font-weight:500;">Features</a>
+      )}
+      <a class="navlink" href="/#how" style="font-size:14px; font-weight:500;">How it works</a>
+      <a class="navlink" href="/#compare" style="font-size:14px; font-weight:500;">Compare</a>
+      <a class="navlink" href={`${GH}/tree/main/docs`} style="font-size:14px; font-weight:500;">Docs</a>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid #c8ded7; border-radius:8px; background:#ffffff; color:#0c1a18 !important; font-size:13px; font-weight:500;">
+        <Icon name="github" style="font-size:15px;" /> Star on GitHub
+      </a>
+      <a class="btn-primary" href="/#quickstart" style="display:inline-flex; align-items:center; height:34px; padding:0 15px; border-radius:8px; background:#0d9488; color:#f0fdfa !important; font-size:13px; font-weight:600;">Get started</a>
+    </div>
+  </nav>
+</header>

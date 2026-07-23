@@ -1,0 +1,58 @@
+---
+import '../styles/fonts.css';
+import '../styles/global.css';
+
+interface Props {
+  /** <title> and og:title. Keep under ~60 chars for search results. */
+  title: string;
+  /** Meta description + og/twitter description. ~150–160 chars. */
+  description: string;
+  /** Route path for the canonical / OG url. Defaults to the current path. */
+  path?: string;
+  /** Social share image, resolved against `site`. */
+  image?: string;
+}
+
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  image = '/og.png',
+} = Astro.props;
+
+const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL(image, Astro.site).href;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="canonical" href={canonical} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0d9488" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DMARC Analyzer" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
