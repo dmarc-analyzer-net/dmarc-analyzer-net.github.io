@@ -29,7 +29,7 @@ const entries = (await getCollection('compare', ({ data }) => !data.draft)).sort
           <li>
             <a class="lift" href={`/compare/${e.id}`} style="display:block; height:100%; border:1px solid #c8ded7; border-radius:14px; background:#ffffff; padding:22px 24px; color:#0c1a18 !important;">
               <h2 style="font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                vs {e.data.competitor}
+                {e.data.roundup ? e.data.competitor : `vs ${e.data.competitor}`}
                 <Icon name="arrow-right-01" style="font-size:17px; color:#0d9488;" />
               </h2>
               <p style="font-size:14px; line-height:1.55; color:#425551; margin:0;">{e.data.description}</p>

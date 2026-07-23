@@ -49,7 +49,12 @@ const compare = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/compare' }),
   schema: z.object({
     title: z.string().max(65),
-    competitor: z.string(), // display name, e.g. "dmarcian"
+    // For 1:1 pages this is the competitor name ("dmarcian"); for roundups it's
+    // a short category label ("Open source & self-hosted") used in nav/cards.
+    competitor: z.string(),
+    // Roundups list many tools instead of comparing us to one; the index and
+    // breadcrumb drop the "vs" framing for them.
+    roundup: z.boolean().default(false),
     description: z.string().min(50).max(160),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
