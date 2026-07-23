@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Cta from '../components/Cta.astro';
+import JsonLd from '../components/JsonLd.astro';
+
+const title = 'Free DMARC analyzer — open source & self-hosted';
+const description =
+  'A genuinely free DMARC analyzer: open source and self-hosted, with unlimited domains and no report data leaving your servers — not a capped free tier.';
+const path = '/free-dmarc-analyzer';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  url: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+  <div style="min-height:100vh; width:100%;">
+    <Header />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Free DMARC analyzer', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:48px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:22px 0 20px; max-width:760px;">A free DMARC analyzer you actually <span style="color:#0d9488;">own</span>.</h1>
+        <p style="font-size:18px; line-height:1.5; color:#425551; margin:0; max-width:640px;">Open source and self-hosted — monitor unlimited domains with no per-domain fees, and keep every report on your own infrastructure. Not a capped free tier.</p>
+      </div>
+    </section>
+
+    <section style="max-width:760px; margin:0 auto; padding:36px 32px 8px;">
+      <div class="prose">
+        <h2>Free — not a "free tier"</h2>
+        <p>
+          Most hosted DMARC tools advertise a free plan, then cap it — one or two
+          domains, a couple of weeks of history, a low message limit — to nudge
+          you toward a paid tier. DMARC Analyzer is free for a different reason:
+          it's <strong>open source</strong> (Apache-2.0) and you
+          <strong>self-host</strong> it. No domain caps, no history limits, no
+          per-message metering.
+        </p>
+
+        <h2>What you get</h2>
+        <ul>
+          <li><strong>Unlimited domains</strong> — no tier to outgrow.</li>
+          <li><strong>Full report history</strong> — bounded only by your own storage.</li>
+          <li><strong>Multi-tenant</strong> — organise domains by client, for agencies and MSPs.</li>
+          <li><strong>Real dashboards</strong> — <a href="/guides/how-to-read-a-dmarc-aggregate-report">aggregate reports</a> turned into a short to-do list, plus spoofing investigation and guided enforcement.</li>
+          <li><strong>Your data stays put</strong> — reports never leave your infrastructure.</li>
+        </ul>
+
+        <h2>How the "free" works</h2>
+        <p>
+          There's no account and no credit card — you run it yourself as a single
+          Docker container backed by PostgreSQL. The source is on
+          <a href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp">GitHub</a>,
+          licensed Apache-2.0, so you can read, modify, and trust it.
+        </p>
+
+        <h2>How it compares to hosted "free" plans</h2>
+        <p>
+          If you want a fully managed service and don't mind cloud hosting or
+          per-domain pricing, a hosted platform's free tier can be a fine start —
+          see the <a href="/compare/best-dmarc-monitoring-tools">buyer's guide</a>.
+          If you'd rather not send report data to a vendor or hit domain caps,
+          compare the <a href="/compare/open-source-dmarc-analyzer">open-source,
+          self-hosted options</a>.
+        </p>
+      </div>
+      <Cta title="Start monitoring for free" text="DMARC Analyzer is open source and self-hosted — spin it up with Docker and monitor unlimited domains, no account and no per-domain fees." />
+    </section>
+    <Footer />
+  </div>
+</BaseLayout>

@@ -18,7 +18,8 @@ heavy" and "lightweight but young."
 
 - **Data sovereignty** — [aggregate reports](/glossary/dmarc-aggregate-report)
   reveal your sending infrastructure; self-hosting keeps that in-house.
-- **No per-domain / per-volume fees** — run unlimited domains for free.
+- **No per-domain / per-volume fees** — run [unlimited domains for
+  free](/free-dmarc-analyzer).
 - **Auditability** — open source you can read, modify, and trust.
 
 ## The options

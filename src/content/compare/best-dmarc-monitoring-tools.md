@@ -52,7 +52,8 @@ cost for convenience and vendor support.
 
 For simple needs: **Postmark's DMARC digests** email you a weekly summary, and
 generic DNS utilities offer one-off record lookups. Good for a single domain;
-limited for ongoing, multi-domain monitoring.
+limited for ongoing, multi-domain monitoring. For a free option you fully own,
+DMARC Analyzer is [free and self-hosted](/free-dmarc-analyzer).
 
 ## Open-source & self-hosted
 
