@@ -4,6 +4,11 @@ Marketing site for [DMARC Analyzer](https://github.com/dmarc-analyzer-net/DmarcA
 an open-source, self-hosted DMARC monitoring tool for agencies. Built with
 [Astro](https://astro.build) and served via GitHub Pages.
 
+> **Adding pages or SEO content?** See
+> [`docs/content-and-seo.md`](docs/content-and-seo.md) — how to add pages,
+> scale up with content collections and programmatic routes, the planned
+> content clusters, and the technical SEO checklist.
+
 ## Develop
 
 ```bash
