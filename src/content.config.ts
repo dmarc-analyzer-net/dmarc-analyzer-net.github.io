@@ -41,4 +41,25 @@ const providers = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary, providers };
+// Comparison / "alternative" pages. Authored in src/content/compare/ and
+// rendered by src/pages/compare/[...slug].astro. These name competitors, so
+// keep every claim factual and durable (see the content style guide); the
+// template appends the trademark disclaimer automatically.
+const compare = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/compare' }),
+  schema: z.object({
+    title: z.string().max(65),
+    // For 1:1 pages this is the competitor name ("dmarcian"); for roundups it's
+    // a short category label ("Open source & self-hosted") used in nav/cards.
+    competitor: z.string(),
+    // Roundups list many tools instead of comparing us to one; the index and
+    // breadcrumb drop the "vs" framing for them.
+    roundup: z.boolean().default(false),
+    description: z.string().min(50).max(160),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides, glossary, providers, compare };
