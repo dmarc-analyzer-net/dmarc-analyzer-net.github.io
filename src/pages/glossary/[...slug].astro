@@ -1,0 +1,60 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import JsonLd from '../../components/JsonLd.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('glossary', ({ data }) => !data.draft);
+  const byId = new Map(entries.map((e) => [e.id, e]));
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, byId },
+  }));
+}
+
+const { entry, byId } = Astro.props;
+const { Content } = await render(entry);
+const path = `/glossary/${entry.id}`;
+
+// Resolve related slugs to real entries so labels stay accurate.
+const related = entry.data.related
+  .map((slug) => byId.get(slug))
+  .filter((e) => e !== undefined)
+  .map((e) => ({ label: e.data.term, href: `/glossary/${e.id}` }));
+
+const definedTermSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTerm',
+  name: entry.data.term,
+  description: entry.data.description,
+  ...(entry.data.aliases.length > 0 && { alternateName: entry.data.aliases }),
+  inDefinedTermSet: new URL('/glossary', Astro.site).href,
+  url: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path}>
+  <JsonLd slot="head" schema={definedTermSchema} />
+  <div style="min-height:100vh;">
+    <Header current="glossary" />
+    <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Glossary', href: '/glossary' },
+        { label: entry.data.term, href: path },
+      ]} />
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:38px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.term}</h1>
+      {entry.data.aliases.length > 0 && (
+        <div style="font-size:13px; color:#5d726d; margin:0 0 24px;">Also known as: {entry.data.aliases.join(', ')}</div>
+      )}
+      <div class="prose">
+        <Content />
+      </div>
+      <RelatedLinks title="Related terms" links={related} />
+    </article>
+    <Footer />
+  </div>
+</BaseLayout>

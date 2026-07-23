@@ -3,12 +3,66 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
+import JsonLd from '../components/JsonLd.astro';
 
 const title = 'DMARC Analyzer — Open-source DMARC monitoring for agencies';
 const description =
   'Open-source, self-hosted DMARC monitoring built for agencies running many client domains. Ingest reports, catch spoofing, and reach enforcement without per-domain fees.';
+
+const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+const siteUrl = Astro.site?.href ?? 'https://dmarc-analyzer-net.github.io/';
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'DMARC Analyzer',
+  url: siteUrl,
+  description: 'Open-source, self-hosted DMARC monitoring for agencies.',
+  sameAs: ['https://github.com/dmarc-analyzer-net'],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'DMARC Analyzer',
+  url: siteUrl,
+};
+
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'DMARC Analyzer',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Docker, Linux',
+  description,
+  url: GH,
+  license: 'https://www.apache.org/licenses/LICENSE-2.0',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
+// Mirror of the on-page FAQ below; keep in sync if the questions change.
+const faqs = [
+  ['What is DMARC, in one sentence?', 'DMARC is an email standard that lets a domain owner tell receiving servers what to do with mail that fails authentication — monitor it, quarantine it, or reject it — and get reports on who is sending as their domain. It is how you stop others from spoofing your clients’ brands.'],
+  ['Why run it myself instead of a hosted tool?', 'Cost and control. Hosted platforms bill per domain and per message, so an agency with dozens of clients pays the most. Self-hosting removes that ceiling, keeps sensitive report data on your own infrastructure, and lets you customise the tool to your workflow.'],
+  ['How many domains can it handle?', 'There is no built-in limit. Domains are grouped by client, and the background worker scales with your database — the same install comfortably serves a handful of domains or several hundred across many clients.'],
+  ['What do I need to run it?', 'For production, Docker and a PostgreSQL database (both included in the compose file) plus a mailbox that receives your DMARC reports. For local development, .NET SDK 10 and Node.js 22+ give you hot reload on both the API and the frontend.'],
+  ['Is it really free?', 'Yes. The project is released under the Apache-2.0 licence — free to use, modify, and deploy commercially. You pay only for the infrastructure you run it on.'],
+];
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map(([q, a]) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
+};
 ---
 <BaseLayout title={title} description={description} path="/">
+  <JsonLd slot="head" schema={orgSchema} />
+  <JsonLd slot="head" schema={websiteSchema} />
+  <JsonLd slot="head" schema={appSchema} />
+  <JsonLd slot="head" schema={faqSchema} />
   <div style="min-height:100vh; width:100%;">
     <Header current="home" />
     <a id="top"></a>
