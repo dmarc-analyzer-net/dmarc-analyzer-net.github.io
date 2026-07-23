@@ -1,0 +1,10 @@
+---
+// Emits a JSON-LD structured-data <script>. Pass a schema object; add
+// `slot="head"` when using it inside a page so it lands in <head> (JSON-LD is
+// also valid in <body>, which is fine for breadcrumbs rendered inline).
+interface Props {
+  schema: Record<string, unknown>;
+}
+const { schema } = Astro.props;
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />

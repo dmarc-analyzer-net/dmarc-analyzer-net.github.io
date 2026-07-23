@@ -1,0 +1,41 @@
+---
+import Icon from './Icon.astro';
+import JsonLd from './JsonLd.astro';
+
+// A breadcrumb trail + matching BreadcrumbList JSON-LD. Pass items in order,
+// root first; the last item is treated as the current page (not linked).
+interface Crumb {
+  label: string;
+  href: string;
+}
+interface Props {
+  items: Crumb[];
+}
+const { items } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.label,
+    item: new URL(c.href, Astro.site).href,
+  })),
+};
+---
+<nav aria-label="Breadcrumb" style="font-size:13px; color:#5d726d;">
+  <ol style="list-style:none; display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0; padding:0;">
+    {items.map((c, i) => (
+      <li style="display:inline-flex; align-items:center; gap:6px;">
+        {i > 0 && <Icon name="arrow-right-01" style="font-size:13px; color:#a7c0b8;" />}
+        {i < items.length - 1 ? (
+          <a class="navlink" href={c.href} style="font-weight:500;">{c.label}</a>
+        ) : (
+          <span aria-current="page" style="color:#2c3f3b;">{c.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+<JsonLd schema={schema} />

@@ -24,13 +24,14 @@ Keep claims truthful to the intended end state.
 
 ## Medium Priority
 
-- [ ] (todo) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`, `Faq.astro` (FAQPage), `Callout.astro`, `Cta.astro`, `Toc.astro`.
-- [ ] (todo) Add JSON-LD structured data: `Organization` + `SoftwareApplication` on home, `FAQPage` on the FAQ, `Article`/`BreadcrumbList` on content pages.
-- [ ] (todo) Set up Astro content collections for `guides` and `glossary` with Zod schemas (title/description length guards) and a `[...slug]` template.
-- [ ] (todo) Ship the glossary foundation (Cluster A): DMARC, SPF, DKIM, BIMI, MTA-STS, TLS-RPT, ARC, policy tags (`p=none/quarantine/reject`, `pct`, `sp`, `adkim`, `aspf`, `rua`, `ruf`, `fo`), alignment concepts. 8-10 to start, interlinked.
-- [ ] (todo) Ship 3-5 how-to guides (Cluster B): publish first DMARC record, read an aggregate report, move none -> quarantine -> reject, diagnose SPF/DKIM alignment failures, self-host with Docker + PostgreSQL.
+- [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
+- [ ] (todo) Build remaining content components: `Faq.astro` (FAQPage), `Callout.astro`, `Cta.astro`, `Toc.astro` — need MDX or `.astro` usage since they can't embed in plain Markdown.
+- [x] (done) Add JSON-LD structured data: `Organization` + `WebSite` + `SoftwareApplication` + `FAQPage` on home; `Article` + `BreadcrumbList` on guides; `DefinedTerm` + `BreadcrumbList` on glossary.
+- [x] (done) Set up Astro content collections for `guides` and `glossary` with Zod schemas (title/description length guards), `[...slug]` templates, and listing index pages.
+- [~] (in-progress) Ship the glossary foundation (Cluster A): initial 6 terms live (DMARC, SPF, DKIM, alignment, aggregate report/RUA, policy). Still to add: BIMI, MTA-STS, TLS-RPT, ARC, remaining policy tags (`pct`, `sp`, `adkim`, `aspf`, `ruf`, `fo`).
+- [~] (in-progress) Ship how-to guides (Cluster B): initial 3 live (publish first record, read an aggregate report, monitoring -> enforcement). Still to add: diagnose SPF/DKIM alignment failures, self-host with Docker + PostgreSQL, manage many client domains.
 - [ ] (todo) Register the site in Google Search Console and submit the sitemap.
-- [ ] (todo) Plan a dropdown/mega-menu in `Header.astro` (Guides / Glossary / Tools / Compare) before the flat nav stops scaling.
+- [ ] (todo) Plan a dropdown/mega-menu in `Header.astro` (Guides / Glossary / Tools / Compare) — nav now carries Guides + Glossary; will need grouping as clusters grow.
 
 ## Low Priority
 
