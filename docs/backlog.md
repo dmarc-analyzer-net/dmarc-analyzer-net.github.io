@@ -6,6 +6,12 @@ page-authoring patterns, and the SEO rationale behind these items.
 
 Status legend: `todo` (not started), `in-progress`, `blocked`, `done`.
 
+**Positioning:** the site markets the *target* product — everything on the app
+roadmap — not only what ships today. Feature claims (e.g. forensic/RUF reports,
+sending-source geography) may lead the implementation; each corresponds to a
+tracked item in the app backlog (`DmarcAnalyzerApp/docs/planning/backlog.md`).
+Keep claims truthful to the intended end state.
+
 ## High Priority
 
 - [x] (done) Astro project scaffold with `BaseLayout` (title/description/canonical/OG/Twitter), `Header`, `Footer`, `Icon`.
@@ -13,11 +19,8 @@ Status legend: `todo` (not started), `in-progress`, `blocked`, `done`.
 - [x] (done) Features page (`features.astro`).
 - [x] (done) Auto-deploy to GitHub Pages on push to `main` (`.github/workflows/deploy.yml`).
 - [x] (done) Auto-generated `sitemap-index.xml` via `@astrojs/sitemap`.
-- [ ] (todo) Fix marketing-copy accuracy vs. the app's actual capabilities (avoids "it doesn't do that" complaints):
-  - Remove/soften "forensic"/"RUF" report claims — the app parses aggregate/RUA only (index trust line + features "Aggregate & forensic reports").
-  - Remove "geography" from spoofing/source claims until IP geolocation ships (index feature card + features "Threat feed"/"Source identification").
-- [ ] (todo) Add `public/robots.txt` pointing at `sitemap-index.xml` (update host when the custom domain goes live).
-- [ ] (todo) Add `.prose` styles to `global.css` (design-token-based) — prerequisite before authoring any Markdown content.
+- [x] (done) Add `public/robots.txt` pointing at `sitemap-index.xml` (update host when the custom domain goes live).
+- [x] (done) Add `.prose` styles to `global.css` (brand-token-based) — prerequisite before authoring any Markdown content.
 
 ## Medium Priority
 
