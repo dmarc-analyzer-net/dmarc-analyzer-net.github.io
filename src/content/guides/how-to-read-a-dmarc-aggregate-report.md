@@ -9,6 +9,10 @@ arrive daily from every mailbox provider. Once you know the shape, though, each
 one answers a single question: *who sent mail as my domain, and did it
 authenticate?*
 
+> Want to see it in action? Paste a report into the free [DMARC report
+> analyzer](/tools/dmarc-report-analyzer) — it parses in your browser, nothing
+> uploaded.
+
 ## The envelope
 
 The top of the report says who generated it and which policy they saw

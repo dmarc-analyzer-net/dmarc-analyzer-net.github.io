@@ -1,0 +1,351 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+import JsonLd from '../../components/JsonLd.astro';
+
+const title = 'Free DMARC report analyzer (open source, in-browser)';
+const description =
+  'Paste or upload a DMARC aggregate (RUA) report and get a readable breakdown — SPF/DKIM alignment per source. Runs entirely in your browser; nothing is uploaded.';
+const path = '/tools/dmarc-report-analyzer';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'DMARC Report Analyzer',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any (web browser)',
+  description,
+  url: new URL(path, Astro.site).href,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+  <div style="min-height:100vh; width:100%;">
+    <Header current="tools" />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Tools', href: '/tools' },
+          { label: 'DMARC report analyzer', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">Free DMARC report analyzer</h1>
+        <p style="font-size:18px; line-height:1.5; color:#425551; margin:0; max-width:640px;">Turn a raw aggregate (RUA) report into a readable breakdown of who sent mail as your domain and whether it aligned. <strong>Everything runs in your browser — nothing is uploaded.</strong></p>
+      </div>
+    </section>
+
+    <section style="max-width:900px; margin:0 auto; padding:28px 32px;">
+      <!-- Tool -->
+      <div id="dropzone" style="border:2px dashed #b9d8cf; border-radius:14px; background:#ffffff; padding:28px; text-align:center; transition:border-color 150ms, background 150ms;">
+        <p style="margin:0 0 12px; font-size:15px; color:#2c3f3b;">Drop a DMARC report here (<code class="mono">.xml</code>, <code class="mono">.gz</code>, or <code class="mono">.zip</code>), or</p>
+        <label class="btn-primary" style="display:inline-flex; align-items:center; height:38px; padding:0 18px; border-radius:9px; background:#0d9488; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">
+          Choose a file
+          <input id="fileInput" type="file" accept=".xml,.gz,.zip,application/xml,text/xml,application/gzip,application/zip" style="display:none;" />
+        </label>
+        <p style="margin:16px 0 6px; font-size:13px; color:#7ba79d;">— or paste the XML —</p>
+        <textarea id="xmlInput" rows="5" placeholder="<feedback>...</feedback>" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; padding:12px; border:1px solid #cfe0da; border-radius:10px; background:#f7fbf9; color:#2c3f3b; resize:vertical;"></textarea>
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+          <button id="analyzeBtn" class="btn-primary" style="height:38px; padding:0 18px; border:0; border-radius:9px; background:#0d9488; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">Analyze</button>
+          <button id="sampleBtn" class="btn-ghost" style="height:38px; padding:0 16px; border:1px solid #c8ded7; border-radius:9px; background:#fff; color:#0c1a18; font-size:14px; font-weight:500; cursor:pointer;">Load a sample</button>
+        </div>
+      </div>
+      <p id="errorMsg" style="display:none; margin:14px 2px 0; font-size:14px; color:#a81f3d;"></p>
+
+      <!-- Results -->
+      <div id="results" style="display:none; margin-top:28px;"></div>
+
+      <p style="margin:18px 2px 0; font-size:12.5px; color:#7ba79d;">🔒 Your report is parsed locally in this browser tab using JavaScript. It is never sent to a server.</p>
+    </section>
+
+    <!-- SEO / explanatory content -->
+    <section style="max-width:760px; margin:0 auto; padding:24px 32px 8px;">
+      <div class="prose">
+        <h2>What this tool does</h2>
+        <p>
+          DMARC <a href="/glossary/dmarc-aggregate-report">aggregate reports</a>
+          arrive as verbose XML (often gzipped) once a day from each mailbox
+          provider. This analyzer parses one and shows, per sending source, how
+          many messages were seen and whether <a href="/glossary/spf">SPF</a> and
+          <a href="/glossary/dkim">DKIM</a> passed and
+          <a href="/glossary/dmarc-alignment">aligned</a> — so you can spot the
+          rows that need action. Learn the theory in
+          <a href="/guides/how-to-read-a-dmarc-aggregate-report">how to read a
+          DMARC aggregate report</a>.
+        </p>
+        <h2>Analyzing one report vs. many</h2>
+        <p>
+          This is a handy one-off reader. Doing it across many domains, every
+          day, from every provider doesn't scale by hand — that's what the
+          self-hosted <a href="/">DMARC Analyzer</a> automates, keeping the data
+          on your own infrastructure. It's also
+          <a href="/free-dmarc-analyzer">free and open source</a>.
+        </p>
+      </div>
+      <Cta />
+    </section>
+    <Footer />
+  </div>
+</BaseLayout>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const fileInput = $('fileInput');
+  const xmlInput = $('xmlInput');
+  const dropzone = $('dropzone');
+  const errorMsg = $('errorMsg');
+  const results = $('results');
+
+  const showError = (msg) => {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    results.style.display = 'none';
+  };
+  const clearError = () => { errorMsg.style.display = 'none'; };
+
+  async function gunzip(buf) {
+    const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+    return await new Response(stream).text();
+  }
+
+  // Minimal single-file ZIP reader (DMARC zips contain one XML). Uses the
+  // central directory for reliable sizes, then inflates with DecompressionStream.
+  async function unzipFirst(buf) {
+    const dv = new DataView(buf);
+    const u8 = new Uint8Array(buf);
+    let eocd = -1;
+    for (let i = buf.byteLength - 22; i >= 0; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('That does not look like a valid .zip file.');
+    const cd = dv.getUint32(eocd + 16, true);
+    if (dv.getUint32(cd, true) !== 0x02014b50) throw new Error('Unsupported .zip layout — try extracting the XML.');
+    const method = dv.getUint16(cd + 10, true);
+    const compSize = dv.getUint32(cd + 20, true);
+    const localOff = dv.getUint32(cd + 42, true);
+    const lhNameLen = dv.getUint16(localOff + 26, true);
+    const lhExtraLen = dv.getUint16(localOff + 28, true);
+    const start = localOff + 30 + lhNameLen + lhExtraLen;
+    const comp = u8.slice(start, start + compSize);
+    if (method === 0) return new TextDecoder().decode(comp);
+    if (method === 8) {
+      const stream = new Blob([comp]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return await new Response(stream).text();
+    }
+    throw new Error('Unsupported compression in the .zip — try extracting the XML.');
+  }
+
+  async function readFile(file) {
+    const name = file.name.toLowerCase();
+    const buf = await file.arrayBuffer();
+    if (name.endsWith('.gz')) return await gunzip(buf);
+    if (name.endsWith('.zip')) return await unzipFirst(buf);
+    return new TextDecoder().decode(buf);
+  }
+
+  function text(el, sel) {
+    const n = el && el.querySelector(sel);
+    return n ? n.textContent.trim() : '';
+  }
+
+  function parse(xml) {
+    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    if (doc.querySelector('parsererror') || !doc.querySelector('feedback')) {
+      throw new Error('Could not parse that as a DMARC report. Check it is aggregate (RUA) XML.');
+    }
+    const meta = doc.querySelector('report_metadata');
+    const pol = doc.querySelector('policy_published');
+    const records = Array.from(doc.querySelectorAll('record')).map((r) => {
+      const pe = r.querySelector('row policy_evaluated');
+      const count = parseInt(text(r, 'row count') || '0', 10) || 0;
+      const dkim = text(pe, 'dkim').toLowerCase();
+      const spf = text(pe, 'spf').toLowerCase();
+      return {
+        ip: text(r, 'row source_ip'),
+        count,
+        dkim, spf,
+        disposition: text(pe, 'disposition') || 'none',
+        headerFrom: text(r, 'identifiers header_from'),
+        pass: dkim === 'pass' || spf === 'pass',
+      };
+    }).sort((a, b) => b.count - a.count);
+
+    const begin = parseInt(text(meta, 'date_range begin') || '0', 10);
+    const end = parseInt(text(meta, 'date_range end') || '0', 10);
+    return {
+      org: text(meta, 'org_name'),
+      domain: text(pol, 'domain'),
+      policy: text(pol, 'p'),
+      begin, end,
+      records,
+    };
+  }
+
+  function fmtDate(epoch) {
+    if (!epoch) return '—';
+    return new Date(epoch * 1000).toISOString().slice(0, 10);
+  }
+
+  function chip(value, ok) {
+    const span = document.createElement('span');
+    span.textContent = value || '—';
+    const good = ok === true, bad = ok === false;
+    span.style.cssText = `display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; background:${good ? '#d7f4ec' : bad ? '#fde5ea' : '#eef3f1'}; color:${good ? '#0b5d54' : bad ? '#a81f3d' : '#54685f'};`;
+    return span;
+  }
+
+  function render(data) {
+    const total = data.records.reduce((s, r) => s + r.count, 0);
+    const passing = data.records.filter((r) => r.pass).reduce((s, r) => s + r.count, 0);
+    const rate = total ? Math.round((passing / total) * 100) : 0;
+
+    results.textContent = '';
+
+    // Summary
+    const summary = document.createElement('div');
+    summary.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;';
+    const stat = (label, value) => {
+      const box = document.createElement('div');
+      box.style.cssText = 'border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:14px 16px;';
+      const l = document.createElement('div');
+      l.textContent = label;
+      l.style.cssText = 'font-size:12px; color:#7ba79d; margin-bottom:4px;';
+      const v = document.createElement('div');
+      v.textContent = value;
+      v.style.cssText = "font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; color:#0c1a18;";
+      box.append(l, v);
+      return box;
+    };
+    summary.append(
+      stat('Domain', data.domain || '—'),
+      stat('DMARC pass rate', total ? rate + '%' : '—'),
+      stat('Messages', total.toLocaleString()),
+      stat('Sources', String(data.records.length)),
+    );
+    results.appendChild(summary);
+
+    const sub = document.createElement('p');
+    sub.textContent = `Reported by ${data.org || 'unknown'} · policy p=${data.policy || '?'} · ${fmtDate(data.begin)} to ${fmtDate(data.end)}`;
+    sub.style.cssText = 'font-size:13px; color:#5d726d; margin:0 0 18px;';
+    results.appendChild(sub);
+
+    // Table
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'overflow-x:auto; border:1px solid #e3eae8; border-radius:12px;';
+    const table = document.createElement('table');
+    table.style.cssText = 'width:100%; border-collapse:collapse; font-size:14px;';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr>' + ['Source IP', 'Messages', 'DKIM', 'SPF', 'Disposition', 'DMARC']
+      .map((h) => `<th style="text-align:left; padding:10px 14px; background:#f2f9f6; font-weight:600; color:#2c3f3b; white-space:nowrap;">${h}</th>`).join('') + '</tr>';
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    data.records.forEach((r) => {
+      const tr = document.createElement('tr');
+      tr.className = 'row-hover';
+      const td = (child) => {
+        const cell = document.createElement('td');
+        cell.style.cssText = 'padding:10px 14px; border-top:1px solid #eef3f1; vertical-align:middle;';
+        if (typeof child === 'string') cell.textContent = child; else cell.appendChild(child);
+        return cell;
+      };
+      const ipCell = td(r.ip || '—');
+      ipCell.style.fontFamily = "'JetBrains Mono',monospace";
+      ipCell.style.fontSize = '13px';
+      tr.append(
+        ipCell,
+        td(r.count.toLocaleString()),
+        td(chip(r.dkim, r.dkim === 'pass' ? true : r.dkim ? false : null)),
+        td(chip(r.spf, r.spf === 'pass' ? true : r.spf ? false : null)),
+        td(r.disposition),
+        td(chip(r.pass ? 'pass' : 'fail', r.pass)),
+      );
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    results.appendChild(wrap);
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function analyze(xml) {
+    clearError();
+    try {
+      if (!xml || !xml.trim()) { showError('Paste a report or choose a file first.'); return; }
+      render(parse(xml));
+    } catch (e) {
+      showError(e && e.message ? e.message : 'Something went wrong reading that report.');
+    }
+  }
+
+  $('analyzeBtn').addEventListener('click', () => analyze(xmlInput.value));
+
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) return;
+    clearError();
+    try {
+      const xml = await readFile(f);
+      xmlInput.value = xml.length > 200000 ? '' : xml; // keep the box light for huge reports
+      await analyze(xml);
+    } catch (e) {
+      showError(e && e.message ? e.message : 'Could not read that file.');
+    }
+  });
+
+  ['dragover', 'dragenter'].forEach((ev) => dropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#14b8a6';
+    dropzone.style.background = '#f0faf7';
+  }));
+  ['dragleave', 'drop'].forEach((ev) => dropzone.addEventListener(ev, (e) => {
+    e.preventDefault();
+    dropzone.style.borderColor = '#b9d8cf';
+    dropzone.style.background = '#ffffff';
+  }));
+  dropzone.addEventListener('drop', async (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    clearError();
+    try {
+      const xml = await readFile(f);
+      xmlInput.value = xml.length > 200000 ? '' : xml;
+      await analyze(xml);
+    } catch (err) {
+      showError(err && err.message ? err.message : 'Could not read that file.');
+    }
+  });
+
+  const SAMPLE = `<?xml version="1.0"?>
+<feedback>
+  <report_metadata>
+    <org_name>google.com</org_name>
+    <email>noreply-dmarc@google.com</email>
+    <report_id>sample-12345</report_id>
+    <date_range><begin>1753142400</begin><end>1753228800</end></date_range>
+  </report_metadata>
+  <policy_published>
+    <domain>example.com</domain><p>none</p><sp>none</sp><pct>100</pct>
+  </policy_published>
+  <record>
+    <row><source_ip>203.0.113.10</source_ip><count>842</count>
+      <policy_evaluated><disposition>none</disposition><dkim>pass</dkim><spf>pass</spf></policy_evaluated></row>
+    <identifiers><header_from>example.com</header_from></identifiers>
+  </record>
+  <record>
+    <row><source_ip>198.51.100.24</source_ip><count>57</count>
+      <policy_evaluated><disposition>none</disposition><dkim>pass</dkim><spf>fail</spf></policy_evaluated></row>
+    <identifiers><header_from>example.com</header_from></identifiers>
+  </record>
+  <record>
+    <row><source_ip>192.0.2.77</source_ip><count>16</count>
+      <policy_evaluated><disposition>none</disposition><dkim>fail</dkim><spf>fail</spf></policy_evaluated></row>
+    <identifiers><header_from>example.com</header_from></identifiers>
+  </record>
+</feedback>`;
+
+  $('sampleBtn').addEventListener('click', () => { xmlInput.value = SAMPLE; analyze(SAMPLE); });
+</script>
