@@ -41,4 +41,20 @@ const providers = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary, providers };
+// Comparison / "alternative" pages. Authored in src/content/compare/ and
+// rendered by src/pages/compare/[...slug].astro. These name competitors, so
+// keep every claim factual and durable (see the content style guide); the
+// template appends the trademark disclaimer automatically.
+const compare = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/compare' }),
+  schema: z.object({
+    title: z.string().max(65),
+    competitor: z.string(), // display name, e.g. "dmarcian"
+    description: z.string().min(50).max(160),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides, glossary, providers, compare };

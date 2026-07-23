@@ -3,7 +3,7 @@ import Icon from './Icon.astro';
 
 interface Props {
   /** Which page is active, so its nav link gets the highlighted treatment. */
-  current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup';
+  current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare';
 }
 const { current } = Astro.props;
 
@@ -38,6 +38,11 @@ const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
         <a href="/dmarc-for" style="font-size:14px; font-weight:600; color:#0d9488 !important;">Setup</a>
       ) : (
         <a class="navlink" href="/dmarc-for" style="font-size:14px; font-weight:500;">Setup</a>
+      )}
+      {current === 'compare' ? (
+        <a href="/compare" style="font-size:14px; font-weight:600; color:#0d9488 !important;">Compare</a>
+      ) : (
+        <a class="navlink" href="/compare" style="font-size:14px; font-weight:500;">Compare</a>
       )}
       <a class="navlink" href="/#how" style="font-size:14px; font-weight:500;">How it works</a>
       <a class="navlink" href={`${GH}/tree/main/docs`} style="font-size:14px; font-weight:500;">Docs</a>

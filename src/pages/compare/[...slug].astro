@@ -1,0 +1,67 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import Cta from '../../components/Cta.astro';
+import JsonLd from '../../components/JsonLd.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('compare', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, all: entries },
+  }));
+}
+
+const { entry, all } = Astro.props;
+const { Content } = await render(entry);
+const path = `/compare/${entry.id}`;
+
+const related = all
+  .filter((e) => e.id !== entry.id)
+  .slice(0, 3)
+  .map((e) => ({ label: e.data.title, href: `/compare/${e.id}` }));
+
+const published = entry.data.publishDate.toISOString();
+const modified = (entry.data.updatedDate ?? entry.data.publishDate).toISOString();
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: published,
+  dateModified: modified,
+  author: { '@type': 'Organization', name: 'DMARC Analyzer' },
+  publisher: { '@type': 'Organization', name: 'DMARC Analyzer' },
+  mainEntityOfPage: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
+  <JsonLd slot="head" schema={articleSchema} />
+  <div style="min-height:100vh;">
+    <Header current="compare" />
+    <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Compare', href: '/compare' },
+        { label: entry.data.competitor, href: path },
+      ]} />
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
+      <p style="font-size:18px; line-height:1.5; color:#5d726d; margin:0 0 32px;">{entry.data.description}</p>
+      <div class="prose">
+        <Content />
+      </div>
+      <p style="margin-top:40px; font-size:12.5px; line-height:1.6; color:#7ba79d;">
+        Named products are trademarks of their respective owners. This comparison
+        reflects our understanding at the time of writing and may change;
+        corrections are welcome via the <a href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp" style="color:#5d8a7f;">GitHub repository</a>.
+      </p>
+      <RelatedLinks title="More comparisons" links={related} />
+      <Cta />
+    </article>
+    <Footer />
+  </div>
+</BaseLayout>
