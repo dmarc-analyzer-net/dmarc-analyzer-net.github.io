@@ -2,7 +2,7 @@
 term: DMARC policy
 description: The DMARC policy (p=) tells receivers whether to monitor, quarantine, or reject mail that fails authentication — the dial you turn toward enforcement.
 aliases: ["p=none", "p=quarantine", "p=reject"]
-related: ["dmarc", "dmarc-aggregate-report", "dmarc-alignment"]
+related: ["dmarc", "dmarc-aggregate-report", "dmarc-alignment", "dmarc-quarantine-vs-reject"]
 ---
 
 The **DMARC policy** is the `p=` tag in your [DMARC](/glossary/dmarc) record. It

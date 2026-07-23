@@ -27,4 +27,18 @@ const glossary = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary };
+// Per-provider "set up SPF/DKIM/DMARC for X" pages. Authored in
+// src/content/dmarc-for/ and rendered by src/pages/dmarc-for/[...slug].astro.
+const providers = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/dmarc-for' }),
+  schema: z.object({
+    title: z.string().max(65),
+    provider: z.string(), // display name, e.g. "Google Workspace"
+    description: z.string().min(50).max(160),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides, glossary, providers };

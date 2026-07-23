@@ -2,7 +2,7 @@
 term: DKIM
 description: DKIM adds a cryptographic signature to outgoing mail so receivers can verify the message really came from your domain and was not altered.
 aliases: ["DomainKeys Identified Mail"]
-related: ["spf", "dmarc", "dmarc-alignment"]
+related: ["spf", "dmarc", "dmarc-alignment", "dkim-selector"]
 ---
 
 **DKIM** (DomainKeys Identified Mail) attaches a cryptographic signature to each
