@@ -20,7 +20,7 @@ in place will simply report failures for everything.
 [Aggregate reports](/glossary/dmarc-aggregate-report) arrive as email
 attachments. Pick or create a mailbox to receive them, e.g.
 `dmarc@yourdomain.com`. High-volume domains generate a lot of these, so a
-dedicated mailbox — pointed at an analyzer — is worth it.
+dedicated mailbox — pointed at an analyzer like [DMARC Analyzer](/) — is worth it.
 
 ## Step 3 — Publish the record
 

@@ -9,7 +9,7 @@ import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('guides', ({ data }) => !data.draft);
+  const entries = await getCollection('providers', ({ data }) => !data.draft);
   return entries.map((entry) => ({
     params: { slug: entry.id },
     props: { entry, all: entries },
@@ -18,13 +18,13 @@ export async function getStaticPaths() {
 
 const { entry, all } = Astro.props;
 const { Content } = await render(entry);
-const path = `/guides/${entry.id}`;
+const path = `/dmarc-for/${entry.id}`;
 
-// Link to the other guides (up to 3) for internal linking.
+// Link to the other provider guides for internal linking.
 const related = all
   .filter((e) => e.id !== entry.id)
   .slice(0, 3)
-  .map((e) => ({ label: e.data.title, href: `/guides/${e.id}` }));
+  .map((e) => ({ label: e.data.title, href: `/dmarc-for/${e.id}` }));
 
 const published = entry.data.publishDate.toISOString();
 const modified = (entry.data.updatedDate ?? entry.data.publishDate).toISOString();
@@ -43,20 +43,20 @@ const articleSchema = {
 <BaseLayout title={`${entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={articleSchema} />
   <div style="min-height:100vh;">
-    <Header current="guides" />
+    <Header current="setup" />
     <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
-        { label: 'Guides', href: '/guides' },
-        { label: entry.data.title, href: path },
+        { label: 'DMARC setup', href: '/dmarc-for' },
+        { label: entry.data.provider, href: path },
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
       <p style="font-size:18px; line-height:1.5; color:#5d726d; margin:0 0 32px;">{entry.data.description}</p>
       <div class="prose">
         <Content />
       </div>
-      <RelatedLinks title="More guides" links={related} />
-      <Cta />
+      <RelatedLinks title="Other providers" links={related} />
+      <Cta title="Monitor every client domain in one place" text="DMARC Analyzer is open source and self-hosted — ingest reports from all your providers and domains in one dashboard, on your own infrastructure. No per-domain fees." />
     </article>
     <Footer />
   </div>

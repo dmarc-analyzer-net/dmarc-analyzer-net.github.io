@@ -1,0 +1,27 @@
+---
+import Icon from './Icon.astro';
+
+// Closing call-to-action band for content pages (guides, provider setup).
+// Funnels educational traffic to the product. Glossary pages intentionally
+// omit this (they stay lean — see the content style guide). Override the copy
+// per page via props when a more specific hook fits.
+interface Props {
+  title?: string;
+  text?: string;
+}
+const {
+  title = 'Own your DMARC data',
+  text = 'DMARC Analyzer is open source and self-hosted — monitor unlimited domains and keep every report on your own infrastructure. No per-domain fees.',
+} = Astro.props;
+
+// The application repo (the marketing site links out to it).
+const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+---
+<aside style="margin-top:48px; border-radius:16px; background:linear-gradient(135deg,#0b2521,#123029); border:1px solid #134e4a; padding:32px 34px;">
+  <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; letter-spacing:-0.02em; color:#f0fdfa; margin:0 0 8px;">{title}</h2>
+  <p style="font-size:15px; line-height:1.6; color:#a7c9c0; margin:0 0 22px; max-width:560px;">{text}</p>
+  <div style="display:flex; flex-wrap:wrap; gap:12px;">
+    <a class="btn-primary" href="/#quickstart" style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:9px; background:#0d9488; color:#f0fdfa !important; font-size:14px; font-weight:600;">Get started</a>
+    <a href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid rgba(255,255,255,0.22); border-radius:9px; background:transparent; color:#e8f2ee !important; font-size:14px; font-weight:500;"><Icon name="github" style="font-size:16px;" /> View on GitHub</a>
+  </div>
+</aside>
