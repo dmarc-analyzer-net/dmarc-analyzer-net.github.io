@@ -4,7 +4,7 @@ description: Seeing "DMARC quarantine/reject policy not enabled"? Here's what th
 publishDate: 2026-07-23
 ---
 
-If a checker (like MxToolbox) shows **"DMARC Quarantine/Reject policy not
+If a DMARC checker shows **"DMARC Quarantine/Reject policy not
 enabled,"** it isn't saying DMARC is broken — it's saying your policy is set to
 **monitor only**. Your record exists, but it's telling receivers to take *no
 action* on mail that fails. Here's what to do about it.

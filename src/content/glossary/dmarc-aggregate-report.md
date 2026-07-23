@@ -30,5 +30,5 @@ Each `<record>` in the XML groups messages by source and reports the
 ```
 
 Reading these by hand across many domains does not scale — which is what a
-DMARC analyzer is for. See
+self-hosted analyzer like [DMARC Analyzer](/) is for. See
 [how to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report).

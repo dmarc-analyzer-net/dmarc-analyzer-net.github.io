@@ -62,6 +62,7 @@ action needed.
 
 One domain is readable by hand. A portfolio of client domains, each with dozens
 of sources and a report from every provider every day, is not — that is what a
-DMARC analyzer aggregates for you. When the "both fail, legitimate" rows are
+self-hosted analyzer like [DMARC Analyzer](/) aggregates for you, every domain in
+one dashboard. When the "both fail, legitimate" rows are
 gone, you are ready to
 [move toward enforcement](/guides/from-monitoring-to-enforcement).
