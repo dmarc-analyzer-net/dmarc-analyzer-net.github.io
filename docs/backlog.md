@@ -41,7 +41,7 @@ Keep claims truthful to the intended end state.
 - [ ] (todo) Add pillar pages tying each cluster together (e.g. `/dmarc-guide`) and wire them into nav.
 - [ ] (todo) Optimize images via Astro `<Image />` (`sharp`) with descriptive `alt`; add per-page OG images (`astro-og-canvas`).
 - [ ] (todo) Add standalone pages: `/about` (open-source/E-E-A-T angle) and any `/pricing` framing (free/self-hosted).
-- [ ] (todo) Wire up the custom domain: `public/CNAME` (`dmarc-analyzer.net`) + update `site` in `astro.config.mjs`.
+- [x] (done) Wire up the custom domain: `public/CNAME` (`dmarc-analyzer.net`) + `site` in `astro.config.mjs` + sitemap host in `robots.txt`; apex ALIAS -> `dmarc-analyzer-net.github.io`.
 
 ## Parking Lot
 

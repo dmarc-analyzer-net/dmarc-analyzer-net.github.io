@@ -5,12 +5,10 @@ import sitemap from '@astrojs/sitemap';
 // so it is served from the domain root — `base` stays "/".
 //
 // `site` is the canonical public URL. It is used for <link rel="canonical">,
-// Open Graph URLs, and the generated sitemap. It currently points at the
-// github.io URL so everything is correct out of the box. If/when the custom
-// domain is wired up (add `public/CNAME` containing `dmarc-analyzer.net`),
-// change this to 'https://dmarc-analyzer.net'.
+// Open Graph URLs, and the generated sitemap. The custom domain is live
+// (apex ALIAS -> dmarc-analyzer-net.github.io) with `public/CNAME` set.
 export default defineConfig({
-  site: 'https://dmarc-analyzer-net.github.io',
+  site: 'https://dmarc-analyzer.net',
   trailingSlash: 'ignore',
   integrations: [sitemap()],
 });

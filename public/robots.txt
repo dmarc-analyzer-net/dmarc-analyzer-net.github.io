@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dmarc-analyzer-net.github.io/sitemap-index.xml
+Sitemap: https://dmarc-analyzer.net/sitemap-index.xml
