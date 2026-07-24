@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+
+const tools = [
+  {
+    href: '/tools/dmarc-report-analyzer',
+    name: 'DMARC report analyzer',
+    note: 'Paste or upload an aggregate (RUA) report and get a readable, per-source breakdown. Runs entirely in your browser.',
+  },
+];
+---
+<BaseLayout
+  title="Free DMARC tools — DMARC Analyzer"
+  description="Free, in-browser DMARC tools — starting with an aggregate (RUA) report analyzer. Open source and private: nothing you paste or upload leaves your browser."
+  path="/tools"
+>
+  <div style="min-height:100vh;">
+    <Header current="tools" />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
+        <div style="font-size:13px; font-weight:600; color:#0d9488; margin-bottom:14px;">Tools</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">Free DMARC tools that run in your browser.</h1>
+        <p style="font-size:18px; line-height:1.5; color:#425551; margin:0; max-width:620px;">No account, no upload — everything runs locally in the page. Open source, like the rest of the project.</p>
+      </div>
+    </section>
+    <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
+      <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;">
+        {tools.map((t) => (
+          <li>
+            <a class="lift" href={t.href} style="display:block; height:100%; border:1px solid #c8ded7; border-radius:14px; background:#ffffff; padding:22px 24px; color:#0c1a18 !important;">
+              <h2 style="font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                {t.name}
+                <Icon name="arrow-right-01" style="font-size:17px; color:#0d9488;" />
+              </h2>
+              <p style="font-size:14px; line-height:1.55; color:#425551; margin:0;">{t.note}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p style="font-size:13px; color:#7ba79d; margin:24px 2px 0;">More tools (record checker, generator, SPF/DKIM lookup) are on the way.</p>
+    </section>
+    <Footer />
+  </div>
+</BaseLayout>
