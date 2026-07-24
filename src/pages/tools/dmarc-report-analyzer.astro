@@ -151,8 +151,20 @@ const schema = {
     return n ? n.textContent.trim() : '';
   }
 
+  // XML is unforgiving about anything before the declaration, and pasted text
+  // routinely arrives with a leading blank line, a BOM, or trailing junk. Trim
+  // to the actual document so a copy/paste artifact isn't reported as invalid.
+  function normalize(xml) {
+    let text = String(xml).replace(/^\uFEFF/, '').trim();
+    const start = text.search(/<(\?xml|feedback)\b/i);
+    if (start > 0) text = text.slice(start);
+    const close = text.toLowerCase().lastIndexOf('</feedback>');
+    if (close !== -1) text = text.slice(0, close + '</feedback>'.length);
+    return text;
+  }
+
   function parse(xml) {
-    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    const doc = new DOMParser().parseFromString(normalize(xml), 'application/xml');
     if (doc.querySelector('parsererror') || !doc.querySelector('feedback')) {
       throw new Error('Could not parse that as a DMARC report. Check it is aggregate (RUA) XML.');
     }
