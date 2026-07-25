@@ -1,6 +1,19 @@
 ---
 import Icon from './Icon.astro';
 
+/**
+ * Site header.
+ *
+ * Four top-level items with the secondary pages grouped under Resources, per the
+ * design system's ruling: the nav was drawn with four links and had grown to
+ * eight, which is what pushed the row to 929px and made every page scroll
+ * sideways on a phone. A flat eight-item row also reads as an unranked list.
+ *
+ * Below 768px the whole thing collapses to a drawer. Both the drawer and the
+ * Resources menu use <details>, so the header needs no JavaScript — the site
+ * ships none, and <details> is keyboard-accessible and communicates its own
+ * state. The trade-off is that neither closes on an outside click.
+ */
 interface Props {
   /** Which page is active, so its nav link gets the highlighted treatment. */
   current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare' | 'tools' | 'docs';
@@ -9,58 +22,212 @@ const { current } = Astro.props;
 
 // Repo for the actual application (the marketing site links out to it).
 const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+
+const PRIMARY = [
+  { href: '/features', label: 'Features', key: 'features' },
+  { href: '/#how', label: 'How it works', key: null },
+  { href: '/compare', label: 'Compare', key: 'compare' },
+] as const;
+
+const RESOURCES = [
+  { href: '/docs', label: 'Docs', key: 'docs' },
+  { href: '/guides', label: 'Guides', key: 'guides' },
+  { href: '/glossary', label: 'Glossary', key: 'glossary' },
+  { href: '/dmarc-for', label: 'Setup', key: 'setup' },
+  { href: '/tools', label: 'Tools', key: 'tools' },
+] as const;
+
+const inResources = RESOURCES.some((r) => r.key === current);
 ---
-<header style="position:sticky; top:0; z-index:50; background:rgba(247,251,249,0.85); backdrop-filter:blur(10px); border-bottom:1px solid var(--border-default);">
-  <nav style="max-width:1160px; margin:0 auto; padding:14px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;">
-    <a href="/" style="display:flex; align-items:center; gap:10px; color:var(--text-body) !important;">
-      <span style="width:30px; height:30px; border-radius:var(--radius-sm); background:linear-gradient(135deg,#0d9488,#115e59); display:flex; align-items:center; justify-content:center;">
+
+<header class="site-header">
+  <nav class="nav">
+    <a href="/" class="brand">
+      <span class="brand-mark">
         <Icon name="shield-energy" style="font-size:17px; color:var(--teal-50);" />
       </span>
-      <span style="font-family:'Space Grotesk',sans-serif; font-size:16.5px; font-weight:600; letter-spacing:-0.01em;">DMARC Analyzer</span>
+      <span class="brand-word">DMARC Analyzer</span>
     </a>
-    <div style="display:flex; align-items:center; gap:28px;">
-      {current === 'features' ? (
-        <a href="/features" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Features</a>
-      ) : (
-        <a class="navlink" href="/features" style="font-size:var(--text-base); font-weight:500;">Features</a>
-      )}
-      {current === 'guides' ? (
-        <a href="/guides" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Guides</a>
-      ) : (
-        <a class="navlink" href="/guides" style="font-size:var(--text-base); font-weight:500;">Guides</a>
-      )}
-      {current === 'glossary' ? (
-        <a href="/glossary" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Glossary</a>
-      ) : (
-        <a class="navlink" href="/glossary" style="font-size:var(--text-base); font-weight:500;">Glossary</a>
-      )}
-      {current === 'setup' ? (
-        <a href="/dmarc-for" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Setup</a>
-      ) : (
-        <a class="navlink" href="/dmarc-for" style="font-size:var(--text-base); font-weight:500;">Setup</a>
-      )}
-      {current === 'compare' ? (
-        <a href="/compare" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Compare</a>
-      ) : (
-        <a class="navlink" href="/compare" style="font-size:var(--text-base); font-weight:500;">Compare</a>
-      )}
-      {current === 'tools' ? (
-        <a href="/tools" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Tools</a>
-      ) : (
-        <a class="navlink" href="/tools" style="font-size:var(--text-base); font-weight:500;">Tools</a>
-      )}
-      <a class="navlink" href="/#how" style="font-size:var(--text-base); font-weight:500;">How it works</a>
-      {current === 'docs' ? (
-        <a href="/docs" style="font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">Docs</a>
-      ) : (
-        <a class="navlink" href="/docs" style="font-size:var(--text-base); font-weight:500;">Docs</a>
-      )}
+
+    <div class="nav-links">
+      {PRIMARY.map((item) => (
+        <a
+          href={item.href}
+          class:list={['nav-link', { 'is-current': item.key !== null && item.key === current }]}
+        >
+          {item.label}
+        </a>
+      ))}
+      <details class="menu">
+        <summary class:list={['nav-link', 'menu-trigger', { 'is-current': inResources }]}>
+          Resources
+          <svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </summary>
+        <div class="menu-panel">
+          {RESOURCES.map((item) => (
+            <a href={item.href} class:list={['menu-item', { 'is-current': item.key === current }]}>{item.label}</a>
+          ))}
+        </div>
+      </details>
     </div>
-    <div style="display:flex; align-items:center; gap:12px;">
-      <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-sm); font-weight:500;">
+
+    <div class="nav-actions">
+      <a class="btn-ghost action-ghost" href={GH}>
         <Icon name="github" style="font-size:var(--text-md);" /> Star on GitHub
       </a>
-      <a class="btn-primary" href="/#quickstart" style="display:inline-flex; align-items:center; height:34px; padding:0 15px; border-radius:var(--radius-sm); background:var(--brand); color:var(--teal-50) !important; font-size:var(--text-sm); font-weight:600;">Get started</a>
+      <a class="btn-primary action-primary" href="/#quickstart">Get started</a>
     </div>
+
+    <details class="drawer">
+      {/* The design system mandates this drawer but ships no menu glyph, and the
+          site's icon set has none either — so the bars are inline here. */}
+      <summary class="drawer-toggle" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" />
+        </svg>
+      </summary>
+      <div class="drawer-panel">
+        {[...PRIMARY, ...RESOURCES].map((item) => (
+          <a href={item.href} class:list={['drawer-link', { 'is-current': item.key !== null && item.key === current }]}>
+            {item.label}
+          </a>
+        ))}
+        <a class="btn-ghost drawer-btn drawer-btn-ghost" href={GH}>
+          <Icon name="github" style="font-size:var(--text-md);" /> Star on GitHub
+        </a>
+        <a class="btn-primary drawer-btn drawer-btn-primary" href="/#quickstart">Get started</a>
+      </div>
+    </details>
   </nav>
 </header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(247, 251, 249, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-default);
+  }
+  .nav {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 14px var(--gutter-desktop);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--text-body) !important; }
+  .brand-mark {
+    width: 30px; height: 30px; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, #0d9488, #115e59);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .brand-word {
+    font-family: var(--font-display);
+    font-size: 16.5px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap;
+  }
+
+  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-link {
+    font-size: var(--text-base); font-weight: 500;
+    color: var(--text-secondary) !important;
+    transition: color 120ms;
+    white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--brand) !important; }
+  .nav-link.is-current { font-weight: 600; color: var(--brand) !important; }
+
+  /* Resources dropdown */
+  .menu { position: relative; }
+  .menu-trigger {
+    display: inline-flex; align-items: center; gap: 5px;
+    cursor: pointer; list-style: none;
+  }
+  .menu-trigger::-webkit-details-marker { display: none; }
+  .menu[open] .chev { transform: rotate(180deg); }
+  .chev { transition: transform 150ms var(--ease-out); }
+  .menu-panel {
+    position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+    min-width: 168px; padding: 6px;
+    display: flex; flex-direction: column;
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-overlay);
+  }
+  .menu-item {
+    padding: 9px 12px; border-radius: var(--radius-xs);
+    font-size: var(--text-base); color: var(--text-secondary) !important;
+    white-space: nowrap;
+  }
+  .menu-item:hover { background: var(--gray-50); color: var(--brand) !important; }
+  .menu-item.is-current { color: var(--brand) !important; font-weight: 600; }
+
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+  .action-ghost {
+    display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 13px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    background: var(--surface-card); color: var(--text-body) !important;
+    font-size: var(--text-sm); font-weight: 500; white-space: nowrap;
+  }
+  .action-primary {
+    display: inline-flex; align-items: center; height: 34px; padding: 0 15px;
+    border-radius: var(--radius-sm); background: var(--brand);
+    color: var(--teal-50) !important; font-size: var(--text-sm); font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Drawer — hidden until the row stops fitting */
+  .drawer { display: none; }
+  .drawer-toggle {
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; margin-right: -10px;
+    cursor: pointer; list-style: none; color: var(--text-body);
+  }
+  .drawer-toggle::-webkit-details-marker { display: none; }
+  .drawer-panel {
+    position: absolute; left: 0; right: 0; top: 100%;
+    display: flex; flex-direction: column;
+    padding: 8px var(--gutter-mobile) 18px;
+    background: var(--surface-page);
+    border-bottom: 1px solid var(--border-default);
+    box-shadow: var(--shadow-raised);
+  }
+  .drawer-link {
+    display: flex; align-items: center; min-height: 44px;
+    font-size: var(--text-md); font-weight: 500;
+    color: var(--text-body) !important;
+    border-bottom: 1px solid var(--border-default);
+  }
+  .drawer-link.is-current { color: var(--brand) !important; font-weight: 600; }
+  .drawer-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    min-height: 44px; margin-top: 10px; border-radius: var(--radius-sm);
+    font-size: var(--text-base); font-weight: 600;
+  }
+  .drawer-btn-ghost {
+    border: 1px solid var(--border-strong); background: var(--surface-card);
+    color: var(--text-body) !important;
+  }
+  .drawer-btn-primary { background: var(--brand); color: var(--teal-50) !important; }
+
+  @media (max-width: 1023px) {
+    .nav-links { gap: 20px; }
+    .action-ghost { display: none; }
+  }
+
+  @media (max-width: 767px) {
+    .nav { padding: 8px var(--gutter-mobile); position: relative; }
+    .nav-links,
+    .nav-actions { display: none; }
+    .drawer { display: block; }
+  }
+</style>
