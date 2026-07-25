@@ -18,4 +18,15 @@ export default defineConfig({
   site: 'https://dmarc-analyzer.net',
   trailingSlash: 'always',
   integrations: [sitemap()],
+  // Dev-server only: Vite blocks Host headers not in its allowlist. When
+  // previewing over SSH via a hostname (see AGENTS.md), pass the host(s) in
+  // DEV_ALLOWED_HOSTS (comma-separated) so no internal hostname is committed.
+  vite: {
+    server: {
+      allowedHosts: (process.env.DEV_ALLOWED_HOSTS ?? '')
+        .split(',')
+        .map((h) => h.trim())
+        .filter(Boolean),
+    },
+  },
 });
