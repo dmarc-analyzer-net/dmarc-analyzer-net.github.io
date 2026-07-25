@@ -12,18 +12,18 @@ matters more than ever.
 
 ## 1. SPF
 
-Publish one [SPF](/glossary/spf) `TXT` record at your root domain:
+Publish one [SPF](/glossary/spf/) `TXT` record at your root domain:
 
 ```
 v=spf1 include:spf.protection.outlook.com -all
 ```
 
 Add any other senders as additional `include:`s in the **same** record. Watch
-the [10-lookup limit](/guides/spf-record-syntax) if you stack several services.
+the [10-lookup limit](/guides/spf-record-syntax/) if you stack several services.
 
 ## 2. DKIM — publish two CNAMEs, then enable signing
 
-Microsoft signs with [DKIM](/glossary/dkim) using two rotating selectors. Add
+Microsoft signs with [DKIM](/glossary/dkim/) using two rotating selectors. Add
 both CNAMEs (values come from the Defender portal, based on your
 `*.onmicrosoft.com` initial domain):
 
@@ -39,16 +39,16 @@ domain and switch **Sign messages for this domain with DKIM signatures** to
 
 ## 3. DMARC
 
-With SPF and DKIM in place, add a [DMARC](/glossary/dmarc) record at
+With SPF and DKIM in place, add a [DMARC](/glossary/dmarc/) record at
 `_dmarc.yourdomain.com`, starting in monitoring mode:
 
 ```
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-`p=none` [monitors safely](/glossary/dmarc-policy); tighten only after
-[reports](/glossary/dmarc-aggregate-report) look clean. Full rollout in
-[publish your first DMARC record](/guides/publish-your-first-dmarc-record).
+`p=none` [monitors safely](/glossary/dmarc-policy/); tighten only after
+[reports](/glossary/dmarc-aggregate-report/) look clean. Full rollout in
+[publish your first DMARC record](/guides/publish-your-first-dmarc-record/).
 
 ## Microsoft-specific gotchas
 
@@ -63,7 +63,7 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ## What next
 
 After a few days, [read the aggregate
-reports](/guides/how-to-read-a-dmarc-aggregate-report); if anything fails, see
-[why your email is failing DMARC](/guides/fix-dmarc-failure). When Exchange
+reports](/guides/how-to-read-a-dmarc-aggregate-report/); if anything fails, see
+[why your email is failing DMARC](/guides/fix-dmarc-failure/). When Exchange
 Online is aligned, move along the [path to
-enforcement](/guides/from-monitoring-to-enforcement).
+enforcement](/guides/from-monitoring-to-enforcement/).

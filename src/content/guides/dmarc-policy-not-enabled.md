@@ -12,7 +12,7 @@ action* on mail that fails. Here's what to do about it.
 
 ## What the warning actually means
 
-The message points at your [`p=` policy](/glossary/dmarc-policy). You almost
+The message points at your [`p=` policy](/glossary/dmarc-policy/). You almost
 certainly have:
 
 ```
@@ -30,8 +30,8 @@ Don't just flip to `reject` — you could block legitimate mail you haven't
 accounted for yet. Move in stages:
 
 1. **Stay on `p=none`** until your [aggregate
-   reports](/guides/how-to-read-a-dmarc-aggregate-report) show every legitimate
-   sender passing and [aligned](/glossary/dmarc-alignment).
+   reports](/guides/how-to-read-a-dmarc-aggregate-report/) show every legitimate
+   sender passing and [aligned](/glossary/dmarc-alignment/).
 2. **Move to `p=quarantine`**, optionally ramping with `pct=`:
    ```
    v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
@@ -43,9 +43,9 @@ accounted for yet. Move in stages:
    ```
 
 The whole progression is covered in [from monitoring to
-enforcement](/guides/from-monitoring-to-enforcement). Not sure which enforcing
+enforcement](/guides/from-monitoring-to-enforcement/). Not sure which enforcing
 policy to pick? See [quarantine vs
-reject](/glossary/dmarc-quarantine-vs-reject).
+reject](/glossary/dmarc-quarantine-vs-reject/).
 
 ## "Not enabled" but you meant to enable it
 
@@ -56,10 +56,10 @@ A few things that cause the warning even when you thought you were enforcing:
 - **A subdomain has its own weaker policy** — or none, falling back to `sp=`.
 - **Editing on Office 365 / GoDaddy / cPanel:** make sure you saved the `_dmarc`
   `TXT` and there's no second, older DMARC record overriding it. See the
-  per-provider steps under [DMARC setup](/dmarc-for).
+  per-provider steps under [DMARC setup](/dmarc-for/).
 
 ## What next
 
 Confirm the change propagated, then keep watching reports as you tighten. If mail
 starts failing after you enforce, work through [why your email is failing
-DMARC](/guides/fix-dmarc-failure).
+DMARC](/guides/fix-dmarc-failure/).

@@ -7,14 +7,14 @@ publishDate: 2026-07-20
 Enforcement — `p=reject` — is the point of DMARC. It is also where people get
 nervous, because a mistake means legitimate mail gets rejected. The fix is not
 courage; it is doing it in stages, driven by your
-[aggregate reports](/glossary/dmarc-aggregate-report).
+[aggregate reports](/glossary/dmarc-aggregate-report/).
 
 ## Stage 0 — Monitor until it's boring
 
-Start at [`p=none`](/glossary/dmarc-policy) and stay there until you can account
+Start at [`p=none`](/glossary/dmarc-policy/) and stay there until you can account
 for **every** source in your reports. The goal: no legitimate sender is failing
-[alignment](/glossary/dmarc-alignment). Fix each one by adding it to
-[SPF](/glossary/spf) or enabling [DKIM](/glossary/dkim) for it.
+[alignment](/glossary/dmarc-alignment/). Fix each one by adding it to
+[SPF](/glossary/spf/) or enabling [DKIM](/glossary/dkim/) for it.
 
 Don't move on while a real sender still fails. That is the single most common
 way to break mail.
@@ -52,4 +52,4 @@ blip rather than a support ticket — the whole point of publishing `rua=` in th
 first place.
 
 New here? Start by
-[publishing your first DMARC record](/guides/publish-your-first-dmarc-record).
+[publishing your first DMARC record](/guides/publish-your-first-dmarc-record/).

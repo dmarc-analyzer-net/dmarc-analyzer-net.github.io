@@ -124,42 +124,32 @@ def fetch(url: str, method: str = "GET"):
 
 
 def normalise(url: str) -> str:
+    """Canonicalise for comparison — but *keep* the trailing slash, which is
+    significant here: the site serves `/features/` and 301s `/features`, so the
+    two are different URLs and an internal link to the slash-less one is a
+    finding, not noise."""
     url, _ = urldefrag(url)
     p = urlparse(url)
     path = re.sub(r"/{2,}", "/", p.path) or "/"
-    if path != "/" and path.endswith("/"):
-        path = path[:-1]
     return f"{p.scheme}://{p.netloc}{path}" + (f"?{p.query}" if p.query else "")
 
 
-MAX_HOPS = 5
-
-
 def fetch_page(url: str):
-    """Fetch a page, transparently following redirects that resolve to the same
-    canonical URL — a host adding a trailing slash (`/docs` -> `/docs/`) is
-    normalisation, not a finding. Genuine redirects to a *different* URL are
-    returned for reporting instead of being followed here.
+    """Fetch a page. Redirects are reported rather than followed: reaching a page
+    via one means some internal link points at the wrong URL, which is the whole
+    point of the check. The target is queued separately by the caller.
 
-    Returns (status, headers, body, hops, external_target|None).
+    Returns (status, headers, body, target|None).
     """
-    current, hops = url, 0
-    while hops <= MAX_HOPS:
-        status, headers, body = fetch(current)
-        if status in (301, 302, 303, 307, 308):
-            location = urljoin(current, headers.get("Location", ""))
-            if normalise(location) == normalise(url):
-                current, hops = location, hops + 1
-                time.sleep(DELAY)
-                continue
-            return status, headers, body, hops, normalise(location)
-        if status >= 500:
-            # Hosts (GitHub Pages included) throttle bursty crawls with 5xx.
-            # Retry once slowly before calling the page broken.
-            time.sleep(3)
-            status, headers, body = fetch(current)
-        return status, headers, body, hops, None
-    return 0, {"x-error": f"redirect loop after {MAX_HOPS} hops"}, b"", hops, None
+    status, headers, body = fetch(url)
+    if status in (301, 302, 303, 307, 308):
+        return status, headers, body, normalise(urljoin(url, headers.get("Location", "")))
+    if status >= 500:
+        # Hosts (GitHub Pages included) throttle bursty crawls with 5xx.
+        # Retry once slowly before calling the page broken.
+        time.sleep(3)
+        status, headers, body = fetch(url)
+    return status, headers, body, None
 
 
 def sitemap_urls(root: str) -> set[str]:
@@ -201,14 +191,11 @@ def main() -> int:
     seen = {queue[0]}
 
     print(f"Crawling {root} …")
-    slash_normalised = 0
 
     while queue and len(pages) < MAX_PAGES:
         url = queue.pop(0)
-        status, headers, body, hops, target = fetch_page(url)
+        status, headers, body, target = fetch_page(url)
         status_of[url] = status
-        if hops:
-            slash_normalised += 1
         time.sleep(DELAY)
 
         if target is not None:
@@ -292,8 +279,14 @@ def main() -> int:
 
         if not p.canonical:
             warnings.append(f"no canonical: {url}")
-        elif normalise(urljoin(url, p.canonical)) != url:
-            notes.append(f"canonical points elsewhere: {url} -> {p.canonical}")
+        elif urlparse(normalise(urljoin(url, p.canonical))).path != urlparse(url).path:
+            # Compared on path, for the same reason as the sitemap check below: a
+            # canonical carries the production absolute URL, so matching on the
+            # full URL would flag every page of a local preview crawl and hide
+            # the mismatches that matter — above all a missing trailing slash,
+            # which points search engines at a URL that 301s.
+            warnings.append(f"canonical path differs from the served URL: "
+                            f"{url} -> {p.canonical}")
 
         if p.robots and "noindex" in p.robots:
             notes.append(f"noindex: {url}")
@@ -362,11 +355,6 @@ def main() -> int:
                 f"outbound {status or 'ERR'}: {target}  [from: {srcs}]")
 
     # --- report -------------------------------------------------------------
-    if slash_normalised:
-        notes.append(f"{slash_normalised} URLs 301 to a trailing-slash form "
-                     f"(GitHub Pages normalisation; harmless, but internal links "
-                     f"could point at the final URL to save a hop)")
-
     print(f"\ncrawled {len(pages)} pages · {len(redirects)} genuine redirects · "
           f"{len(external)} distinct outbound links ({checked} checked) · "
           f"{len(sm)} sitemap URLs\n")

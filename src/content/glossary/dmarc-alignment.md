@@ -5,8 +5,8 @@ aliases: ["SPF alignment", "DKIM alignment", "identifier alignment"]
 related: ["spf", "dkim", "dmarc"]
 ---
 
-**Alignment** is the rule that turns [SPF](/glossary/spf) and
-[DKIM](/glossary/dkim) passes into a [DMARC](/glossary/dmarc) pass. It is not
+**Alignment** is the rule that turns [SPF](/glossary/spf/) and
+[DKIM](/glossary/dkim/) passes into a [DMARC](/glossary/dmarc/) pass. It is not
 enough for SPF or DKIM to pass — the domain they authenticated must **match the
 domain in the visible `From:` address**.
 

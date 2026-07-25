@@ -32,7 +32,10 @@ const {
   current,
 } = Astro.props;
 
-const canonical = new URL(path, Astro.site).href;
+// `trailingSlash: "always"`, so the URL the site actually serves always ends in
+// a slash. Normalise here too: a caller passing "/features" would otherwise
+// publish a canonical that 301s, pointing search engines at the wrong URL.
+const canonical = new URL(path.endsWith('/') ? path : `${path}/`, Astro.site).href;
 const ogImage = new URL(image, Astro.site).href;
 ---
 <!doctype html>

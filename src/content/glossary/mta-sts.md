@@ -10,7 +10,7 @@ they **must** use an encrypted, authenticated **TLS** connection when delivering
 mail to your domain — and refuse to deliver if they can't. It closes a gap the
 authentication standards leave open.
 
-Where [SPF](/glossary/spf), [DKIM](/glossary/dkim), and [DMARC](/glossary/dmarc)
+Where [SPF](/glossary/spf/), [DKIM](/glossary/dkim/), and [DMARC](/glossary/dmarc/)
 verify *who sent* a message, MTA-STS protects *how it travels*: without it, an
 attacker can strip the `STARTTLS` upgrade and force mail to be sent in plaintext
 (a downgrade attack). MTA-STS makes receivers reject that fallback.
@@ -33,6 +33,6 @@ Bump the `id` whenever you change the policy so servers refetch it.
 
 Add a **TLS-RPT** record (`_smtp._tls.yourdomain.com`) to receive reports about
 TLS delivery failures — the same way [DMARC aggregate
-reports](/glossary/dmarc-aggregate-report) give you visibility into
+reports](/glossary/dmarc-aggregate-report/) give you visibility into
 authentication. MTA-STS and TLS-RPT are the natural next step after your domain
 reaches DMARC enforcement.

@@ -21,7 +21,7 @@ const first = sections[0]?.items[0];
 <BaseLayout current="docs"
   title="Documentation — DMARC Analyzer"
   description="Install, configure, and operate your own DMARC Analyzer: Docker quick start, full configuration reference, mailbox setup, upgrades, and troubleshooting."
-  path="/docs"
+  path="/docs/"
 >
     <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
       <aside style="position:sticky; top:88px;">
@@ -38,7 +38,7 @@ const first = sections[0]?.items[0];
 
         {first && (
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:36px;">
-            <a class="btn-primary" href={`/docs/${first.id}`} style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50) !important; font-size:var(--text-base); font-weight:600;">Start here</a>
+            <a class="btn-primary" href={`/docs/${first.id}/`} style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50) !important; font-size:var(--text-base); font-weight:600;">Start here</a>
             <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="github" style="font-size:16px;" /> Source on GitHub</a>
           </div>
         )}
@@ -49,7 +49,7 @@ const first = sections[0]?.items[0];
             <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;">
               {group.items.map((item) => (
                 <li>
-                  <a class="lift" href={`/docs/${item.id}`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:16px 18px; color:var(--text-body) !important;">
+                  <a class="lift" href={`/docs/${item.id}/`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:16px 18px; color:var(--text-body) !important;">
                     <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:var(--text-md); font-weight:600;">
                       {item.data.title}
                       <Icon name="arrow-right-01" style="font-size:var(--text-md); color:var(--brand);" />
@@ -64,7 +64,7 @@ const first = sections[0]?.items[0];
 
         <p style="font-size:13.5px; color:var(--text-faint); margin:28px 0 0;">
           Looking for DMARC itself rather than this software? Start with the
-          <a href="/guides">guides</a> and <a href="/glossary">glossary</a>. Design
+          <a href="/guides/">guides</a> and <a href="/glossary/">glossary</a>. Design
           notes, the roadmap and architecture decisions live in
           <a href={`${GH}/tree/main/docs/planning`}>the repository</a>.
         </p>

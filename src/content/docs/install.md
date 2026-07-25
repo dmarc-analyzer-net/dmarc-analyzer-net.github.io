@@ -15,7 +15,7 @@ runs both plus PostgreSQL.
 - ~1 GB RAM and a little disk for PostgreSQL. Report data is small; a busy domain
   produces a few MB a month.
 - A mailbox that receives your DMARC aggregate reports — see
-  [connecting a mailbox](/docs/mailbox-setup). You can install first and add it after.
+  [connecting a mailbox](/docs/mailbox-setup/). You can install first and add it after.
 
 ## Quick start
 
@@ -82,4 +82,4 @@ repository README.
 
 ## Next
 
-Create your first client and domain in [first steps](/docs/getting-started).
+Create your first client and domain in [first steps](/docs/getting-started/).

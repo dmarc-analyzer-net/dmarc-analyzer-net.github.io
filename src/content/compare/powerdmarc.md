@@ -33,4 +33,4 @@ self-host, PowerDMARC has a well-developed MSP offering.
 If you're an agency or MSP that would rather **self-host, own client data
 outright, and skip per-domain billing**, DMARC Analyzer is built around exactly
 that multi-tenant, self-hosted model. See the
-[per-provider setup guides](/dmarc-for) for onboarding client domains.
+[per-provider setup guides](/dmarc-for/) for onboarding client domains.

@@ -7,8 +7,15 @@ import sitemap from '@astrojs/sitemap';
 // `site` is the canonical public URL. It is used for <link rel="canonical">,
 // Open Graph URLs, and the generated sitemap. The custom domain is live
 // (apex ALIAS -> dmarc-analyzer-net.github.io) with `public/CNAME` set.
+// `build.format` defaults to "directory", so every page is emitted as
+// `<route>/index.html` and GitHub Pages serves it at `/features/` — 301-ing
+// `/features` to it. `trailingSlash: "always"` makes that the one canonical
+// form everywhere (canonical tags, sitemap, llms.txt, and every internal href),
+// so no internal link spends a hop on that redirect. Internal links must
+// therefore be written *with* the trailing slash; `scripts/crawl.py` fails CI
+// on any that are not.
 export default defineConfig({
   site: 'https://dmarc-analyzer.net',
-  trailingSlash: 'ignore',
+  trailingSlash: 'always',
   integrations: [sitemap()],
 });

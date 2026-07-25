@@ -12,7 +12,7 @@ despite what people assume, is *off* by default. Here's the full setup.
 
 ## 1. SPF
 
-Add a single [SPF](/glossary/spf) `TXT` record at your root domain authorizing
+Add a single [SPF](/glossary/spf/) `TXT` record at your root domain authorizing
 Google to send:
 
 ```
@@ -21,13 +21,13 @@ v=spf1 include:_spf.google.com -all
 
 If other services also send as your domain (a newsletter tool, CRM, etc.), add
 their `include:` to the **same** record — never create a second SPF record. See
-[SPF record syntax](/guides/spf-record-syntax) for combining senders and the
+[SPF record syntax](/guides/spf-record-syntax/) for combining senders and the
 10-lookup limit.
 
 ## 2. DKIM — you must generate and turn it on
 
 This is the step most people miss: Google Workspace does **not** sign with
-[DKIM](/glossary/dkim) until you generate a key and start authentication.
+[DKIM](/glossary/dkim/) until you generate a key and start authentication.
 
 1. In the **Google Admin console** → *Apps → Google Workspace → Gmail →
    Authenticate email*.
@@ -42,16 +42,16 @@ recognized before you start authentication.
 
 ## 3. DMARC
 
-Once SPF and DKIM are live, publish a [DMARC](/glossary/dmarc) record in
+Once SPF and DKIM are live, publish a [DMARC](/glossary/dmarc/) record in
 monitoring mode at `_dmarc.yourdomain.com`:
 
 ```
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-`p=none` [monitors without affecting delivery](/glossary/dmarc-policy); `rua=`
-is where [aggregate reports](/glossary/dmarc-aggregate-report) are sent. See
-[publish your first DMARC record](/guides/publish-your-first-dmarc-record) for
+`p=none` [monitors without affecting delivery](/glossary/dmarc-policy/); `rua=`
+is where [aggregate reports](/glossary/dmarc-aggregate-report/) are sent. See
+[publish your first DMARC record](/guides/publish-your-first-dmarc-record/) for
 the safe rollout.
 
 ## Where reports come from
@@ -66,12 +66,12 @@ Google sends DMARC aggregate reports **once per day**, identified as coming from
 - **Don't list Google's IPs manually** in SPF; use `include:_spf.google.com`,
   which Google keeps current.
 - **One SPF record only** — a leftover second record causes a `permerror` and a
-  [DMARC failure](/guides/fix-dmarc-failure).
+  [DMARC failure](/guides/fix-dmarc-failure/).
 - **Propagation** — DKIM changes can take up to 48h; don't move to
   `quarantine`/`reject` until reports confirm Gmail is aligned.
 
 ## What next
 
 Give it a few days, then [read your aggregate
-reports](/guides/how-to-read-a-dmarc-aggregate-report) and, once clean, follow
-the [path to enforcement](/guides/from-monitoring-to-enforcement).
+reports](/guides/how-to-read-a-dmarc-aggregate-report/) and, once clean, follow
+the [path to enforcement](/guides/from-monitoring-to-enforcement/).
