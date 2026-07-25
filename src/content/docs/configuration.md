@@ -84,6 +84,69 @@ than the normal interval — backing off from 5 seconds up to
 `ScheduleIntervalSeconds` — so a transient outage doesn't idle ingestion for a
 whole hour.
 
+## Email delivery
+
+Alerts (and the future digest) are sent over SMTP. **Until `Host` and
+`FromAddress` are set, delivery is off** — alerts are still recorded and visible
+in the API, they just aren't emailed. Nothing errors.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Email__Host` | — | SMTP relay hostname. Setting this and `FromAddress` enables delivery. |
+| `Email__Port` | `587` | |
+| `Email__UseStartTls` | `true` | Set `false` only for a local relay that doesn't offer STARTTLS. |
+| `Email__Username` | — | Leave blank for an unauthenticated relay (common for an in-cluster MTA). |
+| `Email__Password` | — | |
+| `Email__FromAddress` | — | Sender address. Make sure your own DMARC policy permits it. |
+| `Email__FromName` | `DMARC Analyzer` | |
+| `Email__BaseUrl` | — | e.g. `https://dmarc.example.com`, used to build links in emails. |
+
+Check it works without waiting for something to break:
+
+```bash
+curl -X POST 'https://dmarc.example.com/api/v1/admin/notifications/test?to=you@example.com'
+```
+
+## Alerts
+
+A worker pass raises an alert when a domain's **compliance drops sharply against
+its own baseline**, or when its **published DMARC policy is weakened** (for
+example `p=reject` back to `p=none`, which silently removes protection).
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Alerts__Enabled` | `true` | Master switch. |
+| `Alerts__IntervalMinutes` | `60` | How often rules are evaluated. |
+| `Alerts__ComplianceDropPercent` | `15` | Percentage-point drop from baseline that raises a failure spike. |
+| `Alerts__MinMessages` | `100` | Ignore days quieter than this — a few failures on a quiet domain is noise. |
+| `Alerts__BaselineDays` | `7` | Days of history used as the comparison baseline. |
+| `Alerts__CooldownHours` | `24` | Don't re-raise the same alert for the same domain within this window. |
+
+Per client you can override the thresholds or switch alerting off entirely
+(Clients → edit, or `PATCH /api/v1/clients/{id}`):
+
+```json
+{ "alertsEnabled": true, "alertComplianceDropPercent": 25, "alertMinMessages": 500 }
+```
+
+Alerts are measured against **report data**, not the wall clock — a domain whose
+reports arrive late won't look like an outage.
+
+### Who gets notified
+
+Add recipients with `POST /api/v1/notification-recipients`. Omit `clientId` to
+have an address receive alerts for **every** client:
+
+```bash
+curl -X POST https://dmarc.example.com/api/v1/notification-recipients \
+  -H 'Content-Type: application/json' \
+  -d '{"clientId":"<id>","email":"ops@client.example","kind":"alert"}'
+```
+
+`kind` is `alert`, `digest`, or `both`. Alert history is at
+`GET /api/v1/alerts?days=30`, and `POST /api/v1/admin/alerts/evaluate` runs an
+evaluation immediately instead of waiting for the next pass.
+
 ## Retention
 
 A daily worker pass deletes DMARC data older than each client's retention window
