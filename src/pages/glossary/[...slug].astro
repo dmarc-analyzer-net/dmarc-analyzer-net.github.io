@@ -1,8 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import JsonLd from '../../components/JsonLd.astro';
@@ -36,10 +34,8 @@ const definedTermSchema = {
   url: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path}>
+<BaseLayout current="glossary" title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={definedTermSchema} />
-  <div style="min-height:100vh;">
-    <Header current="glossary" />
     <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
@@ -55,6 +51,4 @@ const definedTermSchema = {
       </div>
       <RelatedLinks title="Related terms" links={related} />
     </article>
-    <Footer />
-  </div>
 </BaseLayout>

@@ -1,8 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import Cta from '../../components/Cta.astro';
@@ -39,10 +37,8 @@ const articleSchema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
+<BaseLayout current="compare" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={articleSchema} />
-  <div style="min-height:100vh;">
-    <Header current="compare" />
     <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
@@ -62,6 +58,4 @@ const articleSchema = {
       <RelatedLinks title="More comparisons" links={related} />
       <Cta />
     </article>
-    <Footer />
-  </div>
 </BaseLayout>

@@ -1,16 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
 
 const title = 'Features — DMARC Analyzer';
 const description =
   'Every capability an agency needs to run DMARC at scale: automatic report ingestion, spoofing investigation, guided enforcement, and white-label reporting.';
 ---
-<BaseLayout title={title} description={description} path="/features">
-  <div style="min-height:100vh; width:100%;">
-    <Header current="features" />
+<BaseLayout current="features" title={title} description={description} path="/features">
     <!-- PAGE HEADER -->
       <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
         <div style="max-width:1160px; margin:0 auto; padding:72px 32px 40px;">
@@ -178,6 +174,4 @@ const description =
       </section>
 
       <!-- FOOTER -->
-    <Footer />
-  </div>
 </BaseLayout>
