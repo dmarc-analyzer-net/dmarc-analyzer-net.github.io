@@ -6,7 +6,7 @@ related: ["dmarc-policy", "dmarc", "dmarc-alignment"]
 ---
 
 `quarantine` and `reject` are the two **enforcing** [DMARC
-policies](/glossary/dmarc-policy) — the difference is what a receiver does with
+policies](/glossary/dmarc-policy/) — the difference is what a receiver does with
 mail that fails authentication.
 
 - **`p=quarantine`** — deliver failing mail, but to the **spam/junk** folder. The
@@ -28,7 +28,7 @@ mail that fails authentication.
 ## Moving between them safely
 
 Don't jump straight to `reject`. Confirm your [aggregate
-reports](/glossary/dmarc-aggregate-report) are clean, then ramp:
+reports](/glossary/dmarc-aggregate-report/) are clean, then ramp:
 
 ```
 v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
@@ -36,4 +36,4 @@ v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
 
 `pct=` applies the policy to a percentage of failing mail so you can increase it
 gradually before switching to `p=reject`. The full progression is in [from
-monitoring to enforcement](/guides/from-monitoring-to-enforcement).
+monitoring to enforcement](/guides/from-monitoring-to-enforcement/).

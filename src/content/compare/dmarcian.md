@@ -34,5 +34,5 @@ self-host, dmarcian is a mature, credible option.
 If you care about **data sovereignty**, want **no per-domain cost at scale**, or
 value **open source you can audit and run yourself**, DMARC Analyzer is built for
 exactly that. New to DMARC? Start by
-[publishing your first record](/guides/publish-your-first-dmarc-record) and
-[reading the reports](/guides/how-to-read-a-dmarc-aggregate-report).
+[publishing your first record](/guides/publish-your-first-dmarc-record/) and
+[reading the reports](/guides/how-to-read-a-dmarc-aggregate-report/).

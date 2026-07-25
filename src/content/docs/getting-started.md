@@ -38,14 +38,14 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 
 `p=none` changes nothing about how your mail is treated — it only asks receivers
 to send reports. Point `rua=` at the mailbox you'll connect in the next step. Our
-[publish your first DMARC record](/guides/publish-your-first-dmarc-record) guide
+[publish your first DMARC record](/guides/publish-your-first-dmarc-record/) guide
 covers this in more depth, and there are per-provider walkthroughs under
-[DMARC setup](/dmarc-for).
+[DMARC setup](/dmarc-for/).
 
 ## 4. Connect the mailbox
 
 **Mailbox sources → New mailbox source** with the IMAP details for the inbox
-receiving those `rua=` reports. See [connecting a mailbox](/docs/mailbox-setup)
+receiving those `rua=` reports. See [connecting a mailbox](/docs/mailbox-setup/)
 for provider specifics, app passwords, and the "default client" setting.
 
 ## 5. Wait for reports
@@ -77,5 +77,5 @@ recent report you have — otherwise a historical import would look empty.
 Monitoring alone doesn't stop spoofing. Once every legitimate sender passes, walk
 the policy from `none` to `quarantine` to `reject` — the Domain detail page
 recommends your next safe step and lists the sources still blocking it. The
-[monitoring to enforcement](/guides/from-monitoring-to-enforcement) guide explains
+[monitoring to enforcement](/guides/from-monitoring-to-enforcement/) guide explains
 the process.

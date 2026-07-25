@@ -6,7 +6,7 @@ publishDate: 2026-07-23
 ---
 
 **"No DMARC record found"** means a checker looked up `_dmarc.yourdomain.com` and
-got nothing back — your domain hasn't published a [DMARC](/glossary/dmarc)
+got nothing back — your domain hasn't published a [DMARC](/glossary/dmarc/)
 policy. It's the most common starting point, and the fix takes five minutes.
 
 ## Why it happens
@@ -28,13 +28,13 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
 - The **Name/Host** is `_dmarc` (your DNS host appends the domain).
-- `p=none` [monitors safely](/glossary/dmarc-policy) — nothing is blocked.
+- `p=none` [monitors safely](/glossary/dmarc-policy/) — nothing is blocked.
 - `rua=` is the mailbox that receives [aggregate
-  reports](/glossary/dmarc-aggregate-report).
+  reports](/glossary/dmarc-aggregate-report/).
 
-Provider-specific steps are under [DMARC setup](/dmarc-for) (Google Workspace,
+Provider-specific steps are under [DMARC setup](/dmarc-for/) (Google Workspace,
 Microsoft 365, GoDaddy). Full walkthrough: [publish your first DMARC
-record](/guides/publish-your-first-dmarc-record).
+record](/guides/publish-your-first-dmarc-record/).
 
 ## The subdomain case
 
@@ -53,5 +53,5 @@ propagates (usually minutes, up to ~an hour).
 ## What next
 
 After it propagates, confirm the record is live, then learn to [read the
-reports](/guides/how-to-read-a-dmarc-aggregate-report) that start arriving and
-plan your [path to enforcement](/guides/from-monitoring-to-enforcement).
+reports](/guides/how-to-read-a-dmarc-aggregate-report/) that start arriving and
+plan your [path to enforcement](/guides/from-monitoring-to-enforcement/).

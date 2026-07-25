@@ -4,7 +4,7 @@ description: A field reference for SPF record syntax — every mechanism and qua
 publishDate: 2026-07-23
 ---
 
-An [SPF](/glossary/spf) record is a single line of DNS that lists who may send
+An [SPF](/glossary/spf/) record is a single line of DNS that lists who may send
 email for your domain. The syntax is small but unforgiving — one wrong qualifier
 or one record too many and it silently fails. This is the field reference.
 
@@ -50,7 +50,7 @@ Most domains want `-all` once they're confident every real sender is listed;
 ## The rules that trip people up
 
 - **One record only.** A domain must have exactly one SPF `TXT` record. Two
-  produces a `permerror` — and a [DMARC failure](/guides/fix-dmarc-failure).
+  produces a `permerror` — and a [DMARC failure](/guides/fix-dmarc-failure/).
 - **Ten DNS-lookup limit.** Every `include`, `a`, `mx`, and `ptr` costs a
   lookup; the total must stay **≤ 10**. Chained providers blow past this fast.
   Flatten or prune when you approach it.
@@ -90,8 +90,8 @@ v=spf1 include:_spf.google.com ~all
 ## What next
 
 After publishing, confirm alignment in your [aggregate
-reports](/guides/how-to-read-a-dmarc-aggregate-report) — SPF passing isn't enough
+reports](/guides/how-to-read-a-dmarc-aggregate-report/) — SPF passing isn't enough
 on its own; it must **align** with your `From:` domain to satisfy DMARC. If it
-isn't, see [why your email is failing DMARC](/guides/fix-dmarc-failure), and
+isn't, see [why your email is failing DMARC](/guides/fix-dmarc-failure/), and
 remember SPF is only one leg of [SPF, DKIM &
-DMARC](/guides/spf-dkim-dmarc).
+DMARC](/guides/spf-dkim-dmarc/).

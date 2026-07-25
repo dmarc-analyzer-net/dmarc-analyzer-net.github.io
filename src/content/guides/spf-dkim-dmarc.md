@@ -12,11 +12,11 @@ what to do about fakes, and reports back to you. Here's how they fit.
 
 ## The 30-second version
 
-- **[SPF](/glossary/spf)** says *which servers are allowed to send* for your
+- **[SPF](/glossary/spf/)** says *which servers are allowed to send* for your
   domain.
-- **[DKIM](/glossary/dkim)** adds a *tamper-proof signature* proving a message
+- **[DKIM](/glossary/dkim/)** adds a *tamper-proof signature* proving a message
   really came from your domain and wasn't altered.
-- **[DMARC](/glossary/dmarc)** ties SPF and DKIM to the `From:` address people
+- **[DMARC](/glossary/dmarc/)** ties SPF and DKIM to the `From:` address people
   see, tells receivers what to do when both fail, and sends you **reports**.
 
 You need all three. SPF and DKIM are the checks; DMARC is the policy and
@@ -35,7 +35,7 @@ v=spf1 include:_spf.google.com include:sendgrid.net -all
 Its weakness on its own: SPF checks the hidden *envelope* sender, not the
 `From:` address recipients see — so it can pass for a lookalike. That's exactly
 the gap DMARC closes. (See [SPF record syntax and
-examples](/guides/spf-record-syntax) for the full breakdown.)
+examples](/guides/spf-record-syntax/) for the full breakdown.)
 
 ## DKIM — a signature that proves authenticity
 
@@ -49,18 +49,18 @@ sturdiest way to pass DMARC.
 
 ## DMARC — the layer that makes them count
 
-[DMARC](/glossary/dmarc) (Domain-based Message Authentication, Reporting &
+[DMARC](/glossary/dmarc/) (Domain-based Message Authentication, Reporting &
 Conformance) adds the three things SPF and DKIM lack on their own:
 
 1. **Alignment** — it requires that the domain SPF or DKIM authenticated
    actually *matches* your `From:` domain. This is what stops a spoofer from
    passing SPF for *their* domain and riding your `From:`. See
-   [DMARC alignment](/glossary/dmarc-alignment).
-2. **Policy** — your [`p=` policy](/glossary/dmarc-policy) tells receivers what
+   [DMARC alignment](/glossary/dmarc-alignment/).
+2. **Policy** — your [`p=` policy](/glossary/dmarc-policy/) tells receivers what
    to do with mail that fails: `none` (monitor), `quarantine` (spam folder), or
    `reject` (block).
 3. **Reporting** — receivers send you [aggregate
-   reports](/glossary/dmarc-aggregate-report) showing every source sending as
+   reports](/glossary/dmarc-aggregate-report/) showing every source sending as
    your domain.
 
 A message **passes DMARC** when *either* SPF *or* DKIM both authenticates **and**
@@ -87,7 +87,7 @@ aligns. Just one aligned mechanism is enough.
 ## What next
 
 Set them up in order: confirm SPF and DKIM exist, then
-[publish your first DMARC record](/guides/publish-your-first-dmarc-record) in
+[publish your first DMARC record](/guides/publish-your-first-dmarc-record/) in
 monitoring mode. If mail is already failing, see
-[why your email is failing DMARC](/guides/fix-dmarc-failure). When your reports
-are clean, walk the [path to enforcement](/guides/from-monitoring-to-enforcement).
+[why your email is failing DMARC](/guides/fix-dmarc-failure/). When your reports
+are clean, walk the [path to enforcement](/guides/from-monitoring-to-enforcement/).

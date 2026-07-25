@@ -45,7 +45,7 @@ environment:
 
 Restart the API and the login page gains a button labelled with your
 `DisplayName`. Full option list: [configuration
-reference](/docs/configuration#single-sign-on-oidc).
+reference](/docs/configuration/#single-sign-on-oidc).
 
 ## Linking and provisioning
 

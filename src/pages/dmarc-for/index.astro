@@ -10,7 +10,7 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
 <BaseLayout current="setup"
   title="Set up DMARC for your email provider — DMARC Analyzer"
   description="Step-by-step SPF, DKIM, and DMARC setup guides for Google Workspace, Microsoft 365, GoDaddy, and more — with the provider-specific gotchas that trip people up."
-  path="/dmarc-for"
+  path="/dmarc-for/"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
@@ -23,7 +23,7 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
       <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px;">
         {providers.map((p) => (
           <li>
-            <a class="lift" href={`/dmarc-for/${p.id}`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px 24px; color:var(--text-body) !important;">
+            <a class="lift" href={`/dmarc-for/${p.id}/`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px 24px; color:var(--text-body) !important;">
               <h2 style="font-size:var(--text-lg); font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 {p.data.provider}
                 <Icon name="arrow-right-01" style="font-size:17px; color:var(--brand);" />

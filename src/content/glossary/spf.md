@@ -19,8 +19,8 @@ v=spf1 include:_spf.google.com include:sendgrid.net -all
 
 SPF alone is easy to bypass, because it checks the hidden envelope sender, not
 the `From:` address a person sees. That gap is why
-[DMARC](/glossary/dmarc) adds [alignment](/glossary/dmarc-alignment) and pairs
-SPF with [DKIM](/glossary/dkim).
+[DMARC](/glossary/dmarc/) adds [alignment](/glossary/dmarc-alignment/) and pairs
+SPF with [DKIM](/glossary/dkim/).
 
 > **Watch the 10-lookup limit.** SPF permits at most 10 DNS lookups; too many
 > `include:`s cause a `permerror` and an SPF failure. Flatten or consolidate

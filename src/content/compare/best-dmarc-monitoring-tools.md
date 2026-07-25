@@ -10,7 +10,7 @@ publishDate: 2026-07-23
 There are more DMARC tools than there used to be, and they fall into three
 groups: **hosted platforms**, **free hosted digests**, and **open-source,
 self-hosted** analyzers. The right pick depends less on features — most parse the
-same [aggregate reports](/glossary/dmarc-aggregate-report) — and more on
+same [aggregate reports](/glossary/dmarc-aggregate-report/) — and more on
 **hosting model, pricing, and who ends up holding your report data**.
 
 > Full disclosure: we build **DMARC Analyzer**, one of the open-source options
@@ -43,30 +43,30 @@ same [aggregate reports](/glossary/dmarc-aggregate-report) — and more on
 Mature, managed, and quick to start — you trade data location and per-domain
 cost for convenience and vendor support.
 
-- **[dmarcian](/compare/dmarcian)** — the category pioneer; strong, technical.
-- **[EasyDMARC](/compare/easydmarc)** — the most approachable UI and tool suite.
-- **[PowerDMARC](/compare/powerdmarc)** — broad platform with a strong MSP /
+- **[dmarcian](/compare/dmarcian/)** — the category pioneer; strong, technical.
+- **[EasyDMARC](/compare/easydmarc/)** — the most approachable UI and tool suite.
+- **[PowerDMARC](/compare/powerdmarc/)** — broad platform with a strong MSP /
   white-label program.
-- **[Valimail](/compare/valimail)** — enterprise-focused, automated enforcement.
+- **[Valimail](/compare/valimail/)** — enterprise-focused, automated enforcement.
 
 ## Free hosted options
 
 For simple needs: **Postmark's DMARC digests** email you a weekly summary, and
 generic DNS utilities offer one-off record lookups. Good for a single domain;
 limited for ongoing, multi-domain monitoring. For a free option you fully own,
-DMARC Analyzer is [free and self-hosted](/free-dmarc-analyzer).
+DMARC Analyzer is [free and self-hosted](/free-dmarc-analyzer/).
 
 ## Open-source & self-hosted
 
 Keep every report on your own infrastructure, with no per-domain fees:
 
-- **[parsedmarc](/compare/parsedmarc)** — the best-known OSS parser; powerful,
+- **[parsedmarc](/compare/parsedmarc/)** — the best-known OSS parser; powerful,
   but you run an Elasticsearch/OpenSearch stack for dashboards.
 - **DMARC Analyzer** — open source and self-hosted, but ships as a single
   container with dashboards built in and **agency multi-tenancy** — no search
   cluster to operate.
 - Several lighter-weight projects exist too — see our
-  [open-source & self-hosted roundup](/compare/open-source-dmarc-analyzer).
+  [open-source & self-hosted roundup](/compare/open-source-dmarc-analyzer/).
 
 ## Which should you choose?
 
@@ -77,4 +77,4 @@ Keep every report on your own infrastructure, with no per-domain fees:
   exactly why we built DMARC Analyzer.
 
 New to all this? Start with [publishing your first DMARC
-record](/guides/publish-your-first-dmarc-record).
+record](/guides/publish-your-first-dmarc-record/).

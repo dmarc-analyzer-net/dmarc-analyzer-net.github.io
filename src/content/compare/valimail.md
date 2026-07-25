@@ -33,4 +33,4 @@ enforcement service with formal compliance backing, that's Valimail's home turf.
 If you want to **start immediately, self-host, and avoid enterprise pricing and
 procurement**, DMARC Analyzer gets you the same core DMARC visibility on your own
 terms. Follow the [path from monitoring to
-enforcement](/guides/from-monitoring-to-enforcement) at your own pace.
+enforcement](/guides/from-monitoring-to-enforcement/) at your own pace.

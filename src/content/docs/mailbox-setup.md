@@ -44,7 +44,7 @@ Most providers won't accept your normal password from a third-party client:
 - **Anything else** — standard IMAP credentials are fine.
 
 Passwords are encrypted at rest with AES-256-GCM using
-[`Security__CredentialEncryptionKey`](/docs/configuration#security).
+[`Security__CredentialEncryptionKey`](/docs/configuration/#security).
 
 ## Your mail is never modified
 
@@ -86,4 +86,4 @@ mailboxes, is deduplicated on domain + report ID + date range.
 - Impatient? Trigger a sync by hand from the mailbox source list rather than
   waiting for the next hourly pass.
 
-If nothing appears, see [troubleshooting](/docs/troubleshooting).
+If nothing appears, see [troubleshooting](/docs/troubleshooting/).

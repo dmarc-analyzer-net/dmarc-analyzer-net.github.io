@@ -175,7 +175,7 @@ curl 'https://dmarc.example.com/api/v1/admin/digest/preview?clientId=<id>'
 
 A daily worker pass deletes DMARC data older than each client's retention window
 (`RetentionMonths` on the client, 27 by default). Clients with `LegalHold` set are
-skipped entirely. See [upgrading and backup](/docs/upgrading-and-backup#retention)
+skipped entirely. See [upgrading and backup](/docs/upgrading-and-backup/#retention)
 for the operational side.
 
 | Variable | Default | What it does |
@@ -191,7 +191,7 @@ non-positive `RetentionMonths` is treated as misconfiguration and falls back to
 
 ## Single sign-on (OIDC)
 
-Off by default; see [single sign-on](/docs/single-sign-on) for a worked example.
+Off by default; see [single sign-on](/docs/single-sign-on/) for a worked example.
 
 | Variable | Default | What it does |
 |---|---|---|

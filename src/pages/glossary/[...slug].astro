@@ -16,13 +16,13 @@ export async function getStaticPaths() {
 
 const { entry, byId } = Astro.props;
 const { Content } = await render(entry);
-const path = `/glossary/${entry.id}`;
+const path = `/glossary/${entry.id}/`;
 
 // Resolve related slugs to real entries so labels stay accurate.
 const related = entry.data.related
   .map((slug) => byId.get(slug))
   .filter((e) => e !== undefined)
-  .map((e) => ({ label: e.data.term, href: `/glossary/${e.id}` }));
+  .map((e) => ({ label: e.data.term, href: `/glossary/${e.id}/` }));
 
 const definedTermSchema = {
   '@context': 'https://schema.org',
@@ -39,7 +39,7 @@ const definedTermSchema = {
     <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
-        { label: 'Glossary', href: '/glossary' },
+        { label: 'Glossary', href: '/glossary/' },
         { label: entry.data.term, href: path },
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:38px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.term}</h1>

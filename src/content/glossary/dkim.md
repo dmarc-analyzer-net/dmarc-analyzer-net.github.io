@@ -18,8 +18,8 @@ a **selector**:
 selector._domainkey.yourdomain.com
 ```
 
-Unlike [SPF](/glossary/spf), DKIM survives forwarding, because the signature
+Unlike [SPF](/glossary/spf/), DKIM survives forwarding, because the signature
 moves with the message rather than depending on the connecting IP.
 
-For DKIM to help [DMARC](/glossary/dmarc), the signing domain (`d=`) must
-[align](/glossary/dmarc-alignment) with the domain in the `From:` address.
+For DKIM to help [DMARC](/glossary/dmarc/), the signing domain (`d=`) must
+[align](/glossary/dmarc-alignment/) with the domain in the `From:` address.

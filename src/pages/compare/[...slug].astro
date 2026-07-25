@@ -16,12 +16,12 @@ export async function getStaticPaths() {
 
 const { entry, all } = Astro.props;
 const { Content } = await render(entry);
-const path = `/compare/${entry.id}`;
+const path = `/compare/${entry.id}/`;
 
 const related = all
   .filter((e) => e.id !== entry.id)
   .slice(0, 3)
-  .map((e) => ({ label: e.data.title, href: `/compare/${e.id}` }));
+  .map((e) => ({ label: e.data.title, href: `/compare/${e.id}/` }));
 
 const published = entry.data.publishDate.toISOString();
 const modified = (entry.data.updatedDate ?? entry.data.publishDate).toISOString();
@@ -42,7 +42,7 @@ const articleSchema = {
     <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
-        { label: 'Compare', href: '/compare' },
+        { label: 'Compare', href: '/compare/' },
         { label: entry.data.competitor, href: path },
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>

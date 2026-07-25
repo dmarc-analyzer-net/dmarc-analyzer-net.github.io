@@ -28,7 +28,7 @@ Work down the chain — most often it's the first item.
 Nearly always credentials rather than configuration:
 
 - Use an **app password**, not the account password — see [connecting a
-  mailbox](/docs/mailbox-setup#app-passwords).
+  mailbox](/docs/mailbox-setup/#app-passwords).
 - Confirm IMAP is enabled for the account. Many Microsoft 365 tenants disable IMAP
   basic auth entirely; if so, that mailbox can't be used yet.
 - Verify host and port (usually `993` with TLS).

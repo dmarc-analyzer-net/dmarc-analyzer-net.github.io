@@ -25,12 +25,12 @@ v=BIMI1; l=https://yourdomain.com/logo.svg; a=https://yourdomain.com/vmc.pem
 ## The catch: BIMI needs DMARC enforcement
 
 BIMI only works if your domain is already at **enforcement** — a
-[DMARC](/glossary/dmarc) [policy](/glossary/dmarc-policy) of `p=quarantine` or
+[DMARC](/glossary/dmarc/) [policy](/glossary/dmarc-policy/) of `p=quarantine` or
 `p=reject`, not `p=none`. In other words, BIMI is a reason to *finish* your DMARC
 rollout, not a shortcut around it.
 
-The typical order is: authenticate with SPF and [DKIM](/glossary/dkim) → move
+The typical order is: authenticate with SPF and [DKIM](/glossary/dkim/) → move
 DMARC to enforcement → prepare an SVG logo (and a VMC if you want Gmail) →
 publish the BIMI record. If your logo isn't appearing, the usual cause is a
 policy still at `p=none` — see [from monitoring to
-enforcement](/guides/from-monitoring-to-enforcement).
+enforcement](/guides/from-monitoring-to-enforcement/).
