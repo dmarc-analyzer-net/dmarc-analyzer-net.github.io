@@ -147,6 +147,30 @@ curl -X POST https://dmarc.example.com/api/v1/notification-recipients \
 `GET /api/v1/alerts?days=30`, and `POST /api/v1/admin/alerts/evaluate` runs an
 evaluation immediately instead of waiting for the next pass.
 
+## Monthly digest
+
+Once a month each client's recipients get a summary of the previous whole month:
+compliance and how it moved, volume, unauthenticated sources, how many domains are
+enforcing, and the domains needing attention.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Digest__Enabled` | `true` | Master switch. |
+| `Digest__DayOfMonth` | `1` | Earliest day of the month the previous month's digest may go out (1–28). |
+| `Digest__CheckIntervalHours` | `6` | How often the worker checks whether one is due. |
+
+Sending is **idempotent** — a month already sent is never sent again, even across
+restarts — so the check interval is safe to lower.
+
+Preview exactly what a client would receive, without sending it:
+
+```bash
+curl 'https://dmarc.example.com/api/v1/admin/digest/preview?clientId=<id>'
+```
+
+`POST /api/v1/admin/digest/send` sends anything due immediately. Recipients need
+`kind` of `digest` or `both` — see [who gets notified](#who-gets-notified).
+
 ## Retention
 
 A daily worker pass deletes DMARC data older than each client's retention window
