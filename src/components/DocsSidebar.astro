@@ -20,7 +20,7 @@ const sections = SECTION_ORDER.map((section) => ({
     .sort((a, b) => a.data.order - b.data.order),
 })).filter((s) => s.items.length > 0);
 ---
-<nav aria-label="Documentation" style="font-size:14px;">
+<nav aria-label="Documentation" style="font-size:var(--text-base);">
   <a
     href="/docs"
     style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? 'var(--brand)' : 'var(--text-secondary)'} !important;`}
