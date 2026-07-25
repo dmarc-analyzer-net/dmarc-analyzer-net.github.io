@@ -1,5 +1,6 @@
 ---
 title: What "DMARC policy not enabled" means (and how to fix it)
+seoTitle: '"DMARC policy not enabled": how to fix'
 description: Seeing "DMARC quarantine/reject policy not enabled"? Here's what that warning means, why checkers flag it, and how to enable an enforcing policy safely.
 publishDate: 2026-07-23
 ---

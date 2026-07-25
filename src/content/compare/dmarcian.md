@@ -1,5 +1,6 @@
 ---
 title: "dmarcian alternative: open source & self-hosted"
+seoTitle: 'dmarcian alternative: open source'
 competitor: dmarcian
 description: A self-hosted, open-source dmarcian alternative with no per-domain pricing — the same DMARC visibility, but your report data stays on your own infrastructure.
 publishDate: 2026-07-23

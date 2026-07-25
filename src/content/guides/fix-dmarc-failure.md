@@ -1,5 +1,6 @@
 ---
 title: Why your email is failing DMARC (and how to fix it)
+seoTitle: 'Why email fails DMARC & how to fix it'
 description: Email failing DMARC? Learn what a DMARC failure actually means, the handful of causes behind it, and exactly how to diagnose and fix each one.
 publishDate: 2026-07-23
 ---

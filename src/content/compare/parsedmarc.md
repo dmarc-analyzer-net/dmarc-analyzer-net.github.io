@@ -1,5 +1,6 @@
 ---
 title: "parsedmarc alternative: same open source, no Elasticsearch"
+seoTitle: 'parsedmarc alternative: no Elasticsearch'
 competitor: parsedmarc
 description: A parsedmarc alternative that's also open source and self-hosted — but runs as a single container with built-in dashboards, no Elasticsearch stack to maintain.
 publishDate: 2026-07-23
