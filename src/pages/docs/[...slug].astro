@@ -47,8 +47,8 @@ const schema = {
 ---
 <BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={schema} />
-    <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
-      <aside style="position:sticky; top:88px;">
+    <div class="docs-shell" style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
+      <aside class="docs-aside" style="position:sticky; top:88px;">
         <DocsSidebar current={entry.id} />
       </aside>
 
@@ -59,7 +59,7 @@ const schema = {
           { label: entry.data.title, href: path },
         ]} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-3xl); line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
-        <p style="font-size:17px; line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
+        <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
 
         {toc.length > 2 && (
           <details style="margin:0 0 28px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--surface-page); padding:12px 16px;">

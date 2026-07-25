@@ -28,7 +28,7 @@ const schema = {
   <ol style="list-style:none; display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0; padding:0;">
     {items.map((c, i) => (
       <li style="display:inline-flex; align-items:center; gap:6px;">
-        {i > 0 && <Icon name="arrow-right-01" style="font-size:var(--text-sm); color:var(--gray-400);" />}
+        {i > 0 && <Icon name="arrow-right" style="font-size:var(--text-sm); color:var(--gray-400);" />}
         {i < items.length - 1 ? (
           <a class="navlink" href={c.href} style="font-weight:500;">{c.label}</a>
         ) : (

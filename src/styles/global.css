@@ -33,6 +33,14 @@
 --status-danger-fg:var(--red-800);--status-danger-bg:var(--red-100);--status-danger-dot:var(--red-600);
 --status-neutral-fg:var(--gray-600);--status-neutral-bg:var(--gray-100);--status-neutral-dot:var(--gray-400);
 --chart-1:var(--teal-600);--chart-2:var(--teal-300);--chart-3:var(--amber-500);--chart-4:var(--red-600);--chart-grid:var(--gray-100);
+/* Feature-card tints — glyph on tint, in rotation order. Decorative graphics at
+   the 3:1 threshold: never set body copy in a --tint-*-fg. */
+--tint-teal-bg:var(--teal-100);--tint-teal-fg:var(--teal-800);
+--tint-indigo-bg:#e3e4fb;--tint-indigo-fg:#3f44a8;
+--tint-red-bg:var(--red-100);--tint-red-fg:var(--red-800);
+--tint-amber-bg:var(--amber-100);--tint-amber-fg:var(--amber-800);
+--tint-purple-bg:#f6dffa;--tint-purple-fg:#83308b;
+--tint-olive-bg:#e4f3cf;--tint-olive-fg:#456a17;
 --link:var(--teal-700);--link-hover:var(--teal-800);
 --focus-ring:0 0 0 3px var(--brand-ring);
 }
@@ -41,7 +49,7 @@
 --font-body:'Instrument Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
 --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
 /* Scale */
---text-xs:12px;--text-sm:13px;--text-base:14px;--text-md:15px;--text-lg:18px;--text-xl:22px;--text-2xl:28px;--text-3xl:36px;--text-4xl:48px;--text-5xl:60px;
+--text-xs:12px;--text-sm:13px;--text-base:14px;--text-md:15px;--text-body-lg:16px;--text-lead:17px;--text-lg:18px;--text-xl:22px;--text-2xl:28px;--text-3xl:36px;--text-4xl:48px;--text-5xl:60px;
 --leading-tight:1.1;--leading-snug:1.3;--leading-normal:1.55;
 --tracking-tight:-0.02em;--tracking-display:-0.03em;--tracking-wide:0.06em;
 /* Weights: body 400/500/600; display 500/700; mono 400/500 */
@@ -52,6 +60,10 @@
 --radius-xs:6px;--radius-sm:8px;--radius-md:10px;--radius-lg:14px;--radius-xl:18px;--radius-pill:999px;
 --control-h-sm:32px;--control-h-md:36px;--control-h-lg:42px;
 --container-max:1160px;--sidebar-w:230px;
+/* Breakpoints. CSS custom properties are invalid inside @media, so these are the
+   canonical values to hardcode there; they exist for JS/container-query use. */
+--bp-sm:480px;--bp-md:768px;--bp-lg:1024px;--bp-xl:1280px;
+--gutter-mobile:20px;--gutter-desktop:24px;
 }
 :root{
 --shadow-card:0 1px 2px rgba(11,29,24,.05);
@@ -142,3 +154,54 @@ code,kbd,pre{font-family:var(--font-mono)}
   .prose table { width: 100%; border-collapse: collapse; font-size:var(--text-base); margin: 0 0 18px; display: block; overflow-x: auto; }
   .prose th, .prose td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--text-on-ink); }
   .prose th { background: var(--surface-page); font-weight: 600; color: var(--gray-800); }
+
+/* --- Responsive ---------------------------------------------------------
+   The site was drawn desktop-first with no breakpoints and rendered ~930px
+   wide inside a 390px viewport. Breakpoints and rules follow the design
+   system's guidelines/responsive.md; the values are duplicated as tokens
+   above for JS/container-query use, since custom properties are invalid
+   inside @media.
+
+   These override inline styles, so they need !important — the page markup
+   carries its desktop grid inline and the query relaxes it below a width.
+   ------------------------------------------------------------------------ */
+
+/* Every full-width section container: gutters, never edge-to-edge. */
+@media (max-width: 1023px) {
+  [style*="max-width:1160px"] { padding-left: var(--gutter-desktop) !important; padding-right: var(--gutter-desktop) !important; }
+  .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  .split  { grid-template-columns: 1fr !important; }
+  .docs-shell { grid-template-columns: minmax(0, 1fr) !important; }
+  .docs-aside { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  [style*="max-width:1160px"] { padding-left: var(--gutter-mobile) !important; padding-right: var(--gutter-mobile) !important; }
+  .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr !important; }
+
+  /* Display type steps down; body never does. */
+  h1[style*="font-size:58px"], h1[style*="font-size:48px"] { font-size: var(--text-3xl) !important; }
+  h2[style*="font-size:44px"], h2[style*="font-size:42px"], h2[style*="font-size:40px"] { font-size: var(--text-2xl) !important; }
+
+  /* Ink CTA panel loses its desktop padding. */
+  .ink-panel { padding: 32px 24px !important; }
+}
+
+@media (max-width: 479px) {
+  h1[style*="font-size:58px"], h1[style*="font-size:48px"] { font-size: var(--text-2xl) !important; }
+}
+
+/* Wide, dense content scrolls inside its own container rather than pushing the
+   page sideways — the design system is explicit that tables must not reflow,
+   because a DMARC row is six columns of technical data and stacking it into
+   key/value blocks destroys the scannability that is the point of the view. */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* The console mock is a depiction of a desktop product, not a responsive layout.
+   Left flexible it squeezes into unreadable two-word columns; pinned to its
+   drawn width it keeps its proportions and scrolls inside the browser frame,
+   which is the same treatment the design system gives real data tables. */
+@media (max-width: 1023px) {
+  .mock-shell { min-width: 880px; }
+}
