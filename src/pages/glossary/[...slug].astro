@@ -48,7 +48,7 @@ const definedTermSchema = {
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:38px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.term}</h1>
       {entry.data.aliases.length > 0 && (
-        <div style="font-size:13px; color:#5d726d; margin:0 0 24px;">Also known as: {entry.data.aliases.join(', ')}</div>
+        <div style="font-size:13px; color:var(--text-faint); margin:0 0 24px;">Also known as: {entry.data.aliases.join(', ')}</div>
       )}
       <div class="prose">
         <Content />
