@@ -66,6 +66,38 @@ Conformance) adds the three things SPF and DKIM lack on their own:
 A message **passes DMARC** when *either* SPF *or* DKIM both authenticates **and**
 aligns. Just one aligned mechanism is enough.
 
+## Alignment, concretely
+
+"Aligned" means the domain that authenticated matches the domain in the `From:`
+header. DMARC offers two strictnesses, and **relaxed is the default**:
+
+| Mode | `From:` | Authenticated domain | Aligned? |
+|---|---|---|---|
+| Relaxed | `yourdomain.com` | `mail.yourdomain.com` | Yes — same organizational domain |
+| Strict | `yourdomain.com` | `mail.yourdomain.com` | No — must match exactly |
+| Either | `yourdomain.com` | `sendgrid.net` | **No** |
+
+Set strictness with `adkim=` (DKIM) and `aspf=` (SPF), each `r` for relaxed or
+`s` for strict. Leave them alone unless you have a specific reason — relaxed is
+almost always what you want.
+
+That third row is the one that matters in practice. A marketing platform sending
+on your behalf will happily pass SPF for *its own* domain, and that pass does
+nothing for you. Fixing it means getting the platform to sign with DKIM as your
+domain, or to use a custom Return-Path on your subdomain.
+
+## What breaks if you skip one
+
+| You have | The gap |
+|---|---|
+| SPF only | Fails the moment mail is forwarded; nothing checks the `From:` |
+| DKIM only | Nothing states which servers are legitimate |
+| SPF + DKIM, no DMARC | Both can pass for a domain that isn't yours — and you get no reports, so you can't see it happening |
+| DMARC at `p=none` forever | Full visibility, zero protection |
+
+The last row is the most common real-world state, and the reason
+["DMARC policy not enabled"](/guides/dmarc-policy-not-enabled/) warnings exist.
+
 ## How a single message flows through all three
 
 1. Your server sends a message with a DKIM signature.
@@ -83,6 +115,19 @@ aligns. Just one aligned mechanism is enough.
 | Lives in | DNS `TXT` | DNS `TXT` + message header | DNS `TXT` |
 | Survives forwarding | No | Usually | — |
 | Gives you reports | No | No | **Yes** |
+
+## The reports are the part people underestimate
+
+Publishing all three records takes an afternoon. The ongoing work is the
+reporting: every receiver that handles your mail sends an XML file, every day,
+per domain. Individually they're unreadable; in aggregate they're the only
+picture you get of who is sending as you.
+
+That's what turns DMARC from a checkbox into an operation — and it's what
+[DMARC Analyzer](/) exists to do: ingest every report, resolve the sending
+sources, and show each domain's path to enforcement. Self-hosted, so client
+report data stays on your infrastructure, and unlimited domains at no
+per-domain cost.
 
 ## What next
 

@@ -36,18 +36,29 @@ same [aggregate reports](/glossary/dmarc-aggregate-report/) — and more on
 | EasyDMARC | Cloud | No | Domains + volume |
 | PowerDMARC | Cloud | No | Domains + volume |
 | Valimail | Cloud | No | Enterprise, quote-based |
+| DMARCwise | Cloud (EU) | No | Per organisation, by domain count |
+| DMARCeye | Cloud | No | Per domain, per month |
 | parsedmarc | Self-hosted | Yes | Free (runs on your search stack) |
 
 ## Hosted platforms
 
-Mature, managed, and quick to start — you trade data location and per-domain
-cost for convenience and vendor support.
+Mature, managed, and quick to start — you trade data location for convenience
+and vendor support. Most also charge by domain count, message volume, or both;
+a few price per organisation instead.
 
 - **[dmarcian](/compare/dmarcian/)** — the category pioneer; strong, technical.
 - **[EasyDMARC](/compare/easydmarc/)** — the most approachable UI and tool suite.
 - **[PowerDMARC](/compare/powerdmarc/)** — broad platform with a strong MSP /
   white-label program.
 - **[Valimail](/compare/valimail/)** — enterprise-focused, automated enforcement.
+- **DMARCwise** — EU-hosted and GDPR-oriented, priced per organisation rather
+  than per domain, with an MSP programme and domain grouping by client. Also
+  hosts MTA-STS and TLS reporting. Report retention is tied to the plan, from
+  two weeks on the free tier to a year at the top.
+- **DMARCeye** — priced per domain per month, with an agency tier that adds
+  multi-tenant accounts and white-labelling. Leans on AI-written analysis of
+  your reports, and includes BIMI checking. History runs 30 days on the free
+  tier and a year on the paid one.
 
 ## Free hosted options
 
