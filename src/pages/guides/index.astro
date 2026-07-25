@@ -26,7 +26,7 @@ const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
             <a class="lift" href={`/guides/${g.id}`} style="display:block; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px 26px; color:var(--text-body) !important;">
               <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 {g.data.title}
-                <Icon name="arrow-right-01" style="font-size:var(--text-lg); color:var(--brand);" />
+                <Icon name="arrow-right" style="font-size:var(--text-lg); color:var(--brand);" />
               </h2>
               <p style="font-size:14.5px; line-height:1.55; color:var(--gray-700); margin:0;">{g.data.description}</p>
             </a>
