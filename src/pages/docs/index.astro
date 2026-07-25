@@ -42,8 +42,8 @@ const first = sections[0]?.items[0];
 
         {first && (
           <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:36px;">
-            <a class="btn-primary" href={`/docs/${first.id}`} style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:9px; background:var(--brand); color:var(--teal-50) !important; font-size:14px; font-weight:600;">Start here</a>
-            <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:9px; background:#fff; color:var(--text-body) !important; font-size:14px; font-weight:500;"><Icon name="github" style="font-size:16px;" /> Source on GitHub</a>
+            <a class="btn-primary" href={`/docs/${first.id}`} style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50) !important; font-size:14px; font-weight:600;">Start here</a>
+            <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body) !important; font-size:14px; font-weight:500;"><Icon name="github" style="font-size:16px;" /> Source on GitHub</a>
           </div>
         )}
 
@@ -53,7 +53,7 @@ const first = sections[0]?.items[0];
             <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;">
               {group.items.map((item) => (
                 <li>
-                  <a class="lift" href={`/docs/${item.id}`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:12px; background:#fff; padding:16px 18px; color:var(--text-body) !important;">
+                  <a class="lift" href={`/docs/${item.id}`} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:16px 18px; color:var(--text-body) !important;">
                     <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; font-weight:600;">
                       {item.data.title}
                       <Icon name="arrow-right-01" style="font-size:15px; color:var(--brand);" />
