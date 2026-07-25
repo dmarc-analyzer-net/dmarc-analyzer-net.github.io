@@ -24,15 +24,15 @@ const schema = {
   })),
 };
 ---
-<nav aria-label="Breadcrumb" style="font-size:13px; color:#5d726d;">
+<nav aria-label="Breadcrumb" style="font-size:var(--text-sm); color:var(--text-faint);">
   <ol style="list-style:none; display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:0; padding:0;">
     {items.map((c, i) => (
       <li style="display:inline-flex; align-items:center; gap:6px;">
-        {i > 0 && <Icon name="arrow-right-01" style="font-size:13px; color:#a7c0b8;" />}
+        {i > 0 && <Icon name="arrow-right-01" style="font-size:var(--text-sm); color:var(--gray-400);" />}
         {i < items.length - 1 ? (
           <a class="navlink" href={c.href} style="font-weight:500;">{c.label}</a>
         ) : (
-          <span aria-current="page" style="color:#2c3f3b;">{c.label}</span>
+          <span aria-current="page" style="color:var(--gray-800);">{c.label}</span>
         )}
       </li>
     ))}

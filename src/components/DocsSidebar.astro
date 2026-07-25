@@ -20,19 +20,19 @@ const sections = SECTION_ORDER.map((section) => ({
     .sort((a, b) => a.data.order - b.data.order),
 })).filter((s) => s.items.length > 0);
 ---
-<nav aria-label="Documentation" style="font-size:14px;">
+<nav aria-label="Documentation" style="font-size:var(--text-base);">
   <a
     href="/docs"
-    style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? '#0c7568' : '#4a5f5b'} !important;`}
+    style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? 'var(--brand)' : 'var(--text-secondary)'} !important;`}
   >
     Overview
   </a>
   {sections.map((group) => (
     <div style="margin-top:20px;">
-      <div style="font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:#5d726d; margin-bottom:8px;">
+      <div style="font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-faint); margin-bottom:8px;">
         {group.section}
       </div>
-      <ul style="list-style:none; margin:0; padding:0; border-left:1px solid #dcebe5;">
+      <ul style="list-style:none; margin:0; padding:0; border-left:1px solid var(--border-default);">
         {group.items.map((item) => {
           const active = item.id === current;
           return (
@@ -40,7 +40,7 @@ const sections = SECTION_ORDER.map((section) => ({
               <a
                 href={`/docs/${item.id}`}
                 aria-current={active ? 'page' : undefined}
-                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? '#0d9488' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? '#0c7568' : '#4a5f5b'} !important; line-height:1.45;`}
+                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? 'var(--teal-600)' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? 'var(--brand)' : 'var(--text-secondary)'} !important; line-height:1.45;`}
               >
                 {item.data.title}
               </a>

@@ -15,17 +15,17 @@ interface Props {
 const { title = 'Related', links } = Astro.props;
 ---
 {links.length > 0 && (
-  <aside style="margin-top:48px; border-top:1px solid #dcebe5; padding-top:28px;">
-    <div style="font-size:13px; font-weight:600; color:#0c7568; margin-bottom:16px;">{title}</div>
+  <aside style="margin-top:48px; border-top:1px solid var(--border-default); padding-top:28px;">
+    <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:16px;">{title}</div>
     <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;">
       {links.map((l) => (
         <li>
-          <a class="lift" href={l.href} style="display:block; height:100%; border:1px solid #c8ded7; border-radius:12px; background:#ffffff; padding:16px 18px; color:#0c1a18 !important;">
-            <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; font-weight:600;">
+          <a class="lift" href={l.href} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:16px 18px; color:var(--text-body) !important;">
+            <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:var(--text-base); font-weight:600;">
               {l.label}
-              <Icon name="arrow-right-01" style="font-size:15px; color:#0c7568;" />
+              <Icon name="arrow-right-01" style="font-size:var(--text-md); color:var(--brand);" />
             </span>
-            {l.note && <span style="display:block; margin-top:5px; font-size:13px; line-height:1.5; color:#5d726d;">{l.note}</span>}
+            {l.note && <span style="display:block; margin-top:5px; font-size:var(--text-sm); line-height:1.5; color:var(--text-faint);">{l.note}</span>}
           </a>
         </li>
       ))}
