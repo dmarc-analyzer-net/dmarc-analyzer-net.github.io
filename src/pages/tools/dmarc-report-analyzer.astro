@@ -92,28 +92,61 @@ const schema = {
 </BaseLayout>
 
 <script>
-  const $ = (id) => document.getElementById(id);
-  const fileInput = $('fileInput');
-  const xmlInput = $('xmlInput');
+  /** One record row as read out of the report. */
+  type ReportRecord = {
+    ip: string;
+    count: number;
+    dkim: string;
+    spf: string;
+    disposition: string;
+    headerFrom: string;
+    pass: boolean;
+  };
+
+  /** A parsed aggregate report, reduced to what this tool displays. */
+  type Report = {
+    org: string;
+    domain: string;
+    policy: string;
+    begin: number;
+    end: number;
+    records: ReportRecord[];
+  };
+
+  // Every id below is a static element in this page's own markup, so a null
+  // would be a template bug rather than a runtime condition. Asserting the type
+  // keeps the checker satisfied without adding guards that would change what
+  // this tool does.
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+    document.getElementById(id) as T;
+
+  const fileInput = $<HTMLInputElement>('fileInput');
+  const xmlInput = $<HTMLTextAreaElement>('xmlInput');
   const dropzone = $('dropzone');
   const errorMsg = $('errorMsg');
   const results = $('results');
 
-  const showError = (msg) => {
+  /** Faithful port of `e && e.message ? e.message : fallback`: a thrown
+   *  DOMException carries a message without being an Error subclass, so
+   *  narrowing with `instanceof Error` would lose those messages. */
+  const errorText = (e: unknown, fallback: string) =>
+    (e as { message?: string } | null | undefined)?.message || fallback;
+
+  const showError = (msg: string) => {
     errorMsg.textContent = msg;
     errorMsg.style.display = 'block';
     results.style.display = 'none';
   };
   const clearError = () => { errorMsg.style.display = 'none'; };
 
-  async function gunzip(buf) {
+  async function gunzip(buf: ArrayBuffer) {
     const stream = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
     return await new Response(stream).text();
   }
 
   // Minimal single-file ZIP reader (DMARC zips contain one XML). Uses the
   // central directory for reliable sizes, then inflates with DecompressionStream.
-  async function unzipFirst(buf) {
+  async function unzipFirst(buf: ArrayBuffer) {
     const dv = new DataView(buf);
     const u8 = new Uint8Array(buf);
     let eocd = -1;
@@ -138,7 +171,7 @@ const schema = {
     throw new Error('Unsupported compression in the .zip — try extracting the XML.');
   }
 
-  async function readFile(file) {
+  async function readFile(file: File) {
     const name = file.name.toLowerCase();
     const buf = await file.arrayBuffer();
     if (name.endsWith('.gz')) return await gunzip(buf);
@@ -146,15 +179,17 @@ const schema = {
     return new TextDecoder().decode(buf);
   }
 
-  function text(el, sel) {
+  function text(el: Element | null, sel: string): string {
     const n = el && el.querySelector(sel);
-    return n ? n.textContent.trim() : '';
+    // textContent is only null for document/doctype nodes, never an Element,
+    // so the fallback is unreachable here — it exists to satisfy the checker.
+    return n ? (n.textContent ?? '').trim() : '';
   }
 
   // XML is unforgiving about anything before the declaration, and pasted text
   // routinely arrives with a leading blank line, a BOM, or trailing junk. Trim
   // to the actual document so a copy/paste artifact isn't reported as invalid.
-  function normalize(xml) {
+  function normalize(xml: string) {
     let text = String(xml).replace(/^\uFEFF/, '').trim();
     const start = text.search(/<(\?xml|feedback)\b/i);
     if (start > 0) text = text.slice(start);
@@ -163,7 +198,7 @@ const schema = {
     return text;
   }
 
-  function parse(xml) {
+  function parse(xml: string): Report {
     const doc = new DOMParser().parseFromString(normalize(xml), 'application/xml');
     if (doc.querySelector('parsererror') || !doc.querySelector('feedback')) {
       throw new Error('Could not parse that as a DMARC report. Check it is aggregate (RUA) XML.');
@@ -196,12 +231,12 @@ const schema = {
     };
   }
 
-  function fmtDate(epoch) {
+  function fmtDate(epoch: number) {
     if (!epoch) return '—';
     return new Date(epoch * 1000).toISOString().slice(0, 10);
   }
 
-  function chip(value, ok) {
+  function chip(value: string, ok: boolean | null) {
     const span = document.createElement('span');
     span.textContent = value || '—';
     const good = ok === true, bad = ok === false;
@@ -209,7 +244,7 @@ const schema = {
     return span;
   }
 
-  function render(data) {
+  function render(data: Report) {
     const total = data.records.reduce((s, r) => s + r.count, 0);
     const passing = data.records.filter((r) => r.pass).reduce((s, r) => s + r.count, 0);
     const rate = total ? Math.round((passing / total) * 100) : 0;
@@ -219,7 +254,7 @@ const schema = {
     // Summary
     const summary = document.createElement('div');
     summary.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;';
-    const stat = (label, value) => {
+    const stat = (label: string, value: string) => {
       const box = document.createElement('div');
       box.style.cssText = 'border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:14px 16px;';
       const l = document.createElement('div');
@@ -257,7 +292,7 @@ const schema = {
     data.records.forEach((r) => {
       const tr = document.createElement('tr');
       tr.className = 'row-hover';
-      const td = (child) => {
+      const td = (child: string | Node) => {
         const cell = document.createElement('td');
         cell.style.cssText = 'padding:10px 14px; border-top:1px solid #eef3f1; vertical-align:middle;';
         if (typeof child === 'string') cell.textContent = child; else cell.appendChild(child);
@@ -283,13 +318,13 @@ const schema = {
     results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  async function analyze(xml) {
+  async function analyze(xml: string) {
     clearError();
     try {
       if (!xml || !xml.trim()) { showError('Paste a report or choose a file first.'); return; }
       render(parse(xml));
     } catch (e) {
-      showError(e && e.message ? e.message : 'Something went wrong reading that report.');
+      showError(errorText(e, 'Something went wrong reading that report.'));
     }
   }
 
@@ -304,7 +339,7 @@ const schema = {
       xmlInput.value = xml.length > 200000 ? '' : xml; // keep the box light for huge reports
       await analyze(xml);
     } catch (e) {
-      showError(e && e.message ? e.message : 'Could not read that file.');
+      showError(errorText(e, 'Could not read that file.'));
     }
   });
 
@@ -327,7 +362,7 @@ const schema = {
       xmlInput.value = xml.length > 200000 ? '' : xml;
       await analyze(xml);
     } catch (err) {
-      showError(err && err.message ? err.message : 'Could not read that file.');
+      showError(errorText(err, 'Could not read that file.'));
     }
   });
 
