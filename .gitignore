@@ -28,6 +28,9 @@ pnpm-debug.log*
 .idea/
 *.swp
 
+# agent tooling — holds live git worktrees; must never be committed
+.claude/
+
 # source design bundle (kept locally, not part of the site)
 *.zip
 
