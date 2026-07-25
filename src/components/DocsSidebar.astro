@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+
+// Persistent docs navigation, grouped by `section` and ordered by `order`.
+// Section order is fixed here rather than alphabetical so the docs read as a
+// sequence (install -> configure -> operate).
+const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'] as const;
+
+interface Props {
+  /** Slug of the page being viewed, so it can be marked current. */
+  current?: string;
+}
+const { current } = Astro.props;
+
+const entries = await getCollection('docs', ({ data }) => !data.draft);
+const sections = SECTION_ORDER.map((section) => ({
+  section,
+  items: entries
+    .filter((e) => e.data.section === section)
+    .sort((a, b) => a.data.order - b.data.order),
+})).filter((s) => s.items.length > 0);
+---
+<nav aria-label="Documentation" style="font-size:14px;">
+  <a
+    href="/docs"
+    style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? '#0d9488' : '#4a5f5b'} !important;`}
+  >
+    Overview
+  </a>
+  {sections.map((group) => (
+    <div style="margin-top:20px;">
+      <div style="font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:#7ba79d; margin-bottom:8px;">
+        {group.section}
+      </div>
+      <ul style="list-style:none; margin:0; padding:0; border-left:1px solid #dcebe5;">
+        {group.items.map((item) => {
+          const active = item.id === current;
+          return (
+            <li>
+              <a
+                href={`/docs/${item.id}`}
+                aria-current={active ? 'page' : undefined}
+                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? '#0d9488' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? '#0d9488' : '#4a5f5b'} !important; line-height:1.45;`}
+              >
+                {item.data.title}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ))}
+</nav>

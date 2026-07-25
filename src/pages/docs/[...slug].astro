@@ -1,0 +1,105 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import DocsSidebar from '../../components/DocsSidebar.astro';
+import JsonLd from '../../components/JsonLd.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs', ({ data }) => !data.draft);
+  const ordered = [...entries].sort((a, b) =>
+    a.data.section === b.data.section
+      ? a.data.order - b.data.order
+      : a.data.section.localeCompare(b.data.section),
+  );
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, ordered },
+  }));
+}
+
+const { entry, ordered } = Astro.props;
+const { Content, headings } = await render(entry);
+const path = `/docs/${entry.id}`;
+
+// Prev/next within the reading sequence (section, then order).
+const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'];
+const sequence = [...ordered].sort((a, b) => {
+  const s = SECTION_ORDER.indexOf(a.data.section) - SECTION_ORDER.indexOf(b.data.section);
+  return s !== 0 ? s : a.data.order - b.data.order;
+});
+const index = sequence.findIndex((e) => e.id === entry.id);
+const prev = index > 0 ? sequence[index - 1] : null;
+const next = index >= 0 && index < sequence.length - 1 ? sequence[index + 1] : null;
+
+// On-page table of contents from h2s (h3s nest under the preceding h2).
+const toc = headings.filter((h) => h.depth === 2);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: entry.data.title,
+  description: entry.data.description,
+  author: { '@type': 'Organization', name: 'DMARC Analyzer' },
+  publisher: { '@type': 'Organization', name: 'DMARC Analyzer' },
+  mainEntityOfPage: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+  <div style="min-height:100vh;">
+    <Header current="docs" />
+    <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
+      <aside style="position:sticky; top:88px;">
+        <DocsSidebar current={entry.id} />
+      </aside>
+
+      <article style="min-width:0;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Docs', href: '/docs' },
+          { label: entry.data.title, href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:36px; line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
+        <p style="font-size:17px; line-height:1.5; color:#5d726d; margin:0 0 28px;">{entry.data.description}</p>
+
+        {toc.length > 2 && (
+          <details style="margin:0 0 28px; border:1px solid #dcebe5; border-radius:10px; background:#f7fbf9; padding:12px 16px;">
+            <summary style="font-size:13px; font-weight:600; color:#2c3f3b;">On this page</summary>
+            <ul style="list-style:none; margin:10px 0 2px; padding:0;">
+              {toc.map((h) => (
+                <li style="margin:4px 0;">
+                  <a href={`#${h.slug}`} style="font-size:13.5px; color:#0f766e;">{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+
+        <div class="prose">
+          <Content />
+        </div>
+
+        {(prev || next) && (
+          <nav aria-label="Pagination" style="margin-top:48px; border-top:1px solid #dcebe5; padding-top:20px; display:flex; gap:16px; justify-content:space-between; flex-wrap:wrap;">
+            {prev ? (
+              <a class="lift" href={`/docs/${prev.id}`} style="flex:1 1 220px; border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:14px 16px; color:#0c1a18 !important;">
+                <span style="display:block; font-size:12px; color:#7ba79d;">Previous</span>
+                <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{prev.data.title}</span>
+              </a>
+            ) : <span style="flex:1 1 220px;"></span>}
+            {next ? (
+              <a class="lift" href={`/docs/${next.id}`} style="flex:1 1 220px; border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:14px 16px; text-align:right; color:#0c1a18 !important;">
+                <span style="display:block; font-size:12px; color:#7ba79d;">Next</span>
+                <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{next.data.title}</span>
+              </a>
+            ) : <span style="flex:1 1 220px;"></span>}
+          </nav>
+        )}
+      </article>
+    </div>
+    <Footer />
+  </div>
+</BaseLayout>

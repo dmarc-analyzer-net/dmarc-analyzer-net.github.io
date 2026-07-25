@@ -62,4 +62,19 @@ const compare = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary, providers, compare };
+// Product documentation for self-hosters (install, configure, operate). Authored
+// in src/content/docs/ and rendered by src/pages/docs/[...slug].astro with a
+// persistent sidebar. `section` groups pages in that sidebar and `order` sorts
+// them within a group — docs read in sequence, unlike the other collections.
+const docs = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
+  schema: z.object({
+    title: z.string().max(65),
+    description: z.string().min(50).max(160),
+    section: z.enum(['Getting started', 'Configuration', 'Operations']),
+    order: z.number(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides, glossary, providers, compare, docs };

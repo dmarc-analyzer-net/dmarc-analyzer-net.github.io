@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import DocsSidebar from '../../components/DocsSidebar.astro';
+import Icon from '../../components/Icon.astro';
+import Cta from '../../components/Cta.astro';
+
+const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'] as const;
+
+const entries = await getCollection('docs', ({ data }) => !data.draft);
+const sections = SECTION_ORDER.map((section) => ({
+  section,
+  items: entries
+    .filter((e) => e.data.section === section)
+    .sort((a, b) => a.data.order - b.data.order),
+})).filter((s) => s.items.length > 0);
+
+const first = sections[0]?.items[0];
+---
+<BaseLayout
+  title="Documentation — DMARC Analyzer"
+  description="Install, configure, and operate your own DMARC Analyzer: Docker quick start, full configuration reference, mailbox setup, upgrades, and troubleshooting."
+  path="/docs"
+>
+  <div style="min-height:100vh;">
+    <Header current="docs" />
+    <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
+      <aside style="position:sticky; top:88px;">
+        <DocsSidebar />
+      </aside>
+
+      <div style="min-width:0;">
+        <div style="font-size:13px; font-weight:600; color:#0d9488; margin-bottom:12px;">Documentation</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:0 0 14px;">Run DMARC Analyzer yourself.</h1>
+        <p style="font-size:17.5px; line-height:1.55; color:#425551; margin:0 0 28px; max-width:620px;">
+          Everything you need to self-host: a Docker quick start, the full configuration
+          reference, connecting the mailbox your reports arrive in, and day-two operations.
+        </p>
+
+        {first && (
+          <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:36px;">
+            <a class="btn-primary" href={`/docs/${first.id}`} style="display:inline-flex; align-items:center; height:40px; padding:0 18px; border-radius:9px; background:#0d9488; color:#f0fdfa !important; font-size:14px; font-weight:600;">Start here</a>
+            <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid #c8ded7; border-radius:9px; background:#fff; color:#0c1a18 !important; font-size:14px; font-weight:500;"><Icon name="github" style="font-size:16px;" /> Source on GitHub</a>
+          </div>
+        )}
+
+        {sections.map((group) => (
+          <section style="margin-bottom:32px;">
+            <h2 style="font-size:15px; font-weight:600; color:#0c1a18; margin:0 0 12px;">{group.section}</h2>
+            <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px;">
+              {group.items.map((item) => (
+                <li>
+                  <a class="lift" href={`/docs/${item.id}`} style="display:block; height:100%; border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:16px 18px; color:#0c1a18 !important;">
+                    <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; font-weight:600;">
+                      {item.data.title}
+                      <Icon name="arrow-right-01" style="font-size:15px; color:#0d9488;" />
+                    </span>
+                    <span style="display:block; margin-top:5px; font-size:13.5px; line-height:1.5; color:#5d726d;">{item.data.description}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+
+        <p style="font-size:13.5px; color:#5d726d; margin:28px 0 0;">
+          Looking for DMARC itself rather than this software? Start with the
+          <a href="/guides">guides</a> and <a href="/glossary">glossary</a>. Design
+          notes, the roadmap and architecture decisions live in
+          <a href={`${GH}/tree/main/docs/planning`}>the repository</a>.
+        </p>
+
+        <Cta />
+      </div>
+    </div>
+    <Footer />
+  </div>
+</BaseLayout>
