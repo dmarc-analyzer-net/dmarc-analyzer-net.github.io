@@ -22,6 +22,14 @@ interface Props {
   image?: string;
   /** Which nav link is active. Forwarded to Header. */
   current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare' | 'tools' | 'docs';
+  /**
+   * Open Graph object type. Editorial pages (guides, glossary) are "article";
+   * landing and index pages stay "website".
+   */
+  ogType?: 'website' | 'article';
+  /** ISO 8601 timestamps, emitted only when ogType is "article". */
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
 const {
@@ -30,6 +38,9 @@ const {
   path = Astro.url.pathname,
   image = '/og.png',
   current,
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
 } = Astro.props;
 
 // `trailingSlash: "always"`, so the URL the site actually serves always ends in
@@ -49,15 +60,24 @@ const ogImage = new URL(image, Astro.site).href;
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="var(--teal-600)" />
+    <!-- Literal hex, not var(--teal-600): meta content is not CSS, so a custom
+         property never resolves here and the tag is silently ignored. Keep in
+         sync with --teal-600 in global.css. -->
+    <meta name="theme-color" content="#0e9481" />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="DMARC Analyzer" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {ogType === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
