@@ -153,7 +153,17 @@ def fetch_page(url: str):
 
 
 def sitemap_urls(root: str) -> set[str]:
-    """Follows sitemap-index.xml to its child sitemaps."""
+    """Follows sitemap-index.xml to its child sitemaps.
+
+    The index lists its children as production absolute URLs, so following them
+    verbatim would fetch the *deployed* sitemap while the rest of the crawl reads
+    a local preview — every not-yet-shipped page then looks "missing from
+    sitemap". Rebase each child onto the root actually being crawled.
+    """
+    def rebase(u: str) -> str:
+        r, p = urlparse(root), urlparse(u)
+        return f"{r.scheme}://{r.netloc}{p.path}" + (f"?{p.query}" if p.query else "")
+
     found: set[str] = set()
     queue = [urljoin(root, "/sitemap-index.xml")]
     seen = set()
@@ -168,7 +178,7 @@ def sitemap_urls(root: str) -> set[str]:
         text = body.decode("utf-8", "replace")
         locs = re.findall(r"<loc>\s*([^<\s]+)\s*</loc>", text)
         if "<sitemapindex" in text:
-            queue.extend(locs)
+            queue.extend(rebase(u) for u in locs)
         else:
             found.update(normalise(u) for u in locs)
     return found

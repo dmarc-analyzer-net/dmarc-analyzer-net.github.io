@@ -1,0 +1,249 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import LogoMark from '../components/LogoMark.astro';
+import Icon from '../components/Icon.astro';
+
+const title = 'Brand assets';
+const description =
+  'Download the DMARC Analyzer logo in SVG and PNG, with the colour palette, type stack and plain-English terms for using the name and mark.';
+const path = '/brand/';
+
+const GH_ISSUES = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/issues';
+
+// Files live in public/brand/ and are generated from the same geometry the site
+// renders, so a download can never drift from the mark in the header.
+const downloads = [
+  {
+    name: 'Logo',
+    note: 'Mark plus wordmark. The default for most uses.',
+    files: [
+      { label: 'SVG', href: '/brand/dmarc-analyzer-logo.svg' },
+      { label: 'PNG', href: '/brand/dmarc-analyzer-logo.png' },
+    ],
+  },
+  {
+    name: 'Logo, reversed',
+    note: 'The same lockup with a light wordmark, for dark backgrounds.',
+    files: [
+      { label: 'SVG', href: '/brand/dmarc-analyzer-logo-on-dark.svg' },
+      { label: 'PNG', href: '/brand/dmarc-analyzer-logo-on-dark.png' },
+    ],
+  },
+  {
+    name: 'Mark',
+    note: 'The shield on its own, where the name already appears nearby.',
+    files: [
+      { label: 'SVG', href: '/brand/dmarc-analyzer-mark.svg' },
+      { label: 'PNG', href: '/brand/dmarc-analyzer-mark.png' },
+    ],
+  },
+  {
+    name: 'App icon',
+    note: 'Square and full-bleed, for avatars and app tiles that apply their own rounding.',
+    files: [
+      { label: 'SVG', href: '/brand/dmarc-analyzer-icon.svg' },
+      { label: 'PNG', href: '/brand/dmarc-analyzer-icon.png' },
+    ],
+  },
+];
+
+const palette = [
+  { name: 'Brand teal', hex: '#0c7568', note: 'Actions, links, active navigation.', fg: '#ffffff' },
+  { name: 'Mint', hex: '#3ae0b0', note: 'Accent and buttons on dark panels.', fg: '#0b1d18' },
+  { name: 'Ink green', hex: '#0b1d18', note: 'Dark panels — terminal, CTA band, footer.', fg: '#e8f2ee' },
+  { name: 'Page', hex: '#f5f8f7', note: 'The faint green-grey the site sits on.', fg: '#101f1c' },
+];
+
+// Called out separately because they are not the brand teal and look like a
+// mistake otherwise. They are reproduced from the original artwork.
+const markGradient = ['#0d9488', '#115e59'];
+
+const type = [
+  { name: 'Space Grotesk', role: 'Display — headings, the wordmark, stat numbers.', css: "font-family:'Space Grotesk',sans-serif; font-weight:600; letter-spacing:-0.03em;" },
+  { name: 'Instrument Sans', role: 'Body and UI.', css: "font-family:'Instrument Sans',sans-serif;" },
+  { name: 'JetBrains Mono', role: 'Anything technical — domains, policies, terminal output.', css: 'font-family:var(--font-mono);' },
+];
+
+const donts = [
+  { note: 'Don’t recolour the mark.', css: 'filter:hue-rotate(150deg) saturate(1.5);' },
+  { note: 'Don’t stretch or squash it.', css: 'transform:scaleX(1.45);' },
+  { note: 'Don’t add effects or outlines.', css: 'filter:drop-shadow(0 0 6px rgba(0,0,0,0.65)); outline:3px dashed var(--red-600); outline-offset:3px;' },
+];
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+    <div class="bsec" style="max-width:960px; margin:0 auto; padding:56px 32px 32px;">
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Brand assets', href: path },
+      ]} />
+      <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">Brand</div>
+      <h1 class="bh1" style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">Logo, colours and how to use them.</h1>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:620px;">Everything you need to write about DMARC Analyzer, list it in a directory, or mention it to a client. Take the files and go — no permission needed for the uses below.</p>
+    </div>
+  </section>
+
+  <!-- LOGO -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:8px 32px 0;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:32px 0 6px;">Logo</h2>
+    <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 0 20px; max-width:640px;">The wordmark is Space Grotesk 600, converted to outlines — the SVGs render correctly without the font installed.</p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:16px;">
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:32px; display:flex; align-items:center; justify-content:center; min-height:150px;">
+        <img src="/brand/dmarc-analyzer-logo.svg" alt="DMARC Analyzer logo" width="252" height="61" style="max-width:100%; height:auto;" />
+      </div>
+      <div style="border:1px solid var(--border-on-ink); border-radius:var(--radius-lg); background:var(--surface-ink); padding:32px; display:flex; align-items:center; justify-content:center; min-height:150px;">
+        <img src="/brand/dmarc-analyzer-logo-on-dark.svg" alt="DMARC Analyzer logo, reversed for dark backgrounds" width="252" height="61" style="max-width:100%; height:auto;" />
+      </div>
+    </div>
+
+    <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+      {downloads.map((d) => (
+        <li style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:18px 20px;">
+          <h3 style="font-size:var(--text-md); font-weight:600; margin:0 0 6px;">{d.name}</h3>
+          <p style="font-size:var(--text-sm); line-height:1.55; color:var(--gray-700); margin:0 0 12px;">{d.note}</p>
+          <div style="display:flex; gap:8px;">
+            {d.files.map((f) => (
+              <a
+                href={f.href}
+                download
+                style="display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 11px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-sm); font-weight:500;"
+              >
+                <Icon name="arrow-right-01" style="font-size:var(--text-sm); color:var(--brand);" /> {f.label}
+              </a>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- CLEAR SPACE & MINIMUM SIZE -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:0 32px;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:44px 0 6px;">Clear space and minimum size</h2>
+    <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 0 20px; max-width:640px;">Keep clear space of at least a quarter of the mark’s height on every side. Below the minimum sizes the bolt inside the shield stops resolving.</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;">
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+        <div style="display:flex; justify-content:center; min-height:108px;">
+          {/* 108 = the 72px mark plus 18px (a quarter of its height) on each side. */}
+          <div style="display:inline-flex; align-items:center; justify-content:center; width:108px; height:108px; border:1px dashed var(--border-strong); border-radius:var(--radius-md);">
+            <LogoMark size={72} />
+          </div>
+        </div>
+        <p style="font-size:var(--text-sm); color:var(--text-faint); margin:14px 0 0;">Clear space — the dashed line sits a quarter of the mark’s height away.</p>
+      </div>
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+        <div style="display:flex; align-items:flex-end; gap:20px; justify-content:center; min-height:72px;">
+          <div style="text-align:center;">
+            <LogoMark size={20} />
+            <div style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--text-faint); margin-top:8px;">20px</div>
+          </div>
+          <div style="text-align:center;">
+            <img src="/brand/dmarc-analyzer-logo.svg" alt="The full logo at its 160px minimum width" width="160" height="39" style="display:block;" />
+            <div style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--text-faint); margin-top:8px;">160px</div>
+          </div>
+        </div>
+        <p style="font-size:var(--text-sm); color:var(--text-faint); margin:14px 0 0;">Minimum size — 20px for the mark, 160px wide for the full logo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DON'TS -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:0 32px;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:44px 0 20px;">What not to do</h2>
+    <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+      {donts.map((d) => (
+        <li style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:20px; text-align:center;">
+          <div style="height:76px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+            <div style={d.css}><LogoMark size={44} /></div>
+          </div>
+          <p style="font-size:var(--text-sm); line-height:1.5; color:var(--red-800); margin:14px 0 0; font-weight:500;">{d.note}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- COLOUR -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:0 32px;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:44px 0 20px;">Colour</h2>
+    <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+      {palette.map((c) => (
+        <li style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);">
+          <div style={`background:${c.hex}; color:${c.fg}; padding:26px 18px; font-family:var(--font-mono); font-size:var(--text-base); font-weight:500;`}>{c.hex}</div>
+          <div style="padding:14px 18px;">
+            <div style="font-size:var(--text-md); font-weight:600;">{c.name}</div>
+            <p style="font-size:var(--text-sm); line-height:1.5; color:var(--gray-700); margin:4px 0 0;">{c.note}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <p style="font-size:var(--text-sm); line-height:1.6; color:var(--text-faint); margin:16px 2px 0;">
+      The mark’s gradient runs
+      {markGradient.map((h, i) => (
+        <>
+          {i > 0 && ' to '}
+          <code style="font-family:var(--font-mono); color:var(--text-secondary);">{h}</code>
+        </>
+      ))}
+      at 135°. Those two are not the brand teal above — they come from the original artwork and are kept as drawn.
+    </p>
+  </section>
+
+  <!-- TYPE -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:0 32px;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:44px 0 20px;">Type</h2>
+    <ul style="list-style:none; margin:0; padding:0; display:grid; gap:12px;">
+      {type.map((t) => (
+        <li style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:20px 24px; display:flex; align-items:baseline; justify-content:space-between; gap:20px; flex-wrap:wrap;">
+          <div>
+            <div style={`font-size:var(--text-xl); ${t.css}`}>{t.name}</div>
+            <p style="font-size:var(--text-sm); line-height:1.5; color:var(--gray-700); margin:6px 0 0;">{t.role}</p>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:var(--text-sm); color:var(--text-faint);">AaBbCc 0123</div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- USAGE -->
+  <section class="bsec" style="max-width:960px; margin:0 auto; padding:0 32px 72px;">
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-2xl); letter-spacing:-0.02em; font-weight:600; margin:44px 0 20px;">Using the name and logo</h2>
+    <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:26px 28px;">
+      <p style="font-size:var(--text-md); line-height:1.65; color:var(--gray-700); margin:0 0 18px;">
+        You may use the DMARC Analyzer name and logo to refer to the project — in
+        articles, comparison pages, directories, talks and integrations. No need
+        to ask first.
+      </p>
+      <p style="font-size:var(--text-md); font-weight:600; margin:0 0 10px;">Please don’t:</p>
+      <ul style="margin:0 0 18px; padding-left:20px; font-size:var(--text-md); line-height:1.7; color:var(--gray-700);">
+        <li>recolour, rotate or stretch the mark</li>
+        <li>use it as your own product or app icon</li>
+        <li>imply endorsement, affiliation or partnership</li>
+        <li>use it in a way that suggests we built your service</li>
+      </ul>
+      <p style="font-size:var(--text-md); line-height:1.65; color:var(--gray-700); margin:0 0 18px;">
+        Apache-2.0 covers the source code. It does not grant rights to the name or
+        logo.
+      </p>
+      <p style="font-size:var(--text-sm); line-height:1.6; color:var(--text-faint); margin:0;">
+        Not sure whether your use is covered? <a href={GH_ISSUES}>Open an issue</a> and ask.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* The global responsive rules in global.css key off `max-width:1160px`, and the
+     display step-down matches literal pixel values — neither reaches a 960px
+     page with a 44px heading. Rather than widen those selectors and touch every
+     other page, this page carries its own. The grids need nothing: they are all
+     auto-fit/minmax, so they reflow on their own. */
+  @media (max-width: 767px) {
+    .bsec {
+      padding-left: var(--gutter-mobile) !important;
+      padding-right: var(--gutter-mobile) !important;
+    }
+    .bh1 { font-size: var(--text-3xl) !important; }
+  }
+</style>
