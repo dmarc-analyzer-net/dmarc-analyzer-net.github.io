@@ -40,17 +40,17 @@ const schema = {
 
     <section style="max-width:900px; margin:0 auto; padding:28px 32px;">
       <!-- Tool -->
-      <div id="dropzone" style="border:2px dashed var(--teal-200); border-radius:14px; background:var(--surface-card); padding:28px; text-align:center; transition:border-color 150ms, background 150ms;">
+      <div id="dropzone" style="border:2px dashed var(--teal-200); border-radius:var(--radius-lg); background:var(--surface-card); padding:28px; text-align:center; transition:border-color 150ms, background 150ms;">
         <p style="margin:0 0 12px; font-size:15px; color:var(--gray-800);">Drop a DMARC report here (<code class="mono">.xml</code>, <code class="mono">.gz</code>, or <code class="mono">.zip</code>), or</p>
-        <label class="btn-primary" style="display:inline-flex; align-items:center; height:38px; padding:0 18px; border-radius:9px; background:var(--brand); color:var(--teal-50); font-size:14px; font-weight:600; cursor:pointer;">
+        <label class="btn-primary" style="display:inline-flex; align-items:center; height:38px; padding:0 18px; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50); font-size:14px; font-weight:600; cursor:pointer;">
           Choose a file
           <input id="fileInput" type="file" accept=".xml,.gz,.zip,application/xml,text/xml,application/gzip,application/zip" style="display:none;" />
         </label>
         <p style="margin:16px 0 6px; font-size:13px; color:var(--text-faint);">— or paste the XML —</p>
-        <textarea id="xmlInput" rows="5" placeholder="<feedback>...</feedback>" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; padding:12px; border:1px solid var(--border-strong); border-radius:10px; background:var(--surface-page); color:var(--gray-800); resize:vertical;"></textarea>
+        <textarea id="xmlInput" rows="5" placeholder="<feedback>...</feedback>" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; padding:12px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-page); color:var(--gray-800); resize:vertical;"></textarea>
         <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
-          <button id="analyzeBtn" class="btn-primary" style="height:38px; padding:0 18px; border:0; border-radius:9px; background:var(--brand); color:var(--teal-50); font-size:14px; font-weight:600; cursor:pointer;">Analyze</button>
-          <button id="sampleBtn" class="btn-ghost" style="height:38px; padding:0 16px; border:1px solid var(--border-strong); border-radius:9px; background:#fff; color:var(--text-body); font-size:14px; font-weight:500; cursor:pointer;">Load a sample</button>
+          <button id="analyzeBtn" class="btn-primary" style="height:38px; padding:0 18px; border:0; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50); font-size:14px; font-weight:600; cursor:pointer;">Analyze</button>
+          <button id="sampleBtn" class="btn-ghost" style="height:38px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body); font-size:14px; font-weight:500; cursor:pointer;">Load a sample</button>
         </div>
       </div>
       <p id="errorMsg" style="display:none; margin:14px 2px 0; font-size:14px; color:var(--status-danger-fg);"></p>
@@ -240,7 +240,7 @@ const schema = {
     const span = document.createElement('span');
     span.textContent = value || '—';
     const good = ok === true, bad = ok === false;
-    span.style.cssText = `display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:600; background:${good ? 'var(--teal-100)' : bad ? 'var(--status-danger-bg)' : 'var(--surface-sunken)'}; color:${good ? 'var(--brand-hover)' : bad ? 'var(--status-danger-fg)' : 'var(--text-secondary)'};`;
+    span.style.cssText = `display:inline-block; padding:2px 9px; border-radius:var(--radius-pill); font-size:12px; font-weight:600; background:${good ? 'var(--teal-100)' : bad ? 'var(--status-danger-bg)' : 'var(--surface-sunken)'}; color:${good ? 'var(--brand-hover)' : bad ? 'var(--status-danger-fg)' : 'var(--text-secondary)'};`;
     return span;
   }
 
@@ -256,7 +256,7 @@ const schema = {
     summary.style.cssText = 'display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;';
     const stat = (label: string, value: string) => {
       const box = document.createElement('div');
-      box.style.cssText = 'border:1px solid var(--border-strong); border-radius:12px; background:#fff; padding:14px 16px;';
+      box.style.cssText = 'border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:14px 16px;';
       const l = document.createElement('div');
       l.textContent = label;
       l.style.cssText = 'font-size:12px; color:var(--text-faint); margin-bottom:4px;';
@@ -281,7 +281,7 @@ const schema = {
 
     // Table
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'overflow-x:auto; border:1px solid var(--border-default); border-radius:12px;';
+    wrap.style.cssText = 'overflow-x:auto; border:1px solid var(--border-default); border-radius:var(--radius-lg);';
     const table = document.createElement('table');
     table.style.cssText = 'width:100%; border-collapse:collapse; font-size:14px;';
     const thead = document.createElement('thead');

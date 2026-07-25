@@ -20,7 +20,7 @@ const { title = 'Related', links } = Astro.props;
     <ul style="list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;">
       {links.map((l) => (
         <li>
-          <a class="lift" href={l.href} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:12px; background:var(--surface-card); padding:16px 18px; color:var(--text-body) !important;">
+          <a class="lift" href={l.href} style="display:block; height:100%; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:16px 18px; color:var(--text-body) !important;">
             <span style="display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:14px; font-weight:600;">
               {l.label}
               <Icon name="arrow-right-01" style="font-size:15px; color:var(--brand);" />
