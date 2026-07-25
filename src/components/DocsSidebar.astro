@@ -23,7 +23,7 @@ const sections = SECTION_ORDER.map((section) => ({
 <nav aria-label="Documentation" style="font-size:14px;">
   <a
     href="/docs"
-    style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? '#0f766e' : '#4a5f5b'} !important;`}
+    style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? '#0c7568' : '#4a5f5b'} !important;`}
   >
     Overview
   </a>
@@ -40,7 +40,7 @@ const sections = SECTION_ORDER.map((section) => ({
               <a
                 href={`/docs/${item.id}`}
                 aria-current={active ? 'page' : undefined}
-                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? '#0d9488' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? '#0f766e' : '#4a5f5b'} !important; line-height:1.45;`}
+                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? '#0d9488' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? '#0c7568' : '#4a5f5b'} !important; line-height:1.45;`}
               >
                 {item.data.title}
               </a>

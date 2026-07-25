@@ -18,7 +18,7 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
     <Header current="setup" />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
-        <div style="font-size:13px; font-weight:600; color:#0f766e; margin-bottom:14px;">DMARC setup</div>
+        <div style="font-size:13px; font-weight:600; color:#0c7568; margin-bottom:14px;">DMARC setup</div>
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">Set up SPF, DKIM & DMARC for your provider.</h1>
         <p style="font-size:18px; line-height:1.5; color:#425551; margin:0; max-width:620px;">Exact records and steps for each email platform — including where each one sends reports from and the gotchas that quietly break authentication.</p>
       </div>
@@ -30,7 +30,7 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
             <a class="lift" href={`/dmarc-for/${p.id}`} style="display:block; height:100%; border:1px solid #c8ded7; border-radius:14px; background:#ffffff; padding:22px 24px; color:#0c1a18 !important;">
               <h2 style="font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 {p.data.provider}
-                <Icon name="arrow-right-01" style="font-size:17px; color:#0f766e;" />
+                <Icon name="arrow-right-01" style="font-size:17px; color:#0c7568;" />
               </h2>
               <p style="font-size:14px; line-height:1.55; color:#425551; margin:0;">{p.data.description}</p>
             </a>
