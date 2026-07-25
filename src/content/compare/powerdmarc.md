@@ -1,5 +1,6 @@
 ---
 title: "PowerDMARC alternative: self-hosted for agencies"
+seoTitle: 'PowerDMARC alternative: self-hosted'
 competitor: PowerDMARC
 description: A self-hosted, open-source PowerDMARC alternative for agencies and MSPs — multi-tenant DMARC monitoring with unlimited domains and no per-domain fees.
 publishDate: 2026-07-23

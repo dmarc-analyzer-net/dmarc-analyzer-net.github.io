@@ -1,5 +1,6 @@
 ---
 title: "EasyDMARC alternative: self-hosted & open source"
+seoTitle: 'EasyDMARC alternative: self-hosted'
 competitor: EasyDMARC
 description: An open-source, self-hosted EasyDMARC alternative with unlimited domains and no report data leaving your servers — DMARC monitoring you run and own yourself.
 publishDate: 2026-07-23

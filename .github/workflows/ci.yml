@@ -1,0 +1,48 @@
+# Quality gate for the site: build it, then crawl the built output.
+#
+# Deliberately crawls the *local preview* rather than production, so a broken
+# link, a duplicate title or a page missing from the sitemap fails the pull
+# request instead of being discovered after it ships.
+#
+# Outbound link checking is skipped here (it hits the real internet and would
+# make CI slow and flaky). Run the crawler without --skip-external, against
+# production, when you want that:
+#
+#   python3 scripts/crawl.py https://dmarc-analyzer.net
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Astro check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      - name: Serve the build
+        run: |
+          npm run preview -- --port 4321 &
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://localhost:4321/ && break
+            sleep 1
+          done
+
+      - name: Technical SEO crawl
+        run: python3 scripts/crawl.py http://localhost:4321 --skip-external

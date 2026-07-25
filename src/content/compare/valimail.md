@@ -1,5 +1,6 @@
 ---
 title: "Valimail alternative: open source, no sales call"
+seoTitle: 'Valimail alternative: open source'
 competitor: Valimail
 description: A self-hosted, open-source Valimail alternative with transparent, no-cost setup — full DMARC visibility without enterprise quotes or a sales process.
 publishDate: 2026-07-23

@@ -40,7 +40,7 @@ const articleSchema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
+<BaseLayout title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={articleSchema} />
   <div style="min-height:100vh;">
     <Header current="guides" />

@@ -1,17 +1,33 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+/**
+ * Guards the *rendered* <title> length. Templates append a suffix (" — DMARC
+ * Analyzer", " — DMARC Analyzer docs"), so a frontmatter title that looks fine
+ * can still truncate in search results. `seoTitle` overrides the title for the
+ * <title> tag only, leaving the on-page h1 free to read well.
+ *
+ * Budget = 60 (Google's practical cut-off) minus the template's suffix.
+ */
+const titleBudget = (budget: number) =>
+  (data: { title: string; seoTitle?: string }) => (data.seoTitle ?? data.title).length <= budget;
+
+const budgetMessage = (budget: number) =>
+  `title (or seoTitle) must be <= ${budget} chars so the rendered <title> stays under 60`;
+
 // How-to guides and longer-form articles. Authored as Markdown in
 // src/content/guides/ and rendered by src/pages/guides/[...slug].astro.
 const guides = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
   schema: z.object({
+    /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
+    seoTitle: z.string().optional(),
     title: z.string().max(65), // keep titles short for SERPs
     description: z.string().min(50).max(160),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     draft: z.boolean().default(false),
-  }),
+  }).refine(titleBudget(43), { message: budgetMessage(43) }),
 });
 
 // Short, precise definition pages. Authored in src/content/glossary/ and
@@ -32,13 +48,15 @@ const glossary = defineCollection({
 const providers = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/dmarc-for' }),
   schema: z.object({
+    /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
+    seoTitle: z.string().optional(),
     title: z.string().max(65),
     provider: z.string(), // display name, e.g. "Google Workspace"
     description: z.string().min(50).max(160),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     draft: z.boolean().default(false),
-  }),
+  }).refine(titleBudget(43), { message: budgetMessage(43) }),
 });
 
 // Comparison / "alternative" pages. Authored in src/content/compare/ and
@@ -48,6 +66,8 @@ const providers = defineCollection({
 const compare = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/compare' }),
   schema: z.object({
+    /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
+    seoTitle: z.string().optional(),
     title: z.string().max(65),
     // For 1:1 pages this is the competitor name ("dmarcian"); for roundups it's
     // a short category label ("Open source & self-hosted") used in nav/cards.
@@ -59,7 +79,7 @@ const compare = defineCollection({
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     draft: z.boolean().default(false),
-  }),
+  }).refine(titleBudget(43), { message: budgetMessage(43) }),
 });
 
 // Product documentation for self-hosters (install, configure, operate). Authored
@@ -69,12 +89,14 @@ const compare = defineCollection({
 const docs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
   schema: z.object({
+    /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
+    seoTitle: z.string().optional(),
     title: z.string().max(65),
     description: z.string().min(50).max(160),
     section: z.enum(['Getting started', 'Configuration', 'Operations']),
     order: z.number(),
     draft: z.boolean().default(false),
-  }),
+  }).refine(titleBudget(38), { message: budgetMessage(38) }),
 });
 
 export const collections = { guides, glossary, providers, compare, docs };

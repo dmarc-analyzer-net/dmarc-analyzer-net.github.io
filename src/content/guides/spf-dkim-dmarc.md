@@ -1,5 +1,6 @@
 ---
 title: "SPF, DKIM & DMARC: how the three work together"
+seoTitle: 'SPF, DKIM & DMARC explained'
 description: SPF, DKIM, and DMARC explained together — what each one actually does, how they combine to stop email spoofing, and why you need all three.
 publishDate: 2026-07-23
 ---
