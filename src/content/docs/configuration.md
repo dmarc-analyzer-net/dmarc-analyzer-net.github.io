@@ -84,6 +84,24 @@ than the normal interval — backing off from 5 seconds up to
 `ScheduleIntervalSeconds` — so a transient outage doesn't idle ingestion for a
 whole hour.
 
+## Retention
+
+A daily worker pass deletes DMARC data older than each client's retention window
+(`RetentionMonths` on the client, 27 by default). Clients with `LegalHold` set are
+skipped entirely. See [upgrading and backup](/docs/upgrading-and-backup#retention)
+for the operational side.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Worker__RetentionEnabled` | `true` | Master switch. Set `false` to keep everything indefinitely. |
+| `Worker__RetentionIntervalHours` | `24` | How often the pass runs. Retention is measured in months, so daily is ample. |
+| `Worker__RetentionBatchSize` | `500` | Reports deleted per transaction, so a large backlog doesn't hold locks across the table. |
+
+Retention is measured against each report's **reporting window end**, not its
+ingest date — a backfilled mailbox doesn't reset the clock on old reports. A
+non-positive `RetentionMonths` is treated as misconfiguration and falls back to
+27 rather than deleting everything.
+
 ## Single sign-on (OIDC)
 
 Off by default; see [single sign-on](/docs/single-sign-on) for a worked example.

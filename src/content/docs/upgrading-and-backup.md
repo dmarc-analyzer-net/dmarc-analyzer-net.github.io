@@ -79,11 +79,48 @@ or mailbox syncs will fail to decrypt their credentials.
 
 ## Retention
 
-Each client has a retention setting (default 27 months). Note honestly: **it is
-recorded but not yet enforced** — no purge job runs today, so report data
-accumulates. Volume is modest (aggregate reports are statistical summaries, not
-message content), but plan disk accordingly on a large portfolio. Automated
-purging is on the roadmap.
+Each client has a retention window, **27 months by default**, and a daily
+background pass deletes DMARC data that has aged out of it. Volume is modest
+regardless — aggregate reports are statistical summaries, not message content.
+
+Two details worth knowing:
+
+- Retention is measured against the report's **reporting window end**, not when
+  you ingested it. A mailbox backfilling two years of history won't be granted a
+  fresh 27 months on old reports.
+- Deleting a report also removes its per-source records and their authentication
+  results. **Purging is deletion, not archival** — nothing is copied elsewhere
+  first, so take a [backup](#what-to-back-up) if you need the history.
+
+Change the window per client (Clients → edit → retention), or set
+`LegalHold` on a client to exempt it from purging entirely — for a dispute or
+investigation where data must be preserved regardless of the window:
+
+```bash
+curl -X PATCH https://dmarc.example.com/api/v1/clients/<id> \
+  -H 'Content-Type: application/json' -d '{"legalHold": true}'
+```
+
+### Previewing and running it manually
+
+An admin can see exactly what the next pass would remove, without removing
+anything:
+
+```bash
+curl https://dmarc.example.com/api/v1/admin/retention/preview
+```
+
+It reports per client: the retention window, the cutoff date, how many reports
+and ledger rows would go, and whether the client is on legal hold. To run the
+purge immediately rather than waiting for the daily pass:
+
+```bash
+curl -X POST https://dmarc.example.com/api/v1/admin/retention/purge
+```
+
+Both require an `agency_admin` session. Tuning knobs — including switching the
+pass off entirely — are in the [configuration
+reference](/docs/configuration#retention).
 
 ## Moving to another host
 
