@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
 
 const tools = [
@@ -12,13 +10,11 @@ const tools = [
   },
 ];
 ---
-<BaseLayout
+<BaseLayout current="tools"
   title="Free DMARC tools — DMARC Analyzer"
   description="Free, in-browser DMARC tools — starting with an aggregate (RUA) report analyzer. Open source and private: nothing you paste or upload leaves your browser."
   path="/tools"
 >
-  <div style="min-height:100vh;">
-    <Header current="tools" />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
         <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:14px;">Tools</div>
@@ -42,6 +38,4 @@ const tools = [
       </ul>
       <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">More tools (record checker, generator, SPF/DKIM lookup) are on the way.</p>
     </section>
-    <Footer />
-  </div>
 </BaseLayout>

@@ -1,6 +1,15 @@
 ---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import '../styles/fonts.css';
 import '../styles/global.css';
+
+/*
+ * Header and Footer live here rather than being repeated in every page, so the
+ * content slot can sit inside a <main> landmark. Without one, screen-reader
+ * users get no "skip to content" target — it was the only accessibility failure
+ * Lighthouse reported against the site.
+ */
 
 interface Props {
   /** <title> and og:title. Keep under ~60 chars for search results. */
@@ -11,6 +20,8 @@ interface Props {
   path?: string;
   /** Social share image, resolved against `site`. */
   image?: string;
+  /** Which nav link is active. Forwarded to Header. */
+  current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare' | 'tools' | 'docs';
 }
 
 const {
@@ -18,6 +29,7 @@ const {
   description,
   path = Astro.url.pathname,
   image = '/og.png',
+  current,
 } = Astro.props;
 
 const canonical = new URL(path, Astro.site).href;
@@ -53,6 +65,12 @@ const ogImage = new URL(image, Astro.site).href;
     <slot name="head" />
   </head>
   <body>
-    <slot />
+    <div style="min-height:100vh;">
+      <Header current={current} />
+      <main>
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>

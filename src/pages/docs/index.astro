@@ -1,8 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import Icon from '../../components/Icon.astro';
 import Cta from '../../components/Cta.astro';
@@ -20,13 +18,11 @@ const sections = SECTION_ORDER.map((section) => ({
 
 const first = sections[0]?.items[0];
 ---
-<BaseLayout
+<BaseLayout current="docs"
   title="Documentation — DMARC Analyzer"
   description="Install, configure, and operate your own DMARC Analyzer: Docker quick start, full configuration reference, mailbox setup, upgrades, and troubleshooting."
   path="/docs"
 >
-  <div style="min-height:100vh;">
-    <Header current="docs" />
     <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
       <aside style="position:sticky; top:88px;">
         <DocsSidebar />
@@ -76,6 +72,4 @@ const first = sections[0]?.items[0];
         <Cta />
       </div>
     </div>
-    <Footer />
-  </div>
 </BaseLayout>

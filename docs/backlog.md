@@ -14,6 +14,38 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [ ] (todo) **Make the site responsive.** There are currently **zero `@media`
+      queries anywhere in the repo** — `git log -S "@media"` confirms none have
+      ever existed. The viewport meta *is* set, so phones honour the desktop
+      widths instead of zooming out to fit, which makes it worse rather than
+      better.
+
+      Measured in Chrome at a 390×844 viewport: every page renders **~930px
+      wide against a 390px viewport — a 2.4× horizontal scroll**. Confirmed on
+      the home page and on `/guides/spf-dkim-dmarc`; the cause is shared, so it
+      affects all 45 pages.
+
+      The primary offender is `Header.astro`: eight nav links plus "Star on
+      GitHub" and "Get started" in a single non-wrapping row, 929px at its
+      widest. **Fixing the header alone removes most of the overflow.** After
+      that, the pieces that still need breakpoints:
+
+      - the quick-start split on `index.astro` — stays two-column, squeezing the
+        Terminal to 84px (its contents wrap correctly; the column does not)
+      - the feature grid and the "how it works" grid — fixed 3-up
+      - the comparison table in the "why open source" section
+      - `DocsSidebar.astro` — fixed 230px beside the docs body
+
+      Needs a decision first on how the nav collapses: hamburger menu, wrapped
+      rows, or dropping secondary links below a breakpoint. Everything after
+      that is mechanical.
+
+      This is long-standing rather than a regression — it predates the
+      design-system work entirely. It matters commercially: the site exists to
+      rank, and a 2.4× horizontal scroll is a mobile-usability problem on every
+      indexed page.
+
+
 - [x] (done) Astro project scaffold with `BaseLayout` (title/description/canonical/OG/Twitter), `Header`, `Footer`, `Icon`.
 - [x] (done) Home page (`index.astro`) — hero, dashboard mockup, features, how-it-works, comparison, FAQ, CTA.
 - [x] (done) Features page (`features.astro`).

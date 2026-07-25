@@ -1,8 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import Cta from '../../components/Cta.astro';
@@ -40,10 +38,8 @@ const articleSchema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
+<BaseLayout current="setup" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={articleSchema} />
-  <div style="min-height:100vh;">
-    <Header current="setup" />
     <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
@@ -58,6 +54,4 @@ const articleSchema = {
       <RelatedLinks title="Other providers" links={related} />
       <Cta title="Monitor every client domain in one place" text="DMARC Analyzer is open source and self-hosted — ingest reports from all your providers and domains in one dashboard, on your own infrastructure. No per-domain fees." />
     </article>
-    <Footer />
-  </div>
 </BaseLayout>

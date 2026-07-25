@@ -1,8 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import JsonLd from '../../components/JsonLd.astro';
@@ -47,10 +45,8 @@ const schema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
+<BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={schema} />
-  <div style="min-height:100vh;">
-    <Header current="docs" />
     <div style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
       <aside style="position:sticky; top:88px;">
         <DocsSidebar current={entry.id} />
@@ -100,6 +96,4 @@ const schema = {
         )}
       </article>
     </div>
-    <Footer />
-  </div>
 </BaseLayout>

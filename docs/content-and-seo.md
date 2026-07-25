@@ -301,6 +301,9 @@ Most of this is already handled; the rest is a few small additions.
 - ✅ Canonical URL, Open Graph, Twitter cards (`BaseLayout`)
 - ✅ `sitemap-index.xml` auto-generated — new pages are included automatically
 - ✅ Fast, static, zero-JS pages (great Core Web Vitals)
+- ✅ One `<main>` landmark per page — `BaseLayout` renders `Header`, a `<main>`
+      wrapping the content slot, and `Footer`, so pages supply content only and
+      pass `current` for the active nav link. Lighthouse accessibility 100.
 - ✅ `/llms.txt` and `/llms-full.txt` ([llmstxt.org](https://llmstxt.org/)) —
       **generated from the content collections**, so a new guide, doc or glossary
       entry appears in both on the next build. Nothing to update by hand. Source:
@@ -312,6 +315,10 @@ Most of this is already handled; the rest is a few small additions.
       belongs under `## Optional`, which by the spec means "skippable if a shorter
       context is needed"; glossary entries and comparison pages live there because
       they are the least necessary for answering a question about the product.
+
+**Known gap**
+- ❌ **No responsive CSS at all** — zero `@media` queries; every page scrolls
+      horizontally at phone widths. See the top item in `backlog.md`.
 
 **To add**
 - [ ] **`public/robots.txt`** pointing at the sitemap:
