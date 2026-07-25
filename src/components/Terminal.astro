@@ -1,0 +1,66 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * Ink-dark terminal block for marketing quick-starts.
+ *
+ * `cmd` lines auto-prefix a mint `$`; `ok` lines auto-prefix `✓`; `gap` draws a
+ * blank spacer row for grouping commands into stanzas. Callers pass data rather
+ * than markup, so every terminal shares one set of colours — previously this
+ * was ~20 lines of inline styles living only on the homepage, and they had
+ * already drifted: the header label sat at 2.73:1 against the panel behind it.
+ *
+ * Colours come from the design tokens in global.css rather than literals, so
+ * `--surface-ink`, `--mint-400` and friends stay the single source of truth.
+ *
+ * Long clone URLs wrap via `overflow-wrap` rather than a `<wbr>`, so nothing
+ * extra lands in the clipboard when a line is copied.
+ */
+export type TerminalLineType = 'comment' | 'cmd' | 'ok' | 'out' | 'gap';
+
+export interface TerminalLine {
+  type: TerminalLineType;
+  /** Omitted for `gap`. */
+  text?: string;
+}
+
+interface Props {
+  title?: string;
+  lines: TerminalLine[];
+}
+
+const { title = 'Terminal', lines } = Astro.props;
+
+const TONE: Record<string, string> = {
+  comment: 'var(--text-on-ink-muted)',
+  cmd: 'var(--text-on-ink)',
+  ok: 'var(--mint-400)',
+  out: 'var(--amber-500)',
+};
+---
+
+<div
+  style="border:1px solid var(--border-on-ink); border-radius:var(--radius-lg); background:var(--surface-ink); overflow:hidden; box-shadow:var(--shadow-ink-panel);"
+>
+  <div
+    style="display:flex; align-items:center; justify-content:space-between; padding:11px 15px; border-bottom:1px solid var(--border-on-ink); background:var(--surface-ink-raised);"
+  >
+    <span class="mono" style="font-size:var(--text-xs); color:var(--text-on-ink-muted);">{title}</span>
+    <Icon name="copy-01" style="font-size:14px; color:var(--text-on-ink-muted);" />
+  </div>
+  <div class="mono" style="padding:20px; font-size:var(--text-sm); line-height:1.9; color:var(--text-on-ink);">
+    {
+      lines.map((line) =>
+        line.type === 'gap' ? (
+          <div style="height:12px;" />
+        ) : (
+          <div style={`color:${TONE[line.type]}; overflow-wrap:anywhere;`}>
+            {line.type === 'cmd' && <span style="color:var(--mint-400); margin-right:8px;">$</span>}
+            {line.type === 'ok' && <span style="margin-right:8px;">✓</span>}
+            {line.text}
+          </div>
+        ),
+      )
+    }
+  </div>
+</div>

@@ -77,17 +77,24 @@ code,kbd,pre{font-family:var(--font-mono)}
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  a { color: #0f766e; text-decoration: none; }
-  a:hover { color: #115e59; }
+  a { color: #0c7568; text-decoration: none; }
+  a:hover { color: #0b5d54; }
   h1, h2, h3 { font-family: 'Space Grotesk', ui-sans-serif, sans-serif; }
   .mono { font-family: 'JetBrains Mono', ui-monospace, 'Menlo', monospace; }
   .lift { transition: transform 180ms cubic-bezier(0.22,1,0.36,1), box-shadow 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms; }
   .lift:hover { transform: translateY(-3px); border-color: #14b8a6 !important; box-shadow: 0 16px 40px -12px rgba(13,148,136,0.18), 0 4px 8px -2px rgba(12,26,24,0.05); }
   .navlink { color: #4a5f5b !important; transition: color 120ms; }
-  .navlink:hover { color: #0f766e !important; }
+  .navlink:hover { color: #0c7568 !important; }
   .btn-primary { transition: transform 80ms ease, background 120ms, box-shadow 120ms; box-shadow: 0 2px 8px -2px rgba(13,148,136,0.45), inset 0 1px 0 rgba(255,255,255,0.18); }
-  .btn-primary:hover { background: #115e59 !important; }
+  .btn-primary:hover { background: #0b5d54 !important; }
   .btn-primary:active { transform: scale(0.98); }
+  /* Primary action *on ink panels*: solid mint with ink text, per the design
+     system. Teal on ink is too close in value to the panel behind it; mint is
+     the accent that dark surfaces are meant to use. Needs its own class because
+     .btn-primary:hover sets its teal with !important. */
+  .btn-mint { transition: transform 80ms ease, background 120ms; }
+  .btn-mint:hover { background: #22c996 !important; }
+  .btn-mint:active { transform: scale(0.98); }
   .btn-ghost { transition: background 120ms, border-color 120ms; }
   .btn-ghost:hover { background: #e8f5f1; border-color: #14b8a6 !important; }
   details > summary { list-style: none; cursor: pointer; }
@@ -115,8 +122,8 @@ code,kbd,pre{font-family:var(--font-mono)}
   .prose ul, .prose ol { margin: 0 0 18px; padding-left: 22px; }
   .prose li { margin: 6px 0; }
   .prose li::marker { color: #5d726d; }
-  .prose a { color: #0f766e; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #b9e3da; }
-  .prose a:hover { color: #115e59; text-decoration-color: #0f766e; }
+  .prose a { color: #0c7568; text-decoration: underline; text-underline-offset: 2px; text-decoration-color: #b9e3da; }
+  .prose a:hover { color: #0b5d54; text-decoration-color: #0c7568; }
   .prose strong { color: #0c1a18; font-weight: 600; }
   .prose blockquote {
     margin: 0 0 18px; padding: 2px 18px; border-left: 3px solid #14b8a6;
