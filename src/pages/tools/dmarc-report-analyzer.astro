@@ -42,14 +42,14 @@ const schema = {
       <!-- Tool -->
       <div id="dropzone" style="border:2px dashed #b9d8cf; border-radius:14px; background:#ffffff; padding:28px; text-align:center; transition:border-color 150ms, background 150ms;">
         <p style="margin:0 0 12px; font-size:15px; color:#2c3f3b;">Drop a DMARC report here (<code class="mono">.xml</code>, <code class="mono">.gz</code>, or <code class="mono">.zip</code>), or</p>
-        <label class="btn-primary" style="display:inline-flex; align-items:center; height:38px; padding:0 18px; border-radius:9px; background:#0d9488; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">
+        <label class="btn-primary" style="display:inline-flex; align-items:center; height:38px; padding:0 18px; border-radius:9px; background:#0f766e; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">
           Choose a file
           <input id="fileInput" type="file" accept=".xml,.gz,.zip,application/xml,text/xml,application/gzip,application/zip" style="display:none;" />
         </label>
-        <p style="margin:16px 0 6px; font-size:13px; color:#7ba79d;">— or paste the XML —</p>
+        <p style="margin:16px 0 6px; font-size:13px; color:#5d726d;">— or paste the XML —</p>
         <textarea id="xmlInput" rows="5" placeholder="<feedback>...</feedback>" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; padding:12px; border:1px solid #cfe0da; border-radius:10px; background:#f7fbf9; color:#2c3f3b; resize:vertical;"></textarea>
         <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
-          <button id="analyzeBtn" class="btn-primary" style="height:38px; padding:0 18px; border:0; border-radius:9px; background:#0d9488; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">Analyze</button>
+          <button id="analyzeBtn" class="btn-primary" style="height:38px; padding:0 18px; border:0; border-radius:9px; background:#0f766e; color:#f0fdfa; font-size:14px; font-weight:600; cursor:pointer;">Analyze</button>
           <button id="sampleBtn" class="btn-ghost" style="height:38px; padding:0 16px; border:1px solid #c8ded7; border-radius:9px; background:#fff; color:#0c1a18; font-size:14px; font-weight:500; cursor:pointer;">Load a sample</button>
         </div>
       </div>
@@ -58,7 +58,7 @@ const schema = {
       <!-- Results -->
       <div id="results" style="display:none; margin-top:28px;"></div>
 
-      <p style="margin:18px 2px 0; font-size:12.5px; color:#7ba79d;">🔒 Your report is parsed locally in this browser tab using JavaScript. It is never sent to a server.</p>
+      <p style="margin:18px 2px 0; font-size:12.5px; color:#5d726d;">🔒 Your report is parsed locally in this browser tab using JavaScript. It is never sent to a server.</p>
     </section>
 
     <!-- SEO / explanatory content -->
@@ -259,7 +259,7 @@ const schema = {
       box.style.cssText = 'border:1px solid #c8ded7; border-radius:12px; background:#fff; padding:14px 16px;';
       const l = document.createElement('div');
       l.textContent = label;
-      l.style.cssText = 'font-size:12px; color:#7ba79d; margin-bottom:4px;';
+      l.style.cssText = 'font-size:12px; color:#5d726d; margin-bottom:4px;';
       const v = document.createElement('div');
       v.textContent = value;
       v.style.cssText = "font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; color:#0c1a18;";
