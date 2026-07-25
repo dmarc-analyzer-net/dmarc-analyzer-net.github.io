@@ -30,3 +30,6 @@ pnpm-debug.log*
 
 # source design bundle (kept locally, not part of the site)
 *.zip
+
+# Python bytecode from scripts/
+__pycache__/
