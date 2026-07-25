@@ -166,9 +166,21 @@ code,kbd,pre{font-family:var(--font-mono)}
    carries its desktop grid inline and the query relaxes it below a width.
    ------------------------------------------------------------------------ */
 
-/* Every full-width section container: gutters, never edge-to-edge. */
+/* Every centred page container: gutters, never edge-to-edge.
+
+   Matched on structure — a max-width plus auto side margins — rather than on
+   one specific width. Keying on "max-width:1160px" reached 18 of the site's 45
+   containers and silently missed every section drawn at 960, 900, 820, 760 or
+   1000, which kept 32px of inline padding all the way down to a 320px screen.
+   Every element in the codebase carrying `margin:0 auto` is a page container,
+   so this cannot over-match, and a section added at a new width is covered
+   without touching this rule. */
 @media (max-width: 1023px) {
-  [style*="max-width:1160px"] { padding-left: var(--gutter-desktop) !important; padding-right: var(--gutter-desktop) !important; }
+  [style*="max-width"][style*="margin:0 auto"],
+  [style*="max-width"][style*="margin: 0 auto"] {
+    padding-left: var(--gutter-desktop) !important;
+    padding-right: var(--gutter-desktop) !important;
+  }
   .grid-3 { grid-template-columns: repeat(2, 1fr) !important; }
   .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
   .split  { grid-template-columns: 1fr !important; }
@@ -177,19 +189,37 @@ code,kbd,pre{font-family:var(--font-mono)}
 }
 
 @media (max-width: 767px) {
-  [style*="max-width:1160px"] { padding-left: var(--gutter-mobile) !important; padding-right: var(--gutter-mobile) !important; }
+  [style*="max-width"][style*="margin:0 auto"],
+  [style*="max-width"][style*="margin: 0 auto"] {
+    padding-left: var(--gutter-mobile) !important;
+    padding-right: var(--gutter-mobile) !important;
+  }
   .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr !important; }
 
-  /* Display type steps down; body never does. */
-  h1[style*="font-size:58px"], h1[style*="font-size:48px"] { font-size: var(--text-3xl) !important; }
-  h2[style*="font-size:44px"], h2[style*="font-size:42px"], h2[style*="font-size:40px"] { font-size: var(--text-2xl) !important; }
+  /* Display type steps down; body never does.
+
+     h1 is matched by element rather than by inline value. There is one per
+     page, so a single size loses no hierarchy, and it cannot be out-run by a
+     new inline size the way a value list can: the previous list covered 58px
+     and 48px, which between them matched exactly one of sixteen h1s. */
+  h1 { font-size: var(--text-3xl) !important; }
+
+  /* h2 sizes do carry hierarchy within a page — a 38px section heading and a
+     24px card heading must not collapse to the same size — so these stay
+     value-matched, stepping only the display-scale ones down to --text-2xl.
+     Anything already at or below 28px is left alone. Keep this list in step
+     with the display sizes actually used. */
+  h2[style*="font-size:38px"], h2[style*="font-size:34px"],
+  h2[style*="font-size:32px"], h2[style*="font-size:30px"] {
+    font-size: var(--text-2xl) !important;
+  }
 
   /* Ink CTA panel loses its desktop padding. */
   .ink-panel { padding: 32px 24px !important; }
 }
 
 @media (max-width: 479px) {
-  h1[style*="font-size:58px"], h1[style*="font-size:48px"] { font-size: var(--text-2xl) !important; }
+  h1 { font-size: var(--text-2xl) !important; }
 }
 
 /* Wide, dense content scrolls inside its own container rather than pushing the

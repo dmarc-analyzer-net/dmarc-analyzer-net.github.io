@@ -10,6 +10,14 @@
  * The gradient stops are stock Tailwind teal-600/800 rather than brand teal.
  * That is the artwork of record — the DS adjudicated it as final and says not
  * to snap it to the palette.
+ *
+ * The glyph stroke is a literal #f0fdfa (stock Tailwind teal-50) for the same
+ * reason, and deliberately not `var(--teal-50)`, which is the palette's #effaf7.
+ * The whole mark is drawn in stock Tailwind teal — 50 for the glyph, 600 to 800
+ * for the gradient — so pointing one of the three at the palette half-converts
+ * artwork the DS says to leave alone, and makes the rendered mark differ from
+ * the files published at /brand/. The difference is invisible; the drift is the
+ * problem.
  */
 interface Props {
   /** Rendered edge length in px. The DS draws the corner at ~0.2 of the box. */
@@ -40,7 +48,7 @@ const gid = `dmg-${Math.random().toString(36).slice(2, 9)}`;
   <g
     transform="translate(14 14) scale(1.75)"
     fill="none"
-    stroke="var(--teal-50)"
+    stroke="#f0fdfa"
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
