@@ -140,7 +140,7 @@ const faqSchema = {
                 </div>
                 <div style="border:1px solid var(--border-default); border-radius:var(--radius-md); padding:14px 15px; background:var(--surface-card);">
                   <div style="font-size:var(--text-xs); color:var(--text-faint); margin-bottom:8px;">Spoofing blocked</div>
-                  <div style="display:flex; align-items:baseline; gap:7px;"><span style="font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">3,481</span><span style="font-size:11px; font-weight:600; color:var(--status-danger-fg); background:#ffe4e6; border-radius:5px; padding:2px 5px;">7 active</span></div>
+                  <div style="display:flex; align-items:baseline; gap:7px;"><span style="font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">3,481</span><span style="font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); border-radius:5px; padding:2px 5px;">7 active</span></div>
                 </div>
               </div>
               <div style="border:1px solid var(--border-default); border-radius:var(--radius-md); overflow:hidden;">
@@ -163,7 +163,7 @@ const faqSchema = {
                   <div style="display:flex; align-items:center; gap:9px;"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--red-600);"></span><span class="mono" style="font-size:var(--text-sm);">acme-retail.com</span></div>
                   <span class="mono" style="font-size:var(--text-xs); color:var(--gray-700); background:var(--text-on-ink); justify-self:start; padding:2px 7px; border-radius:5px;">p=none</span>
                   <div style="display:flex; align-items:center; gap:9px;"><div style="flex:1; height:6px; border-radius:var(--radius-pill); background:var(--text-on-ink); overflow:hidden;"><div style="width:61%; height:100%; background:var(--red-600);"></div></div><span style="font-size:var(--text-xs); color:var(--text-faint); font-variant-numeric:tabular-nums; width:36px; text-align:right;">61%</span></div>
-                  <span style="justify-self:end; font-size:11px; font-weight:600; color:var(--status-danger-fg); background:#ffe4e6; padding:3px 9px; border-radius:var(--radius-pill);">Spoofing</span>
+                  <span style="justify-self:end; font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); padding:3px 9px; border-radius:var(--radius-pill);">Spoofing</span>
                 </div>
                 <div class="row-hover" style="display:grid; grid-template-columns:1.6fr 1fr 1.3fr 0.8fr; gap:12px; align-items:center; padding:12px 16px;">
                   <div style="display:flex; align-items:center; gap:9px;"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--teal-600);"></span><span class="mono" style="font-size:var(--text-sm);">harbor-logistics.io</span></div>
@@ -204,12 +204,12 @@ const faqSchema = {
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Group domains by client, tag them, and give each account its own view. Add the 43rd domain at the same price as the first — zero.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:#e0e7ff; align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="mail-receive-02" style="font-size:19px; color:#4f46e5;" /></span>
+            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="mail-receive-02" style="font-size:19px; color:var(--tint-indigo-fg);" /></span>
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Automatic report ingestion</h3>
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Point a mailbox at the tool. Aggregate and forensic XML reports are fetched, parsed, and de-duplicated on a schedule — no manual uploads.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:#ffe4e6; align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="alert-02" style="font-size:19px; color:var(--status-danger-fg);" /></span>
+            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-red-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="alert-02" style="font-size:19px; color:var(--tint-red-fg);" /></span>
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Spoofing &amp; threat detection</h3>
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Unauthenticated sources are surfaced the moment they appear, with the sending IP, volume, and geography so you can act before a client does.</p>
           </div>
@@ -219,12 +219,12 @@ const faqSchema = {
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Each domain shows exactly what stands between p=none and p=reject, with source-by-source alignment for SPF and DKIM.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:#fae8ff; align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="file-export" style="font-size:19px; color:#a21caf;" /></span>
+            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-purple-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="file-export" style="font-size:19px; color:var(--tint-purple-fg);" /></span>
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">White-label client reports</h3>
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Export a clean monthly summary per domain — your logo, your colours — that a non-technical client can actually read.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:#ecfccb; align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="database-02" style="font-size:19px; color:#4d7c0f;" /></span>
+            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-olive-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="database-02" style="font-size:19px; color:var(--tint-olive-fg);" /></span>
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Runs as a single container with PostgreSQL. Client report data never leaves your infrastructure — a real answer for data-residency clauses.</p>
           </div>
