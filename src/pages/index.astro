@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
+import BrowserFrame from '../components/BrowserFrame.astro';
+import Terminal from '../components/Terminal.astro';
 import JsonLd from '../components/JsonLd.astro';
 
 const title = 'DMARC Analyzer — Open-source DMARC monitoring for agencies';
@@ -94,15 +96,7 @@ const faqSchema = {
 
       <!-- DASHBOARD MOCKUP -->
       <section style="max-width:1160px; margin:0 auto; padding:24px 32px 40px;">
-        <div style="border:1px solid #b9e3da; border-radius:16px; background:#ffffff; overflow:hidden; box-shadow:0 24px 64px -24px rgba(13,148,136,0.22), 0 8px 16px -4px rgba(12,26,24,0.04);">
-          <div style="display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid #dcebe5; background:#f2f9f6;">
-            <div style="display:flex; gap:7px;">
-              <span style="width:11px; height:11px; border-radius:999px; background:#f87171;"></span>
-              <span style="width:11px; height:11px; border-radius:999px; background:#fbbf24;"></span>
-              <span style="width:11px; height:11px; border-radius:999px; background:#34d399;"></span>
-            </div>
-            <div class="mono" style="font-size:12px; color:#5d726d;">app.dmarc-analyzer.net / overview</div>
-          </div>
+        <BrowserFrame url="app.dmarc-analyzer.net / overview">
           <div style="display:flex;">
             <aside style="width:214px; flex-shrink:0; border-right:1px solid #dcebe5; background:#f2f9f6; padding:16px 12px; display:flex; flex-direction:column; gap:2px;">
               <div style="font-size:11px; font-weight:500; color:#5d726d; padding:4px 10px 6px;">Agency workspace</div>
@@ -184,7 +178,7 @@ const faqSchema = {
               </div>
             </div>
           </div>
-        </div>
+        </BrowserFrame>
       </section>
 
       <!-- TRUST STRIP -->
@@ -286,24 +280,20 @@ const faqSchema = {
             </ul>
             <a class="btn-ghost" href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp#readme" style="display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 18px; border:1px solid #c8ded7; border-radius:10px; background:#ffffff; color:#0c1a18 !important; font-size:14px; font-weight:500;"><Icon name="book-open-01" style="font-size:16px;" /> Read the setup guide</a>
           </div>
-          <div style="border:1px solid #134e4a; border-radius:14px; background:#0b2521; overflow:hidden; box-shadow:0 16px 40px -12px rgba(11,37,33,0.4);">
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 15px; border-bottom:1px solid #134e4a; background:#10312c;">
-              <span class="mono" style="font-size:12px; color:#5d726d;">Terminal</span>
-              <Icon name="copy-01" style="font-size:14px; color:#99c4bb;" />
-            </div>
-            <div class="mono" style="padding:20px; font-size:13px; line-height:1.9; color:#d5efe8;">
-              <div><span style="color:#99c4bb;"># clone and enter</span></div>
-              <div><span style="color:#2dd4bf;">$</span> git clone https://github.com/<wbr>dmarc-analyzer-net/DmarcAnalyzerApp</div>
-              <div><span style="color:#2dd4bf;">$</span> cd DmarcAnalyzerApp</div>
-              <div style="height:12px;"></div>
-              <div><span style="color:#99c4bb;"># build + run api, worker, postgres</span></div>
-              <div><span style="color:#2dd4bf;">$</span> docker compose up -d --build</div>
-              <div style="height:12px;"></div>
-              <div style="color:#fbbf24;">✓ api      → http://localhost:8080</div>
-              <div style="color:#fbbf24;">✓ worker   → APP_MODE=worker</div>
-              <div style="color:#fbbf24;">✓ postgres → localhost:5432</div>
-            </div>
-          </div>
+          <Terminal
+            lines={[
+              { type: 'comment', text: '# clone and enter' },
+              { type: 'cmd', text: 'git clone https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp' },
+              { type: 'cmd', text: 'cd DmarcAnalyzerApp' },
+              { type: 'gap' },
+              { type: 'comment', text: '# build + run api, worker, postgres' },
+              { type: 'cmd', text: 'docker compose up -d --build' },
+              { type: 'gap' },
+              { type: 'ok', text: 'api      → http://localhost:8080' },
+              { type: 'ok', text: 'worker   → APP_MODE=worker' },
+              { type: 'ok', text: 'postgres → localhost:5432' },
+            ]}
+          />
         </div>
       </section>
 
