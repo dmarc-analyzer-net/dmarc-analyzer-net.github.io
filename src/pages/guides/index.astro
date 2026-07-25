@@ -18,21 +18,21 @@ const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
     <Header current="guides" />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
-        <div style="font-size:13px; font-weight:600; color:#0c7568; margin-bottom:14px;">Guides</div>
+        <div style="font-size:13px; font-weight:600; color:var(--brand); margin-bottom:14px;">Guides</div>
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">DMARC, explained by people who read the reports.</h1>
-        <p style="font-size:18px; line-height:1.5; color:#425551; margin:0; max-width:600px;">Step-by-step guides for getting a domain from no protection to full enforcement — without breaking legitimate mail.</p>
+        <p style="font-size:18px; line-height:1.5; color:var(--gray-700); margin:0; max-width:600px;">Step-by-step guides for getting a domain from no protection to full enforcement — without breaking legitimate mail.</p>
       </div>
     </section>
     <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
       <ul style="list-style:none; margin:0; padding:0; display:grid; gap:16px;">
         {guides.map((g) => (
           <li>
-            <a class="lift" href={`/guides/${g.id}`} style="display:block; border:1px solid #c8ded7; border-radius:14px; background:#ffffff; padding:24px 26px; color:#0c1a18 !important;">
+            <a class="lift" href={`/guides/${g.id}`} style="display:block; border:1px solid var(--border-strong); border-radius:14px; background:var(--surface-card); padding:24px 26px; color:var(--text-body) !important;">
               <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
                 {g.data.title}
-                <Icon name="arrow-right-01" style="font-size:18px; color:#0c7568;" />
+                <Icon name="arrow-right-01" style="font-size:18px; color:var(--brand);" />
               </h2>
-              <p style="font-size:14.5px; line-height:1.55; color:#425551; margin:0;">{g.data.description}</p>
+              <p style="font-size:14.5px; line-height:1.55; color:var(--gray-700); margin:0;">{g.data.description}</p>
             </a>
           </li>
         ))}
