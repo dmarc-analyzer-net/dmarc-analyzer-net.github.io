@@ -17,10 +17,10 @@ heavy" and "lightweight but young."
 
 ## Why self-host
 
-- **Data sovereignty** — [aggregate reports](/glossary/dmarc-aggregate-report)
+- **Data sovereignty** — [aggregate reports](/glossary/dmarc-aggregate-report/)
   reveal your sending infrastructure; self-hosting keeps that in-house.
 - **No per-domain / per-volume fees** — run [unlimited domains for
-  free](/free-dmarc-analyzer).
+  free](/free-dmarc-analyzer/).
 - **Auditability** — open source you can read, modify, and trust.
 
 ## The options
@@ -31,7 +31,7 @@ heavy" and "lightweight but young."
 | parsedmarc | Python | Parser + Elasticsearch/OpenSearch + Kibana/Grafana | Via Kibana/Grafana | No |
 | Lightweight viewers | Go / Rust / PHP | A single small service + SQLite/MySQL | Basic, built in | Usually no |
 
-- **[parsedmarc](/compare/parsedmarc)** — the most established. A flexible parser
+- **[parsedmarc](/compare/parsedmarc/)** — the most established. A flexible parser
   with rich outputs, but dashboards mean standing up and maintaining a search
   stack (Elasticsearch/OpenSearch + Kibana/Grafana). Best if you already run one
   or want a CLI parser for your own pipeline.
@@ -50,4 +50,4 @@ heavy" and "lightweight but young."
   that's the gap DMARC Analyzer was built for.
 
 Prefer a managed service, or comparing against the hosted platforms too? See the
-[full buyer's guide](/compare/best-dmarc-monitoring-tools).
+[full buyer's guide](/compare/best-dmarc-monitoring-tools/).

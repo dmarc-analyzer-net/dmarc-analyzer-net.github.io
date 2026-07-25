@@ -10,14 +10,14 @@ typically once a day — summarising all the mail it saw claiming to be from you
 domain. It does **not** contain message content; it is a statistical roll-up:
 sending IP, message count, SPF/DKIM results, and the disposition applied.
 
-You request them with the `rua=` tag in your [DMARC](/glossary/dmarc) record:
+You request them with the `rua=` tag in your [DMARC](/glossary/dmarc/) record:
 
 ```
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
 Each `<record>` in the XML groups messages by source and reports the
-[alignment](/glossary/dmarc-alignment) outcome:
+[alignment](/glossary/dmarc-alignment/) outcome:
 
 ```xml
 <record>
@@ -31,4 +31,4 @@ Each `<record>` in the XML groups messages by source and reports the
 
 Reading these by hand across many domains does not scale — which is what a
 self-hosted analyzer like [DMARC Analyzer](/) is for. See
-[how to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report).
+[how to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report/).

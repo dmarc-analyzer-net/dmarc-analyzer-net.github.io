@@ -46,7 +46,7 @@ import Footer from '../components/Footer.astro';
 <BaseLayout
   title="About — DMARC Analyzer"
   description="Who builds DMARC Analyzer and why it's open source."
-  path="/about"
+  path="/about/"
 >
   <div style="min-height:100vh;">
     <Header />
@@ -60,7 +60,7 @@ import Footer from '../components/Footer.astro';
 Graph/Twitter tags, and favicon. Always pass a unique `title`, `description`,
 and the `path`.
 
-Nested routes: `src/pages/dmarc-for/google-workspace.astro` → `/dmarc-for/google-workspace`.
+Nested routes: `src/pages/dmarc-for/google-workspace.astro` → `/dmarc-for/google-workspace/`.
 
 ---
 
@@ -129,7 +129,7 @@ const { Content } = await render(entry);
 <BaseLayout
   title={entry.data.title}
   description={entry.data.description}
-  path={`/guides/${entry.id}`}
+  path={`/guides/${entry.id}/`}
 >
   <div style="min-height:100vh;">
     <Header />
@@ -154,7 +154,7 @@ publishDate: 2026-08-01
 DMARC aggregate reports arrive as XML once a day from each mailbox provider…
 ```
 
-It appears at `/guides/how-to-read-a-dmarc-report`, is added to the sitemap
+It appears at `/guides/how-to-read-a-dmarc-report/`, is added to the sitemap
 automatically, and passes the same SEO checks as every other page.
 
 > **Prose styling:** markdown produces bare `<h2>`, `<p>`, `<ul>`, `<pre>` etc.
@@ -205,7 +205,7 @@ const { p } = Astro.props;
 <BaseLayout
   title={`Set up DMARC for ${p.name}`}
   description={`Step-by-step DMARC setup and report monitoring for ${p.name} — where reports come from and what to watch for.`}
-  path={`/dmarc-for/${p.slug}`}
+  path={`/dmarc-for/${p.slug}/`}
 >
   <div style="min-height:100vh;">
     <Header />
@@ -334,7 +334,9 @@ Most of this is already handled; the rest is a few small additions.
       Google's [Rich Results Test](https://search.google.com/test/rich-results).
 - [ ] **One H1 per page**, descriptive; use H2/H3 for structure.
 - [ ] **Internal links** — every new page should link to 2–4 related pages and
-      be linked to from at least one existing page (use `RelatedLinks`).
+      be linked to from at least one existing page (use `RelatedLinks`). Always
+      write them **with a trailing slash** (`/glossary/spf/`, not `/glossary/spf`)
+      — see *Trailing slashes* below.
 - [ ] **Images:** use Astro's `<Image />` (`src/assets/…`) for automatic
       resize/format/lazy-loading. Always set descriptive `alt`. *(Requires
       `sharp`, which builds fine in CI.)*
@@ -343,6 +345,16 @@ Most of this is already handled; the rest is a few small additions.
       page has a title-specific share card instead of the single default.
 - [ ] **Register the site in [Google Search Console](https://search.google.com/search-console)**
       and submit the sitemap. This is how you'll see what actually ranks.
+
+**Trailing slashes:** Astro's default `build.format: "directory"` emits every
+page as `<route>/index.html`, so GitHub Pages serves it at `/features/` and
+301-redirects `/features` to it. `trailingSlash: "always"` in `astro.config.mjs`
+makes the slashed form canonical everywhere — canonical tags, OG urls, the
+sitemap, `llms.txt` and every internal `href`. **Write internal links with the
+trailing slash**; a slash-less one still works for visitors but burns a redirect
+hop, and a slash-less `path` prop would emit a canonical pointing at a URL that
+301s. `scripts/crawl.py` fails CI on both (`astro preview` 404s the slash-less
+form, so a missed link shows up as a broken link).
 
 **Redirects:** GitHub Pages has no server-side redirects. If you rename a URL,
 add an Astro [`redirects`](https://docs.astro.build/en/reference/configuration-reference/#redirects)

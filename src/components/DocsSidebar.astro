@@ -22,7 +22,7 @@ const sections = SECTION_ORDER.map((section) => ({
 ---
 <nav aria-label="Documentation" style="font-size:var(--text-base);">
   <a
-    href="/docs"
+    href="/docs/"
     style={`display:block; padding:6px 0; font-weight:${current === undefined ? 600 : 500}; color:${current === undefined ? 'var(--brand)' : 'var(--text-secondary)'} !important;`}
   >
     Overview
@@ -38,7 +38,7 @@ const sections = SECTION_ORDER.map((section) => ({
           return (
             <li>
               <a
-                href={`/docs/${item.id}`}
+                href={`/docs/${item.id}/`}
                 aria-current={active ? 'page' : undefined}
                 style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? 'var(--teal-600)' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? 'var(--brand)' : 'var(--text-secondary)'} !important; line-height:1.45;`}
               >

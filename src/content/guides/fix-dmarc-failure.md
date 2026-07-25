@@ -12,8 +12,8 @@ checking them.
 
 ## The one rule behind every DMARC failure
 
-A message **passes DMARC** when *either* [SPF](/glossary/spf) *or*
-[DKIM](/glossary/dkim) does two things at once:
+A message **passes DMARC** when *either* [SPF](/glossary/spf/) *or*
+[DKIM](/glossary/dkim/) does two things at once:
 
 1. **Authenticates** — the check itself passes, and
 2. **Aligns** — the domain it authenticated matches your `From:` domain.
@@ -32,7 +32,7 @@ SPF authenticates the **envelope sender** (the hidden `Return-Path`), not the
 `From:` address your recipients see. When you send through a marketing platform
 or ESP, the envelope is often *their* domain (e.g. `bounces.sendgrid.net`) while
 your `From:` is `you@yourdomain.com`. SPF passes for *their* domain — but that
-domain doesn't [align](/glossary/dmarc-alignment) with yours, so it earns you
+domain doesn't [align](/glossary/dmarc-alignment/) with yours, so it earns you
 nothing under DMARC.
 
 **Fix:** get alignment, not just authentication. Either
@@ -48,7 +48,7 @@ makes the SPF-alignment problem moot.
 
 If a legitimate service (CRM, help desk, invoicing tool, newsletter) sends as
 your domain but you never set it up for authentication, it will fail. Every such
-source shows up in your [aggregate reports](/glossary/dmarc-aggregate-report).
+source shows up in your [aggregate reports](/glossary/dmarc-aggregate-report/).
 
 **Fix:** for each real source, add its SPF `include:` and publish its DKIM key
 (most providers give you a selector and a CNAME/TXT to add). Then confirm it
@@ -90,7 +90,7 @@ enough to **break DKIM** too. The result is a DMARC failure for mail you did
 legitimately send.
 
 **Fix:** there's no perfect fix, but aligned DKIM survives most forwarding, and
-[ARC](/glossary/dkim) lets participating receivers honor a prior "pass". Don't
+[ARC](/glossary/dkim/) lets participating receivers honor a prior "pass". Don't
 tighten your policy based on forwarding failures alone — read the reports first.
 
 ## Cause 5 — a subdomain with no record
@@ -100,13 +100,13 @@ it has none, by your organizational policy's subdomain tag (`sp=`). A forgotten
 subdomain sending unauthenticated mail will fail.
 
 **Fix:** publish DMARC (and SPF/DKIM) on active subdomains, and set a deliberate
-`sp=` on your main [policy](/glossary/dmarc-policy) rather than leaving it to
+`sp=` on your main [policy](/glossary/dmarc-policy/) rather than leaving it to
 chance.
 
 ## How to diagnose which one it is
 
 Don't guess — the answer is in the data. DMARC
-[aggregate reports](/glossary/dmarc-aggregate-report) list every source sending
+[aggregate reports](/glossary/dmarc-aggregate-report/) list every source sending
 as your domain and show, per source, whether SPF and DKIM **authenticated** and
 whether they **aligned**. That two-by-two (auth × alignment) tells you exactly
 which cause above applies:
@@ -117,7 +117,7 @@ which cause above applies:
 - Passes for known mail but fails only on forwarded paths → Cause 4
 
 Learn to read them in [how to read a DMARC aggregate
-report](/guides/how-to-read-a-dmarc-aggregate-report).
+report](/guides/how-to-read-a-dmarc-aggregate-report/).
 
 ## Quick checklist
 
@@ -131,6 +131,6 @@ report](/guides/how-to-read-a-dmarc-aggregate-report).
 
 Once failures are down to only the sources you expect, you're ready to move from
 monitoring toward enforcement — safely, in stages. See
-[from monitoring to enforcement](/guides/from-monitoring-to-enforcement), and if
+[from monitoring to enforcement](/guides/from-monitoring-to-enforcement/), and if
 you haven't yet, [publish your first DMARC
-record](/guides/publish-your-first-dmarc-record) in monitoring mode first.
+record](/guides/publish-your-first-dmarc-record/) in monitoring mode first.

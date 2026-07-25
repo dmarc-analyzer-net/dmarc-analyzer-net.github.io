@@ -33,4 +33,4 @@ suite in one dashboard, EasyDMARC delivers that.
 If you'd rather **self-host**, monitor **unlimited domains** without tier limits,
 and keep client data on infrastructure you control, DMARC Analyzer is the
 open-source alternative. If a checker flags problems, our guide on
-[why email fails DMARC](/guides/fix-dmarc-failure) walks through the fixes.
+[why email fails DMARC](/guides/fix-dmarc-failure/) walks through the fixes.

@@ -29,7 +29,7 @@ const item = (
   base: string,
 ): Item => ({
   title: entry.data.title,
-  url: `${SITE}${base}/${entry.id}`,
+  url: `${SITE}${base}/${entry.id}/`,
   description: entry.data.description,
   body: entry.body ?? '',
 });
@@ -75,14 +75,14 @@ export async function buildSections(): Promise<Section[]> {
         },
         {
           title: 'Features',
-          url: `${SITE}/features`,
+          url: `${SITE}/features/`,
           description:
             'Multi-tenant dashboards, per-source drill-down, alerting, digests and policy guidance.',
           body: '',
         },
         {
           title: 'Free DMARC analyzer, self-hosted',
-          url: `${SITE}/free-dmarc-analyzer`,
+          url: `${SITE}/free-dmarc-analyzer/`,
           description:
             'How to run the analyzer for free on your own infrastructure, with no seat or domain limits.',
           body: '',
@@ -108,7 +108,7 @@ export async function buildSections(): Promise<Section[]> {
       items: [
         {
           title: 'Free DMARC report analyzer',
-          url: `${SITE}/tools/dmarc-report-analyzer`,
+          url: `${SITE}/tools/dmarc-report-analyzer/`,
           description: 'Browser-based tool for reading a single DMARC aggregate report.',
           body: '',
         },
@@ -117,7 +117,7 @@ export async function buildSections(): Promise<Section[]> {
         ...glossary
           .map((e) => ({
             title: e.data.term,
-            url: `${SITE}/glossary/${e.id}`,
+            url: `${SITE}/glossary/${e.id}/`,
             description: e.data.description,
             body: e.body ?? '',
           }))

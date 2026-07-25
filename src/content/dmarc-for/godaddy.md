@@ -18,7 +18,7 @@ domain into the *Name* — GoDaddy appends it automatically.
 
 ## 1. SPF
 
-Add one [SPF](/glossary/spf) `TXT` record. For GoDaddy-hosted Microsoft 365:
+Add one [SPF](/glossary/spf/) `TXT` record. For GoDaddy-hosted Microsoft 365:
 
 ```
 Type: TXT   Name: @   Value: v=spf1 include:spf.protection.outlook.com -all
@@ -26,11 +26,11 @@ Type: TXT   Name: @   Value: v=spf1 include:spf.protection.outlook.com -all
 
 Using Google Workspace instead? Use `include:_spf.google.com`. Either way,
 combine multiple senders into a **single** record — see [SPF record
-syntax](/guides/spf-record-syntax).
+syntax](/guides/spf-record-syntax/).
 
 ## 2. DKIM
 
-[DKIM](/glossary/dkim) values come from your **email provider**, not GoDaddy —
+[DKIM](/glossary/dkim/) values come from your **email provider**, not GoDaddy —
 you just publish them in GoDaddy DNS. For Microsoft 365, add the two selector
 CNAMEs Microsoft gives you:
 
@@ -45,20 +45,20 @@ alone doesn't sign). For Google Workspace, add the single `google._domainkey`
 
 ## 3. DMARC
 
-Add a [DMARC](/glossary/dmarc) `TXT` record in GoDaddy DNS:
+Add a [DMARC](/glossary/dmarc/) `TXT` record in GoDaddy DNS:
 
 ```
 Type: TXT   Name: _dmarc   Value: v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-Start at [`p=none`](/glossary/dmarc-policy) and only tighten once
-[reports](/glossary/dmarc-aggregate-report) are clean.
+Start at [`p=none`](/glossary/dmarc-policy/) and only tighten once
+[reports](/glossary/dmarc-aggregate-report/) are clean.
 
 ## GoDaddy-specific gotchas
 
 - **Check for a duplicate SPF record** — GoDaddy sometimes pre-populates one.
   Two SPF records is a `permerror` and a [DMARC
-  failure](/guides/fix-dmarc-failure). Edit the existing one instead of adding a
+  failure](/guides/fix-dmarc-failure/). Edit the existing one instead of adding a
   second.
 - **Use `@` for the root** and the short subdomain (`_dmarc`,
   `selector1._domainkey`) in *Name* — don't include the full domain.
@@ -70,6 +70,6 @@ Start at [`p=none`](/glossary/dmarc-policy) and only tighten once
 ## What next
 
 Once records propagate, [read your aggregate
-reports](/guides/how-to-read-a-dmarc-aggregate-report) to confirm every sender
+reports](/guides/how-to-read-a-dmarc-aggregate-report/) to confirm every sender
 aligns, then follow the [path to
-enforcement](/guides/from-monitoring-to-enforcement).
+enforcement](/guides/from-monitoring-to-enforcement/).

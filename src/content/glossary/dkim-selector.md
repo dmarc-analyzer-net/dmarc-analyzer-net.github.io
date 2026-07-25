@@ -5,7 +5,7 @@ aliases: ["DKIM selectors", "selector"]
 related: ["dkim", "dmarc", "spf"]
 ---
 
-A **DKIM selector** is the label that identifies *which* [DKIM](/glossary/dkim)
+A **DKIM selector** is the label that identifies *which* [DKIM](/glossary/dkim/)
 public key a receiver should use to verify a message. It lets one domain publish
 several keys — for different providers or for rotation — without them colliding.
 
@@ -42,4 +42,4 @@ record they control, so they can rotate keys without you touching DNS. Others
 publish exactly what your provider specifies.
 
 If DKIM isn't verifying, a wrong or missing selector is a common cause — see
-[why your email is failing DMARC](/guides/fix-dmarc-failure).
+[why your email is failing DMARC](/guides/fix-dmarc-failure/).

@@ -120,7 +120,7 @@ curl -X POST https://dmarc.example.com/api/v1/admin/retention/purge
 
 Both require an `agency_admin` session. Tuning knobs — including switching the
 pass off entirely — are in the [configuration
-reference](/docs/configuration#retention).
+reference](/docs/configuration/#retention).
 
 ## Moving to another host
 

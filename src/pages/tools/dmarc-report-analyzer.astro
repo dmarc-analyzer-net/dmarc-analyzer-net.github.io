@@ -7,7 +7,7 @@ import JsonLd from '../../components/JsonLd.astro';
 const title = 'Free DMARC report analyzer';
 const description =
   'Paste or upload a DMARC aggregate (RUA) report and get a readable breakdown — SPF/DKIM alignment per source. Runs entirely in your browser; nothing is uploaded.';
-const path = '/tools/dmarc-report-analyzer';
+const path = '/tools/dmarc-report-analyzer/';
 
 const schema = {
   '@context': 'https://schema.org',
@@ -26,7 +26,7 @@ const schema = {
       <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
-          { label: 'Tools', href: '/tools' },
+          { label: 'Tools', href: '/tools/' },
           { label: 'DMARC report analyzer', href: path },
         ]} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">Free DMARC report analyzer</h1>
@@ -62,14 +62,14 @@ const schema = {
       <div class="prose">
         <h2>What this tool does</h2>
         <p>
-          DMARC <a href="/glossary/dmarc-aggregate-report">aggregate reports</a>
+          DMARC <a href="/glossary/dmarc-aggregate-report/">aggregate reports</a>
           arrive as verbose XML (often gzipped) once a day from each mailbox
           provider. This analyzer parses one and shows, per sending source, how
-          many messages were seen and whether <a href="/glossary/spf">SPF</a> and
-          <a href="/glossary/dkim">DKIM</a> passed and
-          <a href="/glossary/dmarc-alignment">aligned</a> — so you can spot the
+          many messages were seen and whether <a href="/glossary/spf/">SPF</a> and
+          <a href="/glossary/dkim/">DKIM</a> passed and
+          <a href="/glossary/dmarc-alignment/">aligned</a> — so you can spot the
           rows that need action. Learn the theory in
-          <a href="/guides/how-to-read-a-dmarc-aggregate-report">how to read a
+          <a href="/guides/how-to-read-a-dmarc-aggregate-report/">how to read a
           DMARC aggregate report</a>.
         </p>
         <h2>Analyzing one report vs. many</h2>
@@ -78,7 +78,7 @@ const schema = {
           day, from every provider doesn't scale by hand — that's what the
           self-hosted <a href="/">DMARC Analyzer</a> automates, keeping the data
           on your own infrastructure. It's also
-          <a href="/free-dmarc-analyzer">free and open source</a>.
+          <a href="/free-dmarc-analyzer/">free and open source</a>.
         </p>
       </div>
       <Cta />

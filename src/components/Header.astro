@@ -25,17 +25,17 @@ const { current } = Astro.props;
 const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
 
 const PRIMARY = [
-  { href: '/features', label: 'Features', key: 'features' },
+  { href: '/features/', label: 'Features', key: 'features' },
   { href: '/#how', label: 'How it works', key: null },
-  { href: '/compare', label: 'Compare', key: 'compare' },
+  { href: '/compare/', label: 'Compare', key: 'compare' },
 ] as const;
 
 const RESOURCES = [
-  { href: '/docs', label: 'Docs', key: 'docs' },
-  { href: '/guides', label: 'Guides', key: 'guides' },
-  { href: '/glossary', label: 'Glossary', key: 'glossary' },
-  { href: '/dmarc-for', label: 'Setup', key: 'setup' },
-  { href: '/tools', label: 'Tools', key: 'tools' },
+  { href: '/docs/', label: 'Docs', key: 'docs' },
+  { href: '/guides/', label: 'Guides', key: 'guides' },
+  { href: '/glossary/', label: 'Glossary', key: 'glossary' },
+  { href: '/dmarc-for/', label: 'Setup', key: 'setup' },
+  { href: '/tools/', label: 'Tools', key: 'tools' },
 ] as const;
 
 const inResources = RESOURCES.some((r) => r.key === current);

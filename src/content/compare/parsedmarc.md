@@ -32,10 +32,10 @@ choice — it's flexible and battle-tested.
 
 ## Where DMARC Analyzer fits
 
-If you want turnkey [dashboards](/guides/how-to-read-a-dmarc-aggregate-report)
-and [agency multi-tenancy](/dmarc-for) without becoming a search-cluster
+If you want turnkey [dashboards](/guides/how-to-read-a-dmarc-aggregate-report/)
+and [agency multi-tenancy](/dmarc-for/) without becoming a search-cluster
 operator, DMARC Analyzer gives you the open-source, self-hosted model with far
 less to run and maintain.
 
-Both keep every [aggregate report](/glossary/dmarc-aggregate-report) on your own
+Both keep every [aggregate report](/glossary/dmarc-aggregate-report/) on your own
 infrastructure — the shared reason to choose open source in the first place.
