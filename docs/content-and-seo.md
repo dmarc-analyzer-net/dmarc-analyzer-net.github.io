@@ -301,6 +301,17 @@ Most of this is already handled; the rest is a few small additions.
 - ✅ Canonical URL, Open Graph, Twitter cards (`BaseLayout`)
 - ✅ `sitemap-index.xml` auto-generated — new pages are included automatically
 - ✅ Fast, static, zero-JS pages (great Core Web Vitals)
+- ✅ `/llms.txt` and `/llms-full.txt` ([llmstxt.org](https://llmstxt.org/)) —
+      **generated from the content collections**, so a new guide, doc or glossary
+      entry appears in both on the next build. Nothing to update by hand. Source:
+      `src/lib/llms.ts` plus the two endpoints in `src/pages/`. Deliberately not in
+      the sitemap: it indexes HTML pages for search crawlers, and these are neither.
+
+      When adding a collection, add it to `buildSections()` in `src/lib/llms.ts` —
+      that is the one place a new collection can be forgotten. Decide too whether it
+      belongs under `## Optional`, which by the spec means "skippable if a shorter
+      context is needed"; glossary entries and comparison pages live there because
+      they are the least necessary for answering a question about the product.
 
 **To add**
 - [ ] **`public/robots.txt`** pointing at the sitemap:
