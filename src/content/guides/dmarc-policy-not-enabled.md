@@ -3,6 +3,7 @@ title: What "DMARC policy not enabled" means (and how to fix it)
 seoTitle: '"DMARC policy not enabled": how to fix'
 description: Seeing "DMARC quarantine/reject policy not enabled"? Here's what that warning means, why checkers flag it, and how to enable an enforcing policy safely.
 publishDate: 2026-07-23
+updatedDate: 2026-07-25
 ---
 
 If a DMARC checker shows **"DMARC Quarantine/Reject policy not
@@ -23,6 +24,9 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 the mail. Checkers flag this because a monitoring-only policy provides visibility
 but **no protection**: a spoofer's mail isn't quarantined or rejected. The warning
 is nudging you toward `p=quarantine` or `p=reject`.
+
+It is a warning, not an error. `p=none` is the correct and recommended place to
+*start* — the problem is only that it's a place many domains never leave.
 
 ## How to fix it (safely)
 
@@ -47,19 +51,51 @@ enforcement](/guides/from-monitoring-to-enforcement/). Not sure which enforcing
 policy to pick? See [quarantine vs
 reject](/glossary/dmarc-quarantine-vs-reject/).
 
+## How to know you're ready
+
+The warning tempts people to change `p=` immediately. Before you do, your reports
+should show all of the following:
+
+- **Every sending source is identified.** No unexplained IPs sending volume you
+  can't attribute.
+- **Legitimate mail passes alignment**, not merely SPF or DKIM in isolation — a
+  message can pass SPF and still fail DMARC if the passing domain isn't your
+  `From:` domain.
+- **The pattern is stable over weeks, not days.** Monthly invoicing runs,
+  quarterly campaigns, and annual renewals send from systems that are invisible
+  in a single week of data.
+- **You know who to call** when a sender you'd forgotten breaks.
+
+A fortnight of clean reports across a full billing cycle is a reasonable bar.
+
 ## "Not enabled" but you meant to enable it
 
 A few things that cause the warning even when you thought you were enforcing:
 
 - **The record is on the wrong host.** DMARC must live at
-  `_dmarc.yourdomain.com`, not the root.
-- **A subdomain has its own weaker policy** — or none, falling back to `sp=`.
-- **Editing on Office 365 / GoDaddy / cPanel:** make sure you saved the `_dmarc`
-  `TXT` and there's no second, older DMARC record overriding it. See the
-  per-provider steps under [DMARC setup](/dmarc-for/).
+  `_dmarc.yourdomain.com`, not the root. If your DNS host appends the domain
+  automatically, typing the full name creates
+  `_dmarc.yourdomain.com.yourdomain.com` — see [no DMARC record
+  found](/guides/no-dmarc-record-found/).
+- **Two DMARC records exist.** Duplicates are treated as no policy at all, so an
+  old `p=none` alongside your new `p=reject` leaves you unenforced.
+- **A subdomain has its own weaker policy** — or none, falling back to `sp=`. A
+  root at `p=reject; sp=none` is still flagged for subdomains.
+- **`pct=` is below 100.** Some checkers report partial enforcement as not
+  enabled, and it does mean most failing mail isn't getting the policy you think.
+- **You're reading a cached answer.** Give DNS an hour before concluding the
+  change didn't take.
+
+Editing on Microsoft 365, GoDaddy, or cPanel? The per-provider steps are under
+[DMARC setup](/dmarc-for/).
 
 ## What next
 
-Confirm the change propagated, then keep watching reports as you tighten. If mail
-starts failing after you enforce, work through [why your email is failing
+Confirm the change propagated, then keep watching reports as you tighten. Across
+a portfolio of client domains this becomes the recurring job — every domain at a
+different stage, each with its own reports to read before the next step is safe.
+That is what [DMARC Analyzer](/) tracks for you: every domain's current policy
+and what stands between it and enforcement, self-hosted, with no per-domain fee.
+
+If mail starts failing after you enforce, work through [why your email is failing
 DMARC](/guides/fix-dmarc-failure/).
