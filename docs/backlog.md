@@ -55,11 +55,18 @@ Keep claims truthful to the intended end state.
       `security.md`; homepage and features copy moved from "one image, two modes" to
       a single container, with the hero showing the prebuilt-image quick start
       rather than clone-and-build.
-- [ ] (blocked on SEO) **Kubernetes on the comparison pages.** Deliberately not
-      written yet. A Helm chart is a real differentiator against `parsedmarc` and
-      `cry-inc/dmarc-report-viewer`, neither of which has one, but the OSS-alternative
-      cluster turned out to have no search volume once checked — so the angle needs
-      keyword work in the private `seo` repo before copy is written here.
+- [x] (done) **Kubernetes on the comparison pages.** The SEO assessment came back
+      "distribution, not keywords": `dmarc kubernetes` sits below terms already at
+      10/mo, and no hosted competitor ranks for a single deployment keyword — so this
+      is one row in the tables that already exist, not a page. Verified before
+      claiming it: none of parsedmarc, dmarc-report-viewer or dmarc-report-converter
+      ships a Helm chart, and none appear on Artifact Hub.
+- [ ] (todo) **Two directory listings**, which the same assessment found are worth
+      more than any page here. Artifact Hub returns two packages for "dmarc", both
+      `dmarc2logstash`, both 0 stars. `awesome-selfhosted` has no DMARC report
+      analyzer at all — DMARC appears twice, both times as a mail-server feature.
+      Tracked in the `seo` repo playbook; the work itself is a chart-metadata change
+      and an upstream PR.
 
 ## Medium Priority
 
