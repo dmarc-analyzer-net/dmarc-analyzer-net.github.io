@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install, build, and upload the Astro site
-        uses: withastro/action@v3
+        uses: withastro/action@v6
         # Defaults: package manager auto-detected, build runs `astro build`,
         # and the `dist/` output is uploaded as the Pages artifact.
 
@@ -36,4 +36,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
