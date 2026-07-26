@@ -38,21 +38,60 @@ Nearly always credentials rather than configuration:
 
 ## The worker isn't ingesting anything
 
-Check it's running and what it's saying:
+Check it's running and what it's saying. On the default single-container install
+the polling loop lives in the `app` container; if you split them, use `worker`.
 
 ```bash
 docker compose ps
-docker compose logs --tail=50 worker
+docker compose logs --tail=50 app
 ```
 
-- **`Exited`** — most likely it started against a database with no schema. The
-  shipped compose files order startup so the worker waits for the API; if you wrote
-  your own, reproduce that ordering. `docker compose up -d` again once the API is
-  healthy.
+- **`Exited`** — most likely it started against a database with no schema. On a
+  split stack the worker waits for the console to report healthy; if you wrote your
+  own compose file, reproduce that ordering.
 - **Running but idle** — with default settings it polls every 60 minutes. Confirm
   at least one mailbox source is **active**, and that its protocol is IMAP.
 - **Repeated `Worker scheduler pass failed`** — the message includes the underlying
   error; a database connection problem is the usual cause.
+
+## "Another worker already holds the ingestion lock"
+
+The container exits on startup with that message. It is doing the right thing:
+**only one worker may run against a database.** Two ingestion loops duplicate
+every sync pass and can send duplicate alert and digest email, so the application
+takes a Postgres advisory lock and a second worker refuses to start.
+
+Usual causes:
+
+- **A `worker` container alongside an `APP_MODE=all` one.** The combined container
+  already runs the loop. Either drop the separate worker, or switch the app to
+  `APP_MODE=api` — the `compose.split.yml` overlay does both at once, which is why
+  using it is safer than editing by hand.
+- **`docker compose up --scale worker=2`.** Not supported. Scale the console
+  instead (`APP_MODE=api` replicas take no lock).
+- **A worker that was killed abruptly.** If the previous container was `SIGKILL`ed
+  or the host lost power, Postgres still holds its lock until it notices the dead
+  connection — usually a minute or two. The replacement will crash-loop until then
+  and then start normally. Wait rather than intervening.
+
+You can confirm who holds it:
+
+```bash
+docker compose exec -T postgres psql -U postgres -d dmarc_analyzer -tAc \
+  "select count(*) from pg_locks where locktype = 'advisory'"
+```
+
+## Kubernetes: pods restart a few times on first install
+
+Expected on a fresh install if you are not using the published chart. Every pod in
+a release starts at once — Kubernetes has no equivalent of Compose's
+`depends_on: condition: service_healthy` — so the app can come up before PostgreSQL
+is accepting connections, fail with `Name or service not known`, and be restarted
+until the database is ready. It converges, but the restart backoff can turn a
+20-second wait into minutes.
+
+The chart handles this with a `wait-for-database` init container. If you wrote your
+own manifests, add one.
 
 ## Parse failures in the sync history
 

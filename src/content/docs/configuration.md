@@ -5,26 +5,51 @@ section: Configuration
 order: 1
 ---
 
-Configuration comes from environment variables. The app is ASP.NET Core, so
-nested settings use a **double underscore** for each level of nesting:
-`Worker:ScheduleIntervalSeconds` is set as `Worker__ScheduleIntervalSeconds`.
+Configuration comes from environment variables, and **the same variable means the
+same thing however you deploy** — Docker Compose in any shape, or the Kubernetes
+chart. There is no per-platform configuration format.
+
+The app is ASP.NET Core, so nested settings use a **double underscore** for each
+level of nesting: `Worker:ScheduleIntervalSeconds` is set as
+`Worker__ScheduleIntervalSeconds`. A single underscore will not work and nothing
+will warn you — the value is ignored and the default applies. If a setting seems to
+have no effect, check the underscores first.
 
 Only two settings are effectively required: the database connection string and the
 credential encryption key.
 
+> This page covers the settings people actually change. The **complete list**,
+> including everything a release adds, lives in
+> [`docs/ops/configuration.md`](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/docs/ops/configuration.md)
+> in the application repository, where a test fails the build if a setting exists
+> in code and is missing from the document. Treat that as canonical if the two ever
+> disagree.
+
 ## Runtime
 
 ### `APP_MODE`
-`api` (default) or `worker`. Selects which half of the system the container runs:
+What the container is for. The same image serves all four.
 
-- `api` — HTTP API plus the web console.
-- `worker` — background mailbox polling only, no HTTP listener.
+| Value | Runs |
+|---|---|
+| `all` | Console and mailbox polling in one process. **What the quick-start compose file uses.** |
+| `api` | HTTP API plus the web console. No polling. |
+| `worker` | Mailbox polling only, no HTTP listener. |
+| `migrate` | Applies pending database migrations and exits. Serves nothing. |
 
-The same image serves both; the quick-start compose file runs one of each.
+Anything else **fails at startup** rather than falling back to `api`. That is
+deliberate: a typo like `APP_MODE=woker` would otherwise give you a container that
+is up, serves the console, and passes its healthcheck while ingesting nothing.
 
-> Only **API mode applies database migrations**. Never run a worker against a
-> database that no API has migrated — the shipped compose files order startup so
-> this can't happen.
+`all` is the default shape for a single host — one container, one log stream.
+Split into `api` + `worker` when ingestion is heavy enough to compete with the
+console, or when you want them to restart independently — the `compose.split.yml`
+overlay does that.
+
+> **Only one worker may run against a database.** A container in `worker` or `all`
+> mode takes a Postgres advisory lock at startup and exits if another already holds
+> it. Two ingestion loops duplicate every sync pass and can send duplicate alert
+> and digest email, so this is enforced rather than advised.
 
 ### `ASPNETCORE_URLS`
 Default `http://+:8080`. Change the port the API listens on.
@@ -44,9 +69,19 @@ ConnectionStrings__Default=Host=postgres;Port=5432;Database=dmarc_analyzer;Usern
 
 ### `Database__MigrateOnStartup`
 `true` in the shipped compose files. When true, the API applies pending EF Core
-migrations at startup. Set `false` if you prefer to control schema changes
-yourself, and apply them with `POST /api/v1/admin/database/migrate` or the
-`dotnet-ef` CLI.
+migrations as it boots.
+
+Set it `false` when something else owns schema changes — running more than one API
+replica, for instance, where replicas would otherwise race to apply the same
+migration. Then apply them with a `migrate`-mode container, which is what the
+Kubernetes chart does:
+
+```bash
+docker compose run --rm -e APP_MODE=migrate app
+```
+
+`POST /api/v1/admin/database/migrate` also works, with an admin session. Worker
+mode ignores this setting entirely — only the web host reads it.
 
 ## Security
 
@@ -78,6 +113,7 @@ All optional. Defaults below are what ships in the image.
 | `Worker__RetryBaseDelaySeconds` | `2` | Base for exponential backoff between those attempts. |
 | `Worker__StaleRunTimeoutMinutes` | `90` | A sync stuck in `running` this long is auto-closed as failed. |
 | `Worker__SyncRunTimeoutMinutes` | `30` | Hard cap on a single mailbox sync. |
+| `Worker__EnforceSingleInstance` | `true` | Refuse to start when another worker already holds the ingestion lock. Turning this off removes the only guard that works on every platform. |
 
 A polling pass that fails (database unreachable, for instance) is retried sooner
 than the normal interval — backing off from 5 seconds up to

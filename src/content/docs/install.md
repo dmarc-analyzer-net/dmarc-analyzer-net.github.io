@@ -5,9 +5,13 @@ section: Getting started
 order: 1
 ---
 
-DMARC Analyzer ships as a single container image that runs in two modes — the API
-(which also serves the web console) and a background worker. The quick start below
-runs both plus PostgreSQL.
+DMARC Analyzer ships as a **single container image**. By default one container runs
+the whole application — the web console and the background mailbox polling — next
+to PostgreSQL. Two containers, and nothing else to install.
+
+That is the right shape for most self-hosters. You can split the console and the
+worker apart, point at a database you already run, or deploy to Kubernetes
+instead — see [other shapes](#other-shapes) below.
 
 ## Requirements
 
@@ -37,13 +41,41 @@ Then open **http://localhost:8080** and create the first administrator account.
 
 | Container | Role |
 |---|---|
-| `api` | HTTP API + web console on port 8080. Applies database migrations at startup. |
-| `worker` | Polls your mailboxes, parses reports, writes them to the database. No HTTP port. |
+| `app` | Web console on port 8080 **and** the mailbox polling loop, in one process (`APP_MODE=all`). Applies database migrations at startup. |
 | `postgres` | Storage, on a named Docker volume (`dmarc-pgdata`). |
 
-Startup is ordered deliberately: Postgres must report healthy, then the API must
-report healthy (which means migrations finished), and only then does the worker
-start. The worker queries tables the API creates, so this ordering matters.
+The app waits for Postgres to report healthy before starting, because it migrates
+the database as it boots. On a first run that is quick; after an upgrade that adds
+a large migration it can take a couple of minutes, and the container is reported
+unhealthy until it finishes. That is the migration running, not a hang.
+
+## Other shapes
+
+Two overlay files sit next to `compose.yml` in the repository. They need Docker
+Compose **v2.24 or newer** (`docker compose version`).
+
+| Instead of the default | Command |
+|---|---|
+| Use a PostgreSQL you already run | `-f compose.yml -f compose.external-db.yml` |
+| Run the console and worker separately | `-f compose.yml -f compose.split.yml` |
+| Both | pass both `-f` flags |
+
+Download them alongside `compose.yml`, then record the choice once so day-to-day
+use stays a plain `docker compose up -d`:
+
+```bash
+curl -fsSL -O https://raw.githubusercontent.com/dmarc-analyzer-net/DmarcAnalyzerApp/main/deploy/compose.split.yml
+echo "COMPOSE_FILE=compose.yml:compose.split.yml" >> .env
+```
+
+Every combination reads the same environment variables. Splitting is worth it once
+a sync pass is heavy enough to slow the console, or when the two need different
+restart schedules; below that the single container is simpler to run and to read
+logs from.
+
+> **Only one worker may run at a time**, whichever shape you pick. The application
+> takes a database lock at startup and a second worker exits rather than starting,
+> so `--scale worker=2` will not silently double-poll your mailboxes.
 
 ## Registries
 
@@ -58,14 +90,43 @@ Both carry `latest`, a `sha-<commit>` tag, and semantic version tags, for
 `linux/amd64` and `linux/arm64` (so a Raspberry Pi or Apple Silicon machine works).
 GHCR is recommended because it doesn't rate-limit anonymous pulls.
 
-To pin a version instead of tracking `latest`, edit the `image:` lines in
-`compose.yml`.
+The quick start above tracks `latest`, which is fine for getting going. For
+anything you depend on, **pin a version** — it makes an upgrade an explicit act
+and a rollback unambiguous:
+
+```yaml
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.1.0
+```
+
+See [upgrading](/docs/upgrading-and-backup/#pinning-a-version).
 
 ## Running behind a reverse proxy
 
 The container speaks plain HTTP on 8080. For anything internet-facing, terminate
-TLS in front of it (Caddy, nginx, Traefik) and forward to the `api` container.
+TLS in front of it (Caddy, nginx, Traefik) and forward to the `app` container.
 Sessions use a `Secure` cookie, so the browser must reach the app over HTTPS.
+
+There is one setting to get right that is easy to miss: without it, **every entry
+in your audit trail records the proxy's address instead of the real caller**. See
+[`Network__*` in the configuration
+reference](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/docs/ops/configuration.md#behind-a-reverse-proxy-network)
+for what to set.
+
+## Kubernetes
+
+There is a Helm chart, published as an OCI artifact on every release:
+
+```bash
+helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
+  --version 0.1.0 --namespace dmarc --create-namespace \
+  --set auth.encryptionKey="$(openssl rand -base64 32)"
+```
+
+It exposes the same two choices as the Compose files, so a deployment can move
+between them without relearning its configuration. The [chart
+README](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/deploy/helm/dmarc-analyzer/README.md)
+covers the values, what it refuses and why, and the caveats on its bundled
+PostgreSQL.
 
 ## Building from source instead
 
@@ -76,9 +137,9 @@ docker compose up -d --build
 ```
 
 That uses the repository's development compose file, which builds the image
-locally and polls mailboxes far more frequently than production defaults. For
-local development without Docker (hot reload for API and frontend), see the
-repository README.
+locally, runs the console and worker as separate containers, and polls mailboxes
+far more frequently than production defaults. For local development without Docker
+(hot reload for API and frontend), see the repository README.
 
 ## Next
 
