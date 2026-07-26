@@ -25,13 +25,13 @@ heavy" and "so light it keeps no history."
 
 ## The options
 
-| Tool | Language | What you run | Dashboards | Multi-tenant |
-|---|---|---|---|---|
-| **DMARC Analyzer** | .NET + React | One container + PostgreSQL | Built in | Yes (per client) |
-| parsedmarc | Python | Parser + Elasticsearch/OpenSearch + Kibana/Grafana | Via Kibana/Grafana | No |
-| dmarc-report-viewer | Rust | One ~10 MB container or a single binary — no database | Built in | No |
-| dmarc-report-converter | Go | A scheduled CLI job — no service to run | Static HTML output, no dashboard | No |
-| Other lightweight viewers | Go / PHP | A single small service + SQLite/MySQL | Basic, built in | Usually no |
+| Tool | Language | What you run | Dashboards | Multi-tenant | Helm chart |
+|---|---|---|---|---|---|
+| **DMARC Analyzer** | .NET + React | One container + PostgreSQL | Built in | Yes (per client) | Yes |
+| parsedmarc | Python | Parser + Elasticsearch/OpenSearch + Kibana/Grafana | Via Kibana/Grafana | No | No |
+| dmarc-report-viewer | Rust | One ~10 MB container or a single binary — no database | Built in | No | No |
+| dmarc-report-converter | Go | A scheduled CLI job — no service to run | Static HTML output, no dashboard | No | No |
+| Other lightweight viewers | Go / PHP | A single small service + SQLite/MySQL | Basic, built in | Usually no | — |
 
 - **[parsedmarc](/compare/parsedmarc/)** — the most established. A flexible parser
   with rich outputs, but dashboards mean standing up and maintaining a search
@@ -39,7 +39,9 @@ heavy" and "so light it keeps no history."
   or want a CLI parser for your own pipeline.
 - **DMARC Analyzer** — open source and self-hosted like parsedmarc, but ships as
   a single container with PostgreSQL and dashboards built in, plus per-client
-  multi-tenancy for agencies. Turnkey, without a search cluster to babysit.
+  multi-tenancy for agencies. Turnkey, without a search cluster to babysit. It also
+  ships a maintained Helm chart — which none of the named alternatives here do — if
+  you would rather run it on Kubernetes than on a single host.
 - **dmarc-report-viewer** — the smallest credible option: a single Rust binary or
   a ~10 MB container with an IMAP client built in and no database at all. It also
   reads SMTP TLS (TLS-RPT) reports, which most DMARC tools including this one

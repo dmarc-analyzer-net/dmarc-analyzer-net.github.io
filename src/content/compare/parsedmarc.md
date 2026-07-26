@@ -22,6 +22,7 @@ dashboards built in — the same data ownership, without running a search cluste
 | What you actually run | One container + PostgreSQL | Parser + Elasticsearch/OpenSearch + Kibana/Grafana |
 | Dashboards | Built in | Configure yourself in Kibana/Grafana |
 | Multi-tenant (many client domains) | Yes, per-client scoping | Not designed for it |
+| Kubernetes | Maintained Helm chart | No chart; write your own manifests |
 | Getting started | `docker compose up` | Provision & maintain a search stack |
 
 ## Where parsedmarc fits
