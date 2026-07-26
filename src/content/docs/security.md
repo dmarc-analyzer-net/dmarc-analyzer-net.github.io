@@ -108,7 +108,18 @@ front of anything internet-facing.
 
 Nothing in the application needs to accept inbound connections from the internet.
 A perfectly reasonable deployment keeps the console on a private network or behind
-your VPN and lets only the outbound IMAP connection cross a boundary.
+your VPN and lets only its outbound connections cross a boundary — IMAP to your
+mailbox, plus DNS for published-policy lookups, SMTP if you enable alert or digest
+mail, and HTTPS to your identity provider if you enable SSO.
+
+> **Private does not mean plain HTTP.** The session cookie is always marked
+> `Secure`, with no setting to relax it. Browsers accept a `Secure` cookie over
+> `http://` only on `localhost`, so reaching the console by hostname or LAN address
+> — `http://dmarc.internal:8080`, `http://10.0.5.7:8080` — lets you submit the login
+> form, returns success, and then silently drops the session, so you land back on
+> the login page with no error. A VPN-only console still needs TLS in front of it,
+> or it is only usable from the host itself (or through an SSH tunnel to
+> `localhost`).
 
 `AllowedHosts` defaults to `*`. Host filtering is usually better handled by the
 proxy, but it is there.

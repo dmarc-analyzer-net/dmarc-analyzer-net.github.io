@@ -24,11 +24,20 @@ without migrating existing accounts. Your provider never controls who is an admi
 
 ## Register the application
 
-In your identity provider, create a **web / confidential** client:
+In your identity provider, create a web client — confidential with a secret, or a
+public client using PKCE. The app always uses PKCE and only sends a client secret
+if you configure one, so either works.
 
-- **Redirect URI**: `https://dmarc.example.com/api/v1/auth/oidc/complete`
+- **Redirect URI**: `https://dmarc.example.com/api/v1/auth/oidc/callback`
 - **Scopes**: `openid`, `profile`, `email`
-- Note the issuer URL, client ID, and client secret.
+- Note the issuer URL and client ID, plus the client secret if you created a
+  confidential client.
+
+The redirect URI ends in `/callback` — that is the path the app registers with the
+handler. You may also see `/api/v1/auth/oidc/complete` in logs or a browser's
+address bar; that is an internal hop the app redirects itself to *after* the
+provider has returned, and registering it as the redirect URI will fail with a
+`redirect_uri` mismatch.
 
 ## Configure the app
 
@@ -37,7 +46,7 @@ environment:
   Auth__Oidc__Enabled: "true"
   Auth__Oidc__Authority: "https://login.example.com"
   Auth__Oidc__ClientId: "dmarc-analyzer"
-  Auth__Oidc__ClientSecret: "…"
+  Auth__Oidc__ClientSecret: "…"        # omit entirely for a public PKCE client
   Auth__Oidc__DisplayName: "Company SSO"
   Auth__Oidc__AutoProvision: "true"
   Auth__Oidc__DefaultRole: "client_viewer"
@@ -46,6 +55,13 @@ environment:
 Restart the API and the login page gains a button labelled with your
 `DisplayName`. Full option list: [configuration
 reference](/docs/configuration/#single-sign-on-oidc).
+
+> **Behind a reverse proxy, SSO needs `Network__UseForwardedHeaders` set.** The app
+> builds its redirect URI from the scheme and host of the incoming request. Without
+> a configured trust list it does not believe `X-Forwarded-Proto`, so it sends
+> `http://…` to a provider expecting `https://…` and the login is rejected. This is
+> the one place where that setting is required rather than merely advisable — see
+> [running behind a reverse proxy](/docs/reverse-proxy/).
 
 ## Linking and provisioning
 

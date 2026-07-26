@@ -153,14 +153,31 @@ both means manual work.
 kubectl -n dmarc scale deploy/dmarc-dmarc-analyzer --replicas=0
 kubectl -n dmarc scale deploy/dmarc-dmarc-analyzer-worker --replicas=0   # if split
 
+# recreate the database empty — the dump contains no DROP statements, so
+# restoring over the existing schema fails on every object
+kubectl -n dmarc exec statefulset/dmarc-dmarc-analyzer-postgres -- \
+  psql -U postgres -d postgres \
+  -c 'DROP DATABASE IF EXISTS dmarc_analyzer;' -c 'CREATE DATABASE dmarc_analyzer;'
+
 gunzip -c dmarc-2026-07-26.sql.gz | kubectl -n dmarc exec -i \
-  statefulset/dmarc-dmarc-analyzer-postgres -- psql -U postgres -d dmarc_analyzer
+  statefulset/dmarc-dmarc-analyzer-postgres -- \
+  psql -v ON_ERROR_STOP=1 -U postgres -d dmarc_analyzer
 
 kubectl -n dmarc scale deploy/dmarc-dmarc-analyzer --replicas=1
+kubectl -n dmarc scale deploy/dmarc-dmarc-analyzer-worker --replicas=1   # if split
 ```
 
 Scale the application down first. Restoring underneath a running worker means it
 is writing while you restore.
+
+**Scale the worker back up.** In `split` mode it is the only thing that ingests, so
+leaving it at zero gives you a console that works perfectly and never receives
+another report. Nothing surfaces that as an error, and the next `helm upgrade`
+quietly restores it, which hides the cause.
+
+`-v ON_ERROR_STOP=1` matters as much here as on Compose: without it `psql` reports
+errors and still exits 0, so a restore that populated almost nothing is
+indistinguishable from one that worked.
 
 Make sure the Secret holds the **original** encryption key before scaling back up,
 or mailbox syncs will fail to decrypt their credentials.
