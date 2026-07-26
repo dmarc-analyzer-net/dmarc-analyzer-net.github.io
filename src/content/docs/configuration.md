@@ -43,8 +43,8 @@ is up, serves the console, and passes its healthcheck while ingesting nothing.
 
 `all` is the default shape for a single host — one container, one log stream.
 Split into `api` + `worker` when ingestion is heavy enough to compete with the
-console, or when you want them to restart independently — the `compose.split.yml`
-overlay does that.
+console, or when you want them to restart independently. See [choosing a
+deployment](/docs/choose-your-deployment/).
 
 > **Only one worker may run against a database.** A container in `worker` or `all`
 > mode takes a Postgres advisory lock at startup and exits if another already holds

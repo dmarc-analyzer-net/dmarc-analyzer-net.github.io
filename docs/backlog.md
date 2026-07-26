@@ -45,30 +45,21 @@ Keep claims truthful to the intended end state.
 - [x] (done) Add `public/robots.txt` pointing at `sitemap-index.xml` (update host when the custom domain goes live).
 - [x] (done) Add `.prose` styles to `global.css` (brand-token-based) — prerequisite before authoring any Markdown content.
 
-## Deployment docs (PR 2 of 2)
+## Deployment docs
 
-PR 1 corrected the pages that were wrong. These are the additions, and each has a
-forward reference waiting for it in `install.md` or `configuration.md`.
-
-- [ ] **`choose-your-deployment.md`** — decision table across bundled/external
-      Postgres, combined/split, Compose/Kubernetes, plus a short managed-Postgres
-      section (RDS, Cloud SQL, Neon: connection string and `sslmode`).
-- [ ] **`kubernetes.md`** — `helm install` from the OCI registry, the two values
-      that matter, what the chart refuses and why, bundled Postgres as
-      evaluation-grade, **and backup/restore for Kubernetes** — today's backup doc is
-      Compose-only, so K8s users have no instructions at all.
-- [ ] **`reverse-proxy.md`** — working Caddy, nginx and Traefik configs *including*
-      `Network__TrustedProxies`. Without it every audit entry records the proxy's
-      address, and the site currently recommends a proxy without saying so.
-- [ ] **`security.md`** — encryption key handling and `existingSecret`, forwarded
-      headers, what is stored and what is not, the single-worker lock. The material
-      exists scattered across four pages.
-- [ ] **Marketing copy.** Homepage hero to the prebuilt-image quick start rather
-      than clone-and-build; the quick-start block from "one image, two modes" to a
-      single container; Terminal mock from three services to two; Kubernetes on the
-      features and compare pages.
-- [ ] Convert the five GitHub links added in PR 1 back to internal links once the
-      pages above exist.
+- [x] (done) **PR 1** — corrected `install.md`, `configuration.md`,
+      `upgrading-and-backup.md` and `troubleshooting.md` against what actually ships,
+      plus `scripts/verify-docs-snippets.sh`.
+- [x] (done) **PR 2** — added `choose-your-deployment.md`, `kubernetes.md` (including
+      the backup/restore Kubernetes users had none of), `reverse-proxy.md` and
+      `security.md`; homepage and features copy moved from "one image, two modes" to
+      a single container, with the hero showing the prebuilt-image quick start
+      rather than clone-and-build.
+- [ ] (blocked on SEO) **Kubernetes on the comparison pages.** Deliberately not
+      written yet. A Helm chart is a real differentiator against `parsedmarc` and
+      `cry-inc/dmarc-report-viewer`, neither of which has one, but the OSS-alternative
+      cluster turned out to have no search volume once checked — so the angle needs
+      keyword work in the private `seo` repo before copy is written here.
 
 ## Medium Priority
 

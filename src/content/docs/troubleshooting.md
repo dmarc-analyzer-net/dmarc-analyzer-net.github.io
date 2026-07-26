@@ -2,7 +2,7 @@
 title: Troubleshooting
 description: Fixes for the common problems — no reports arriving, mailbox authentication failures, a worker that stopped, parse failures, and lost admin access.
 section: Operations
-order: 2
+order: 3
 ---
 
 ## No reports are arriving
