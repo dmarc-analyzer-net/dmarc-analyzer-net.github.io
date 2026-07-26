@@ -7,19 +7,59 @@ order: 1
 
 ## Upgrading
 
+Take a [database backup](#what-to-back-up) first, then:
+
 ```bash
 cd dmarc-analyzer
 docker compose pull
-docker compose up -d
+docker compose up -d --force-recreate
 ```
 
-The API applies any pending database migrations at startup (assuming
-`Database__MigrateOnStartup` is `true`, as in the shipped compose file), so there
-is no separate migration step. Startup ordering means the worker waits for the API
-to finish before it resumes polling.
+The app applies pending database migrations as it boots, so there is no separate
+migration step.
 
-Take a database backup first — see below — and expect a few seconds of downtime
-while the API restarts.
+> **`--force-recreate` is not optional, and this is the one trap on this page.**
+> Plain `docker compose up -d` recreates a container only when its *configuration
+> or image* changes. A pending migration is a fact about your database and Compose
+> cannot see it — so if the image you pulled turns out to be the one you already
+> had, Compose leaves the container running and **nothing migrates**, while the
+> healthcheck goes on returning 200 the whole time. A green healthcheck does not
+> prove your schema is current.
+
+So confirm it rather than assuming. Count the applied migrations:
+
+```bash
+docker compose exec -T postgres psql -U postgres -d dmarc_analyzer -tAc \
+  'select count(*), max("MigrationId") from "__EFMigrationsHistory"'
+```
+
+The column names are quoted and case-sensitive — `select migration_id` fails.
+
+Expect a few seconds of downtime while the app restarts, or a couple of minutes if
+the release carries a large migration. The largest so far rewrites every report
+record in one statement: about 94 seconds per 5.3 million rows. The app allows ten
+minutes for it and does not accept HTTP until it finishes.
+
+### Migrating without downtime
+
+If you would rather the console stayed up, apply the schema change first with a
+throwaway container that migrates and exits:
+
+```bash
+docker compose pull
+docker compose run --rm -e APP_MODE=migrate app
+docker compose up -d --force-recreate
+```
+
+`migrate` mode serves nothing, ingests nothing, and takes no locks, so the running
+instance is undisturbed. It names each migration as it applies them; with nothing
+pending it prints `No pending migrations; nothing to do.` and exits 0, so it is
+safe to run twice.
+
+This is how the Kubernetes chart does it, and it is the only approach that works
+when you run more than one console replica — replicas would otherwise race to
+apply the same migration. For a single-container Compose install the simpler
+restart above is fine.
 
 ### Pinning a version
 
@@ -35,10 +75,13 @@ semantic versions.
 
 ### Rolling back
 
-Set the image back to the previous tag and `docker compose up -d`. One caveat:
-**migrations are not automatically reversed.** If the newer version changed the
-schema, an older image may not run against the migrated database — which is why
-you take a backup before upgrading.
+Set the image back to the previous tag and `docker compose up -d --force-recreate`.
+One caveat: **migrations are not automatically reversed.** If the newer version
+changed the schema, an older image may not run against the migrated database —
+which is why you take a backup before upgrading.
+
+This is the practical argument for pinning: rolling back from `latest` means
+working out which version you were on.
 
 ## What to back up
 

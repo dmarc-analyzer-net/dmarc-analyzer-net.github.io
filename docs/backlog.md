@@ -45,6 +45,31 @@ Keep claims truthful to the intended end state.
 - [x] (done) Add `public/robots.txt` pointing at `sitemap-index.xml` (update host when the custom domain goes live).
 - [x] (done) Add `.prose` styles to `global.css` (brand-token-based) — prerequisite before authoring any Markdown content.
 
+## Deployment docs (PR 2 of 2)
+
+PR 1 corrected the pages that were wrong. These are the additions, and each has a
+forward reference waiting for it in `install.md` or `configuration.md`.
+
+- [ ] **`choose-your-deployment.md`** — decision table across bundled/external
+      Postgres, combined/split, Compose/Kubernetes, plus a short managed-Postgres
+      section (RDS, Cloud SQL, Neon: connection string and `sslmode`).
+- [ ] **`kubernetes.md`** — `helm install` from the OCI registry, the two values
+      that matter, what the chart refuses and why, bundled Postgres as
+      evaluation-grade, **and backup/restore for Kubernetes** — today's backup doc is
+      Compose-only, so K8s users have no instructions at all.
+- [ ] **`reverse-proxy.md`** — working Caddy, nginx and Traefik configs *including*
+      `Network__TrustedProxies`. Without it every audit entry records the proxy's
+      address, and the site currently recommends a proxy without saying so.
+- [ ] **`security.md`** — encryption key handling and `existingSecret`, forwarded
+      headers, what is stored and what is not, the single-worker lock. The material
+      exists scattered across four pages.
+- [ ] **Marketing copy.** Homepage hero to the prebuilt-image quick start rather
+      than clone-and-build; the quick-start block from "one image, two modes" to a
+      single container; Terminal mock from three services to two; Kubernetes on the
+      features and compare pages.
+- [ ] Convert the five GitHub links added in PR 1 back to internal links once the
+      pages above exist.
+
 ## Medium Priority
 
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
