@@ -21,27 +21,15 @@ Keep claims truthful to the intended end state.
       type, gutters and the ink CTA padding all step down. Verified in Chrome:
       the home page went from 929px-in-390px to no page overflow at all, and
       mobile Lighthouse is 100/100/100.
-- [ ] (todo) **Move the GitHub Actions off the Node 20 runtime.** Every CI and
-      deploy run logs `Node 20 is being deprecated. This workflow is running with
-      Node 24 by default.` — the runner already forces Node 24 and runs the
-      node20 actions on it through a compatibility shim, so this is an
-      unsupported combination in use today rather than a pending break.
+- [x] (done) Move the GitHub Actions off the Node 20 runtime. checkout, setup-node
+      and deploy-pages went v4 -> v5, which is the *first* major declaring
+      `using: node24` — verified by reading `action.yml` at each tag rather than
+      taking the newest. `withastro/action` went v3 -> v6: it is a composite that
+      internally pinned `actions/setup-node@v4.4.0` (node20), so bumping only our
+      own pins would have left the warning coming from inside it. v5 was the first
+      composite with node24 internals, but it dropped `upload-pages-artifact`
+      while v6 has it back, so v6 is both current and closest to v3's behaviour.
 
-      Verified 2026-07-25 — the current majors declare `using: node24`:
-
-      | Action | Pinned | Declares node24 |
-      |---|---|---|
-      | `actions/checkout` | v4 (×2) | **v7.0.1** |
-      | `actions/setup-node` | v4 | **v7.0.0** |
-      | `actions/deploy-pages` | v4 | **v5.0.0** |
-
-      `withastro/action@v3` needs checking separately — it wraps setup-node and
-      may pull its own runtime.
-
-      Major bumps, so read the changelogs; `checkout` v4→v7 crosses three. Verify
-      a real deploy to Pages before merging, not just a green build — this repo's
-      CI and its deploy are separate workflows and only CI runs on a PR. The app
-      repo has the same item.
 
 - [x] (done) Docs sidebar on mobile. Below 1024px it now moves below the article
       under an "All documentation" heading rather than disappearing. A disclosure
