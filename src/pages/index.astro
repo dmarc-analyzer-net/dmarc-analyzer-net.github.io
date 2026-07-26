@@ -84,7 +84,7 @@ const faqSchema = {
             </a>
           </div>
           <div class="mono" style="display:inline-flex; align-items:center; gap:10px; font-size:var(--text-sm); color:var(--gray-700); background:var(--teal-50); border:1px solid var(--teal-200); border-radius:var(--radius-sm); padding:9px 13px;">
-            <span style="color:var(--brand);">$</span> docker compose up -d --build
+            <span style="color:var(--brand);">$</span> curl -fsSL -o compose.yml … &amp;&amp; docker compose up -d
             <span style="width:1px; height:14px; background:var(--teal-200);"></span>
             <Icon name="copy" style="font-size:var(--text-base); color:var(--text-faint);" />
           </div>
@@ -227,7 +227,7 @@ const faqSchema = {
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
             <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-olive-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="database" style="font-size:19px; color:var(--tint-olive-fg);" /></span>
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Runs as a single container with PostgreSQL. Client report data never leaves your infrastructure — a real answer for data-residency clauses.</p>
+            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Runs as a single container with PostgreSQL, on Docker Compose or Kubernetes. Client report data never leaves your infrastructure — a real answer for data-residency clauses.</p>
           </div>
         </div>
         <div style="margin-top:28px;">
@@ -269,25 +269,24 @@ const faqSchema = {
           <div>
             <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">Quick start</div>
             <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">Running in under five minutes.</h2>
-            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0 0 24px;">One image, two modes — API and worker — plus PostgreSQL. Clone, compose up, and open the dashboard. Prerequisites are Docker and a mailbox for report delivery.</p>
+            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0 0 24px;">One container for the whole application, plus PostgreSQL. Download the compose file, generate a key, and open the dashboard. Prerequisites are Docker and a mailbox for report delivery.</p>
             <ul style="list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px;">
-              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> API + React build served from one container</li>
-              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Background worker for scheduled report sync</li>
-              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> PostgreSQL for storage, no external services</li>
+              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Console and report ingestion in one container</li>
+              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Split them, or bring your own PostgreSQL, when you need to</li>
+              <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Helm chart for Kubernetes, the same settings either way</li>
             </ul>
             <a class="btn-ghost" href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp#readme" style="display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 18px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="book-open" style="font-size:16px;" /> Read the setup guide</a>
           </div>
           <Terminal
             lines={[
-              { type: 'comment', text: '# clone and enter' },
-              { type: 'cmd', text: 'git clone https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp' },
-              { type: 'cmd', text: 'cd DmarcAnalyzerApp' },
+              { type: 'comment', text: '# fetch the compose file' },
+              { type: 'cmd', text: 'curl -fsSL -o compose.yml https://…/deploy/compose.yml' },
               { type: 'gap' },
-              { type: 'comment', text: '# build + run api, worker, postgres' },
-              { type: 'cmd', text: 'docker compose up -d --build' },
+              { type: 'comment', text: '# key that encrypts stored mailbox passwords' },
+              { type: 'cmd', text: 'echo "DMARC_ENCRYPTION_KEY=$(openssl rand -base64 32)" > .env' },
+              { type: 'cmd', text: 'docker compose up -d' },
               { type: 'gap' },
-              { type: 'ok', text: 'api      → http://localhost:8080' },
-              { type: 'ok', text: 'worker   → APP_MODE=worker' },
+              { type: 'ok', text: 'app      → http://localhost:8080' },
               { type: 'ok', text: 'postgres → localhost:5432' },
             ]}
           />

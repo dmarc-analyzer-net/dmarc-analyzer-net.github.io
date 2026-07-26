@@ -11,7 +11,7 @@ to PostgreSQL. Two containers, and nothing else to install.
 
 That is the right shape for most self-hosters. You can split the console and the
 worker apart, point at a database you already run, or deploy to Kubernetes
-instead — see [other shapes](#other-shapes) below.
+instead — see [choosing a deployment](/docs/choose-your-deployment/).
 
 ## Requirements
 
@@ -68,10 +68,8 @@ curl -fsSL -O https://raw.githubusercontent.com/dmarc-analyzer-net/DmarcAnalyzer
 echo "COMPOSE_FILE=compose.yml:compose.split.yml" >> .env
 ```
 
-Every combination reads the same environment variables. Splitting is worth it once
-a sync pass is heavy enough to slow the console, or when the two need different
-restart schedules; below that the single container is simpler to run and to read
-logs from.
+Every combination reads the same environment variables. [Choosing a
+deployment](/docs/choose-your-deployment/) covers when each is worth it.
 
 > **Only one worker may run at a time**, whichever shape you pick. The application
 > takes a database lock at startup and a second worker exits rather than starting,
@@ -108,9 +106,8 @@ Sessions use a `Secure` cookie, so the browser must reach the app over HTTPS.
 
 There is one setting to get right that is easy to miss: without it, **every entry
 in your audit trail records the proxy's address instead of the real caller**. See
-[`Network__*` in the configuration
-reference](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/docs/ops/configuration.md#behind-a-reverse-proxy-network)
-for what to set.
+[running behind a reverse
+proxy](/docs/reverse-proxy/) for working Caddy, nginx and Traefik configs.
 
 ## Kubernetes
 
@@ -123,10 +120,8 @@ helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
 ```
 
 It exposes the same two choices as the Compose files, so a deployment can move
-between them without relearning its configuration. The [chart
-README](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/deploy/helm/dmarc-analyzer/README.md)
-covers the values, what it refuses and why, and the caveats on its bundled
-PostgreSQL.
+between them without relearning its configuration. See
+[Kubernetes](/docs/kubernetes/).
 
 ## Building from source instead
 
