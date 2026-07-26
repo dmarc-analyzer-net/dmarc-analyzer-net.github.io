@@ -152,8 +152,10 @@ code,kbd,pre{font-family:var(--font-mono)}
   .prose img { max-width: 100%; height: auto; border-radius:var(--radius-lg); border: 1px solid var(--border-default); }
   .prose hr { border: 0; border-top: 1px solid var(--border-default); margin: 40px 0; }
   .prose table { width: 100%; border-collapse: collapse; font-size:var(--text-base); margin: 0 0 18px; display: block; overflow-x: auto; }
-  .prose th, .prose td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--text-on-ink); }
+  .prose th, .prose td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border-default); }
   .prose th { background: var(--surface-page); font-weight: 600; color: var(--gray-800); }
+
+.docs-aside-heading { display: none; }
 
 /* --- Responsive ---------------------------------------------------------
    The site was drawn desktop-first with no breakpoints and rendered ~930px
@@ -185,7 +187,24 @@ code,kbd,pre{font-family:var(--font-mono)}
   .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
   .split  { grid-template-columns: 1fr !important; }
   .docs-shell { grid-template-columns: minmax(0, 1fr) !important; }
-  .docs-aside { display: none !important; }
+  /* The docs nav moves below the article rather than disappearing. Hiding it
+     left phone readers with only prev/next, and a disclosure above the article
+     would push the content they came for off the screen. Ordered last, it reads
+     as "where to go next", which is what a doc page ends with anyway. */
+  .docs-aside {
+    order: 2;
+    position: static !important;
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-default);
+  }
+  .docs-aside-heading {
+    display: block;
+    margin: 0 0 14px;
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-body);
+  }
 }
 
 @media (max-width: 767px) {

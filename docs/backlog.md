@@ -43,11 +43,11 @@ Keep claims truthful to the intended end state.
       CI and its deploy are separate workflows and only CI runs on a PR. The app
       repo has the same item.
 
-- [ ] (todo) Docs sidebar on mobile. It is hidden below 1024px, so navigating
-      between doc pages on a phone relies on the prev/next links. The design
-      system specifies a drawer for the *console* sidebar but is silent on the
-      website's; a collapsible "Documentation" list above the article would
-      close the gap.
+- [x] (done) Docs sidebar on mobile. Below 1024px it now moves below the article
+      under an "All documentation" heading rather than disappearing. A disclosure
+      above the article would have pushed the content the reader came for off the
+      screen; ordered last it reads as "where to go next", which is how a doc
+      page ends anyway.
 
 - [x] (done) Astro project scaffold with `BaseLayout` (title/description/canonical/OG/Twitter), `Header`, `Footer`, `Icon`.
 - [x] (done) Home page (`index.astro`) — hero, dashboard mockup, features, how-it-works, comparison, FAQ, CTA.
