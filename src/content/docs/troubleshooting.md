@@ -114,6 +114,27 @@ historical data, "last 30 days" covers the 30 days before that newest report —
 data exists but the default window may sit past it. Widen the window with the day
 selector.
 
+## The login form accepts my password and returns me to the login page
+
+No error, no failed-login entry that helps, just a loop. Almost always TLS.
+
+The session cookie is always marked `Secure`, and browsers accept a `Secure`
+cookie over `http://` only on `localhost`. So sign-in works at
+`http://localhost:8080` and silently fails at `http://dmarc.internal:8080` or
+`http://10.0.5.7:8080` — the server sets the cookie, the browser discards it, and
+the next request arrives unauthenticated.
+
+Fix it by reaching the console over HTTPS: put a [reverse
+proxy](/docs/reverse-proxy/) in front of it, even on a private network or VPN. To
+confirm the diagnosis without setting one up, tunnel to it and use `localhost`:
+
+```bash
+ssh -L 8080:localhost:8080 you@the-host   # then open http://localhost:8080
+```
+
+If you are already behind a proxy and still looping, check that the proxy actually
+terminates TLS and that the browser address bar says `https://`.
+
 ## I can't sign in / lost the admin account
 
 Registration is locked after the first-run bootstrap, so you can't simply

@@ -109,16 +109,49 @@ the dump.
 
 ## Restoring
 
+The dump is a plain SQL script of `CREATE` and `COPY` statements, with no `DROP`s
+in it. That matters: restoring it over a database that already has a schema fails
+on every object, and **`psql` reports success anyway** unless you tell it not to.
+So restore into an empty database, and make errors fatal:
+
 ```bash
-# with the stack stopped except postgres
+# stop everything, then bring up only postgres
+docker compose down
 docker compose up -d postgres
+
+# recreate the database empty (this discards the current contents)
+docker compose exec -T postgres psql -U postgres -d postgres \
+  -c 'DROP DATABASE IF EXISTS dmarc_analyzer;' -c 'CREATE DATABASE dmarc_analyzer;'
+
 gunzip -c dmarc-2026-07-25.sql.gz | \
-  docker compose exec -T postgres psql -U postgres -d dmarc_analyzer
+  docker compose exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -d dmarc_analyzer
+
 docker compose up -d
 ```
 
+`-v ON_ERROR_STOP=1` is the important flag. Without it `psql` prints its errors,
+carries on to the next statement, and exits 0 — so a restore that populated almost
+nothing looks exactly like one that worked. With it, the first failure stops the
+run and returns non-zero.
+
+`docker compose down` before `DROP DATABASE` is not optional either: the drop fails
+while the app still holds connections.
+
 Restore `.env` with the original `DMARC_ENCRYPTION_KEY` before starting the API,
 or mailbox syncs will fail to decrypt their credentials.
+
+Then check the restore landed, rather than assuming:
+
+```bash
+docker compose exec -T postgres psql -U postgres -d dmarc_analyzer -tAc \
+  'select count(*) from "__EFMigrationsHistory"'
+docker compose exec -T postgres psql -U postgres -d dmarc_analyzer -tAc \
+  'select count(*) from dmarc_report'
+```
+
+The migration count should match what the backed-up instance had, and a mailbox
+source should sync successfully — that last one is the real test of the encryption
+key, since nothing else exercises it.
 
 ## Retention
 

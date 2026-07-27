@@ -33,6 +33,13 @@ docker compose up -d
 
 Then open **http://localhost:8080** and create the first administrator account.
 
+Do that from the machine itself, on `localhost`. The session cookie is always
+`Secure`, so signing in over plain HTTP at a hostname or LAN address appears to
+succeed and then loops back to the login page — put [TLS in
+front](/docs/reverse-proxy/) before you browse to it any other way. Create the
+first admin before pointing public DNS at it, too: until that account exists,
+registration is open to whoever reaches the page first.
+
 > **Keep `.env` safe and backed up.** `DMARC_ENCRYPTION_KEY` decrypts your stored
 > mailbox credentials. Lose it and you must re-enter every mailbox password; leak
 > it and anyone with your database can read them.
