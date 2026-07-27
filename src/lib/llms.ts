@@ -88,6 +88,20 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'Self-hosted DMARC monitoring',
+          url: `${SITE}/self-hosted-dmarc-monitoring/`,
+          description:
+            'What aggregate reports reveal about your infrastructure, and the operational cost of owning the monitoring yourself.',
+          body: '',
+        },
+        {
+          title: 'Migrating from parsedmarc',
+          url: `${SITE}/parsedmarc-alternative/`,
+          description:
+            'The mechanics of moving: the mailbox is the migration path, the first sync reads all of it, and both tools can read the same mailbox at once.',
+          body: '',
+        },
+        {
           title: 'Source code',
           url: REPO,
           description:

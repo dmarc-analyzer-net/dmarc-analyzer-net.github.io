@@ -50,3 +50,11 @@ difference: parsedmarc is not built to keep many clients' data separate.
 
 Both keep every [aggregate report](/glossary/dmarc-aggregate-report/) on your own
 infrastructure — the shared reason to choose open source in the first place.
+
+## Already running parsedmarc?
+
+Then the question isn't which is better in the abstract, it's what a move costs.
+[Migrating from parsedmarc](/parsedmarc-alternative/) covers the mechanics: your
+mailbox is the migration path, the first sync reads all of it, and ingestion
+never modifies the mailbox — so you can run both against the same reports for as
+long as you like before deciding.

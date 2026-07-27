@@ -18,7 +18,9 @@ heavy" and "so light it keeps no history."
 ## Why self-host
 
 - **Data sovereignty** — [aggregate reports](/glossary/dmarc-aggregate-report/)
-  reveal your sending infrastructure; self-hosting keeps that in-house.
+  reveal your sending infrastructure; [self-hosting keeps that
+  in-house](/self-hosted-dmarc-monitoring/), along with the operational cost of
+  owning it.
 - **No per-domain / per-volume fees** — run [unlimited domains for
   free](/free-dmarc-analyzer/).
 - **Auditability** — open source you can read, modify, and trust.
