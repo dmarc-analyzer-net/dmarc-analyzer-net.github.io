@@ -255,11 +255,13 @@ primary source; where a line number is given it was accurate in July 2026.
       produces a perfect-looking record and no reports, and nothing bounces to
       tell you. Also live: the **record generator** (`dmarc generator` 1,300/mo),
       which omits every tag left at its default and explains what the result does
-      to mail. Still to add: SPF checker (`spf checker` 5,400/mo — the valuable
-      part is recursively expanding `include:` and counting against the 10-DNS-
-      lookup limit, since exceeding it is a permerror that fails silently) and
-      DKIM lookup (`dkim checker` 6,600/mo — needs a selector, so it also needs a
-      list of common ones to try).
+      to mail. And the **SPF checker** (`spf checker` 5,400/mo), which recursively
+      expands every `include:`/`redirect=` and counts against the 10-DNS-lookup
+      limit — exceeding it is a `permerror` that fails silently, and it is the
+      most common way a working SPF setup dies. Shared DoH code lives in
+      `src/lib/doh.ts`. Still to add: DKIM lookup (`dkim checker` 6,600/mo —
+      needs a selector, so it also needs a list of common ones to try, and
+      decoding the key to report its bit length is the differentiating check).
 - [ ] (todo) Add MDX (`npx astro add mdx`) if guides need interactive/embedded components (callouts, tabbed code, a record checker).
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
 - [ ] (todo) Add a blog/changelog collection to announce releases and roadmap progress.

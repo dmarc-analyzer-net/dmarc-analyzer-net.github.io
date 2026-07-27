@@ -135,6 +135,13 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'SPF record checker',
+          url: `${SITE}/tools/spf-checker/`,
+          description:
+            'Browser-based tool that recursively expands SPF includes and counts DNS lookups against the RFC 7208 limit of 10, past which SPF returns permerror.',
+          body: '',
+        },
+        {
           title: 'Free DMARC report analyzer',
           url: `${SITE}/tools/dmarc-report-analyzer/`,
           description: 'Browser-based tool for reading a single DMARC aggregate report.',
