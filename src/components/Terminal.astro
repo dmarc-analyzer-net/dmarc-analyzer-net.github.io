@@ -22,6 +22,13 @@ export interface TerminalLine {
   type: TerminalLineType;
   /** Omitted for `gap`. */
   text?: string;
+  /**
+   * What the copy button puts on the clipboard for this line, when the
+   * displayed text is abbreviated to fit. A long raw.githubusercontent.com URL
+   * shown as `https://…/deploy/compose.yml` is readable but not runnable, and
+   * the clipboard must carry the version that runs.
+   */
+  copyText?: string;
 }
 
 interface Props {
@@ -30,6 +37,15 @@ interface Props {
 }
 
 const { title = 'Terminal', lines } = Astro.props;
+
+// Only the commands. Comments, output and `ok` lines are context for reading,
+// not something anyone wants pasted into a shell — and the `$` prefix is
+// decoration this component adds, so it must not travel with the text.
+const commands = lines
+  .filter((line) => line.type === 'cmd')
+  .map((line) => line.copyText ?? line.text ?? '')
+  .filter(Boolean)
+  .join('\n');
 
 const TONE: Record<string, string> = {
   comment: 'var(--text-on-ink-muted)',
@@ -46,7 +62,18 @@ const TONE: Record<string, string> = {
     style="display:flex; align-items:center; justify-content:space-between; padding:11px 15px; border-bottom:1px solid var(--border-on-ink); background:var(--surface-ink-raised);"
   >
     <span class="mono" style="font-size:var(--text-xs); color:var(--text-on-ink-muted);">{title}</span>
-    <Icon name="copy" style="font-size:var(--text-base); color:var(--text-on-ink-muted);" />
+    {commands && (
+      <button
+        type="button"
+        data-copy={commands}
+        aria-label="Copy the commands from this terminal"
+        class="mono"
+        style="display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; padding:0; cursor:pointer; font-size:var(--text-xs); color:var(--text-on-ink-muted);"
+      >
+        <Icon name="copy" style="font-size:var(--text-base);" />
+        <span data-copy-label>Copy</span>
+      </button>
+    )}
   </div>
   <div class="mono" style="padding:20px; font-size:var(--text-sm); line-height:1.9; color:var(--text-on-ink);">
     {
@@ -64,3 +91,10 @@ const TONE: Record<string, string> = {
     }
   </div>
 </div>
+
+<script>
+  // Astro hoists and dedupes this, so a page with several terminals still
+  // loads it once, and it also covers the hero button on the homepage.
+  import { wireCopyButtons } from '../lib/clipboard';
+  wireCopyButtons();
+</script>

@@ -11,6 +11,29 @@ const description =
   'Open-source, self-hosted DMARC monitoring for agencies running many client domains. Catch spoofing and reach enforcement, with no per-domain fees.';
 
 const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
+
+const COMPOSE_URL =
+  'https://raw.githubusercontent.com/dmarc-analyzer-net/DmarcAnalyzerApp/main/deploy/compose.yml';
+
+/**
+ * What the hero's copy button puts on the clipboard, and what the terminal
+ * below copies for its first line.
+ *
+ * All three commands, because the middle one is not optional: `compose.yml`
+ * declares `DMARC_ENCRYPTION_KEY` with `${VAR:?message}`, so `docker compose
+ * up -d` exits 1 before starting anything if `.env` does not exist. The hero
+ * used to advertise `curl … && docker compose up -d`, which could never have
+ * worked — verified by running it against the real compose file.
+ *
+ * Kept verbatim in step with `docs/install.md`; `scripts/verify-docs-snippets.sh`
+ * is the guard.
+ */
+const QUICKSTART = [
+  `curl -fsSL -o compose.yml ${COMPOSE_URL}`,
+  'echo "DMARC_ENCRYPTION_KEY=$(openssl rand -base64 32)" > .env',
+  'docker compose up -d',
+].join('\n');
+
 const siteUrl = Astro.site?.href ?? 'https://dmarc-analyzer-net.github.io/';
 
 const orgSchema = {
@@ -84,9 +107,18 @@ const faqSchema = {
             </a>
           </div>
           <div class="mono" style="display:inline-flex; align-items:center; gap:10px; font-size:var(--text-sm); color:var(--gray-700); background:var(--teal-50); border:1px solid var(--teal-200); border-radius:var(--radius-sm); padding:9px 13px;">
-            <span style="color:var(--brand);">$</span> curl -fsSL -o compose.yml … &amp;&amp; docker compose up -d
+            <span id="quickstart-preview"><span style="color:var(--brand);">$</span> curl -fsSL -o compose.yml …</span>
             <span style="width:1px; height:14px; background:var(--teal-200);"></span>
-            <Icon name="copy" style="font-size:var(--text-base); color:var(--text-faint);" />
+            <button
+              type="button"
+              data-copy={QUICKSTART}
+              data-copy-target="quickstart-preview"
+              aria-label="Copy the full quick-start commands"
+              style="display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; padding:0; cursor:pointer; font:inherit; color:var(--brand); font-weight:600;"
+            >
+              <Icon name="copy" style="font-size:var(--text-base);" />
+              <span data-copy-label>Copy quick start</span>
+            </button>
           </div>
         </div>
       </section>
@@ -280,7 +312,11 @@ const faqSchema = {
           <Terminal
             lines={[
               { type: 'comment', text: '# fetch the compose file' },
-              { type: 'cmd', text: 'curl -fsSL -o compose.yml https://…/deploy/compose.yml' },
+              {
+                type: 'cmd',
+                text: 'curl -fsSL -o compose.yml https://…/deploy/compose.yml',
+                copyText: `curl -fsSL -o compose.yml ${COMPOSE_URL}`,
+              },
               { type: 'gap' },
               { type: 'comment', text: '# key that encrypts stored mailbox passwords' },
               { type: 'cmd', text: 'echo "DMARC_ENCRYPTION_KEY=$(openssl rand -base64 32)" > .env' },
@@ -376,3 +412,11 @@ const faqSchema = {
 
       <!-- FOOTER -->
 </BaseLayout>
+
+<script>
+  // The hero's copy button lives here rather than inside a Terminal, so wire it
+  // from this page too — this must not depend on the page happening to render a
+  // Terminal as well. wireCopyButtons is idempotent per button.
+  import { wireCopyButtons } from '../lib/clipboard';
+  wireCopyButtons();
+</script>
