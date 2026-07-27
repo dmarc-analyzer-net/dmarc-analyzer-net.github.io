@@ -116,7 +116,10 @@ a very large database may want more.
 
 ## Backup and restore
 
-Two things to back up, exactly as on [Compose](/docs/upgrading-and-backup/#what-to-back-up):
+Same as on [Compose](/docs/upgrading-and-backup/#what-to-back-up), including the
+[configuration export](/docs/upgrading-and-backup/#the-configuration-export), which is the
+primary backup and can be shipped straight to object storage. The two things below remain
+the pre-upgrade artifact and the key that makes any of it restorable:
 the database, and the encryption key.
 
 ### Database
