@@ -19,6 +19,11 @@ const tools = [
     note: 'Expands every include and counts your DNS lookups against the limit of 10 — the ceiling that breaks SPF with no warning once you cross it.',
   },
   {
+    href: '/tools/dkim-checker/',
+    name: 'DKIM record checker',
+    note: 'Decode a selector’s public key to get its real length, and catch revoked keys and testing mode left switched on. Don’t know your selector? Try the common ones.',
+  },
+  {
     href: '/tools/dmarc-report-analyzer/',
     name: 'DMARC report analyzer',
     note: 'Paste or upload an aggregate (RUA) report and get a readable, per-source breakdown. Runs entirely in your browser.',
@@ -27,7 +32,7 @@ const tools = [
 ---
 <BaseLayout current="tools"
   title="Free DMARC tools — DMARC Analyzer"
-  description="Free, in-browser DMARC and SPF tools: record checker, generator, SPF lookup counter, report analyzer. Open source, no account, nothing leaves the page."
+  description="Free, in-browser DMARC, SPF and DKIM tools: record checkers, a DMARC generator, an SPF lookup counter and a report analyzer. Open source, no account."
   path="/tools/"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
@@ -51,6 +56,6 @@ const tools = [
           </li>
         ))}
       </ul>
-      <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">A DKIM lookup is on the way.</p>
+      <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">Everything here runs client-side and is <a href="https://github.com/dmarc-analyzer-net/dmarc-analyzer-net.github.io">open source</a>, like the application itself.</p>
     </section>
 </BaseLayout>

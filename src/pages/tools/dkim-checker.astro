@@ -1,0 +1,639 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+
+const title = 'DKIM record checker';
+const description =
+  'Free DKIM checker: look up a selector’s public key, decode it to report the real key length, and catch revoked keys and testing mode left switched on.';
+const path = '/tools/dkim-checker/';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'DKIM Record Checker',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any (web browser)',
+  description,
+  url: new URL(path, Astro.site).href,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+<BaseLayout current="tools" title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Tools', href: '/tools/' },
+          { label: 'DKIM record checker', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">DKIM record checker</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Look up a selector's public key and <strong>decode it</strong> — so you get the real key length, not just "a record exists". Don't know your selector? Try the common ones.</p>
+      </div>
+    </section>
+
+    <section style="max-width:900px; margin:0 auto; padding:28px 32px;">
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px;">
+          <div>
+            <label for="domainInput" style="display:block; font-size:var(--text-sm); font-weight:600; color:var(--gray-800); margin-bottom:8px;">Domain</label>
+            <input id="domainInput" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+              placeholder="yourdomain.com"
+              style="width:100%; height:40px; font-family:'JetBrains Mono',monospace; font-size:14px; padding:0 12px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-page); color:var(--gray-800);" />
+          </div>
+          <div>
+            <label for="selectorInput" style="display:block; font-size:var(--text-sm); font-weight:600; color:var(--gray-800); margin-bottom:8px;">Selector</label>
+            <input id="selectorInput" type="text" list="selectors" autocomplete="off" autocapitalize="off" spellcheck="false"
+              placeholder="google"
+              style="width:100%; height:40px; font-family:'JetBrains Mono',monospace; font-size:14px; padding:0 12px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-page); color:var(--gray-800);" />
+            <datalist id="selectors"></datalist>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;">
+          <button id="checkBtn" class="btn-primary" style="height:40px; padding:0 20px; border:0; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50); font-size:var(--text-base); font-weight:600; cursor:pointer;">Check selector</button>
+          <button id="discoverBtn" class="btn-ghost" style="height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body); font-size:var(--text-base); font-weight:500; cursor:pointer;">Try common selectors</button>
+          <button id="sampleBtn" class="btn-ghost" style="height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body); font-size:var(--text-base); font-weight:500; cursor:pointer;">Try an example</button>
+        </div>
+        <p style="margin:12px 2px 0; font-size:12.5px; color:var(--text-faint);">Looks up <code class="mono">&lt;selector&gt;._domainkey.&lt;domain&gt;</code> over DNS-over-HTTPS. The key is decoded in the page — nothing is sent to us.</p>
+      </div>
+
+      <p id="errorMsg" style="display:none; margin:14px 2px 0; font-size:var(--text-base); color:var(--status-danger-fg);"></p>
+
+      <div id="results" style="display:none; margin-top:28px;"></div>
+    </section>
+
+    <!-- SEO / explanatory content -->
+    <section style="max-width:760px; margin:0 auto; padding:24px 32px 8px;">
+      <div class="prose">
+        <h2>You need the selector, and DNS will not tell you</h2>
+        <p>
+          A DKIM key lives at
+          <code>&lt;selector&gt;._domainkey.yourdomain.com</code>, and there is no
+          way to list the selectors a domain uses — DNS has no directory. You
+          either know the name or you guess it.
+        </p>
+        <p>
+          The reliable way to find it is a message you actually sent: open the
+          raw source, find the <code>DKIM-Signature</code> header, and read the
+          <code>s=</code> tag. That is the selector, and <code>d=</code> next to
+          it is the signing domain. Failing that, "try common selectors" above
+          checks the ones we have seen in the wild — <code>google</code> for
+          Workspace, <code>selector1</code> and <code>selector2</code> for
+          Microsoft 365, <code>k1</code>/<code>k2</code> for Mailchimp,
+          <code>s1</code>/<code>s2</code> for SendGrid, and a handful more.
+        </p>
+        <p>
+          Every sender that signs for you has its own selector, so a domain
+          normally has several live at once. Finding one does not mean you have
+          found them all — see
+          <a href="/glossary/dkim-selector/">DKIM selectors explained</a>.
+        </p>
+
+        <h2>What "the record exists" misses</h2>
+        <p>Three failures look identical to a checker that only confirms a record is present:</p>
+        <ul>
+          <li><strong>A revoked key.</strong> An empty <code>p=</code> is not a broken record — it is the defined way to revoke a key (RFC 6376 §3.6.1). The record resolves perfectly and every signature it covers fails.</li>
+          <li><strong>Testing mode left on.</strong> <code>t=y</code> tells verifiers to treat the mail as though it were unsigned, <em>even when the signature verifies</em>. It is meant for the first week of a rollout. It is routinely still there years later, quietly making DKIM decorative.</li>
+          <li><strong>A 1024-bit key.</strong> Common, and still shipped by default by some providers. <a href="https://www.rfc-editor.org/rfc/rfc8301" rel="nofollow">RFC 8301</a> requires at least 1024 bits and says signers <em>should</em> use 2048. This tool decodes the key rather than trusting the record, so the length it reports is the real one.</li>
+        </ul>
+
+        <h2>DKIM survives what SPF does not</h2>
+        <p>
+          DKIM signs the message, so the signature travels with it. Forwarding,
+          mailing lists and "send as" all break
+          <a href="/glossary/spf/">SPF</a> while leaving a DKIM signature
+          intact — which is why a domain with both usually passes
+          <a href="/glossary/dmarc/">DMARC</a> on DKIM, and why DKIM is the one
+          worth getting right first.
+        </p>
+        <p>
+          It only counts for DMARC when the signing domain
+          <a href="/glossary/dmarc-alignment/">aligns</a> with the visible
+          <code>From:</code> address, though. A vendor signing with their own
+          <code>d=</code> produces a valid signature that does nothing for you.
+          Whether that is happening is a question the daily
+          <a href="/glossary/dmarc-aggregate-report/">aggregate reports</a>
+          answer, per sender — which is what
+          <a href="/">DMARC Analyzer</a> is for.
+          <a href="/free-dmarc-analyzer/">Free and open source</a>, and
+          <a href="/self-hosted-dmarc-monitoring/">self-hosted</a>.
+        </p>
+      </div>
+
+      <RelatedLinks links={[
+        { label: 'DKIM selectors explained', href: '/glossary/dkim-selector/', note: 'What the selector is and why there are several.' },
+        { label: 'SPF, DKIM & DMARC together', href: '/guides/spf-dkim-dmarc/', note: 'How the three fit.' },
+        { label: 'SPF record checker', href: '/tools/spf-checker/', note: 'Count your SPF lookups against the limit of 10.' },
+        { label: 'DMARC record checker', href: '/tools/dmarc-checker/', note: 'The policy on top of both.' },
+      ]} />
+
+      <Cta />
+    </section>
+</BaseLayout>
+
+<script>
+  import { errorText, lookupTxt, LOOKS_LIKE_DOMAIN, normalizeDomain } from '../../lib/doh';
+
+  type Finding = {
+    level: 'good' | 'warn' | 'bad';
+    title: string;
+    detail: string;
+    link?: { href: string; label: string };
+  };
+
+  /**
+   * Selectors confirmed against live DNS rather than collected from lists.
+   * Each was seen resolving to a real key record on at least one domain in
+   * July 2026; candidates that could not be confirmed were dropped rather than
+   * guessed at, because a selector that never resolves is just noise here.
+   */
+  const COMMON_SELECTORS = [
+    'google',        // Google Workspace
+    'selector1',     // Microsoft 365
+    'selector2',     // Microsoft 365
+    'k1',            // Mailchimp / Mandrill
+    'k2',            // Mailchimp / Mandrill
+    's1',            // SendGrid
+    's2',            // SendGrid
+    'mandrill',      // Mandrill
+    'protonmail',    // Proton
+    'protonmail2',
+    'protonmail3',
+    'mail',
+    'default',
+    'dkim',
+    'smtp',
+  ];
+
+  // Every id below is a static element in this page's own markup, so a null
+  // would be a template bug rather than a runtime condition.
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+    document.getElementById(id) as T;
+
+  const domainInput = $<HTMLInputElement>('domainInput');
+  const selectorInput = $<HTMLInputElement>('selectorInput');
+  const checkBtn = $<HTMLButtonElement>('checkBtn');
+  const discoverBtn = $<HTMLButtonElement>('discoverBtn');
+  const errorMsg = $('errorMsg');
+  const results = $('results');
+
+  // Populate the datalist from the same source the discovery button uses.
+  const datalist = $('selectors');
+  for (const s of COMMON_SELECTORS) {
+    const option = document.createElement('option');
+    option.value = s;
+    datalist.appendChild(option);
+  }
+
+  const showError = (msg: string) => {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    results.style.display = 'none';
+  };
+  const clearError = () => { errorMsg.style.display = 'none'; };
+
+  // ------------------------------------------------------------- parsing
+
+  type Tag = { name: string; value: string };
+
+  /** DKIM tag lists use `;` separators like DMARC, but values are often base64
+   *  containing `=`, so only the first `=` separates name from value. */
+  function parseTags(record: string): Tag[] {
+    return record.split(';').map((s) => s.trim()).filter(Boolean).map((s) => {
+      const eq = s.indexOf('=');
+      return eq === -1
+        ? { name: s.toLowerCase(), value: '' }
+        : { name: s.slice(0, eq).trim().toLowerCase(), value: s.slice(eq + 1).trim() };
+    });
+  }
+
+  /**
+   * A TXT record is a DKIM key record if it declares itself one, or carries a
+   * `p=` tag. Both halves matter: `v=` is only RECOMMENDED by RFC 6376 and
+   * plenty of real records omit it, while requiring merely "some TXT exists"
+   * would report a hit for every selector on a domain with a wildcard TXT —
+   * which is not hypothetical, several large domains have one.
+   */
+  function isDkimRecord(record: string): boolean {
+    const tags = parseTags(record);
+    if (tags.some((t) => t.name === 'v' && /^dkim1$/i.test(t.value))) return true;
+    return tags.some((t) => t.name === 'p');
+  }
+
+  // ---------------------------------------------------------------- keys
+
+  function base64Bytes(b64: string): Uint8Array | null {
+    try {
+      const normalized = b64.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+      const binary = atob(padded);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * RSA modulus size, by importing the SubjectPublicKeyInfo and measuring the
+   * modulus the browser parsed out of it. Decoding rather than pattern-matching
+   * the base64 is the point of this tool: the length it reports is the key's,
+   * not a guess from the string's length.
+   */
+  async function rsaBits(spki: Uint8Array): Promise<number | null> {
+    try {
+      const key = await crypto.subtle.importKey(
+        'spki',
+        spki as BufferSource,
+        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+        true,
+        ['verify'],
+      );
+      const jwk = await crypto.subtle.exportKey('jwk', key);
+      if (!jwk.n) return null;
+      const modulus = base64Bytes(jwk.n);
+      return modulus ? modulus.length * 8 : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // -------------------------------------------------------------- checks
+
+  async function check(record: string): Promise<Finding[]> {
+    const out: Finding[] = [];
+    const tags = parseTags(record);
+    const get = (name: string) => tags.find((t) => t.name === name);
+
+    const v = get('v');
+    if (v && !/^dkim1$/i.test(v.value)) {
+      out.push({
+        level: 'bad',
+        title: `v=${v.value} is not a DKIM version this understands`,
+        detail: 'The only defined value is DKIM1. Anything else and verifiers ignore the key.',
+      });
+    }
+
+    const k = get('k');
+    // Absent k means rsa (RFC 6376 §3.6.1).
+    const algorithm = (k?.value || 'rsa').toLowerCase();
+    const knownAlgorithm = algorithm === 'rsa' || algorithm === 'ed25519';
+    if (!knownAlgorithm) {
+      out.push({
+        level: 'bad',
+        title: `k=${k?.value} is not a recognised key type`,
+        detail: 'RFC 6376 defines rsa, and RFC 8463 adds ed25519. Verifiers treat anything else as an unusable key, so what the p value contains does not matter.',
+      });
+    }
+
+    // The single most misleading state: a record that resolves perfectly and
+    // fails every signature.
+    const p = get('p');
+    if (!p) {
+      out.push({
+        level: 'bad',
+        title: 'No p tag — there is no public key here',
+        detail: 'Without a p tag this is not a usable key record, so nothing signed with this selector can verify.',
+      });
+    } else if (p.value === '') {
+      out.push({
+        level: 'bad',
+        title: 'The key is revoked (p= is empty)',
+        detail: 'An empty p value is the defined way to revoke a key, not a broken record. The lookup succeeds and every signature using this selector fails. If this selector is still in use, republish the public key.',
+      });
+    } else {
+      const bytes = base64Bytes(p.value);
+      if (!knownAlgorithm) {
+        // Already reported above. Measuring it as RSA anyway would contradict
+        // that finding — "unusable key type" followed by "1024-bit RSA key".
+      } else if (!bytes) {
+        out.push({
+          level: 'bad',
+          title: 'The public key is not valid base64',
+          detail: 'The p value could not be decoded, so verifiers cannot read the key either. This is usually damage from an editor wrapping the record, or a chunked TXT that was reassembled wrongly.',
+        });
+      } else if (algorithm === 'ed25519') {
+        if (bytes.length === 32) {
+          out.push({
+            level: 'good',
+            title: 'Ed25519 key, 256 bits',
+            detail: 'A valid Ed25519 public key. Shorter and stronger than RSA at this size — the trade is that some older verifiers do not support it, so it is usually published alongside an RSA selector rather than instead of one.',
+          });
+        } else {
+          out.push({
+            level: 'bad',
+            title: `Ed25519 key is ${bytes.length} bytes, not 32`,
+            detail: 'An Ed25519 public key is exactly 32 bytes. This one cannot be used.',
+          });
+        }
+      } else {
+        const bits = await rsaBits(bytes);
+        if (bits === null) {
+          out.push({
+            level: 'bad',
+            title: 'The key decoded, but is not a usable RSA public key',
+            detail: 'The base64 was valid but the browser could not parse it as a SubjectPublicKeyInfo structure. Verifiers will reject it too. Check the key was published in the right format.',
+          });
+        } else if (bits < 1024) {
+          out.push({
+            level: 'bad',
+            title: `${bits}-bit RSA key — below the minimum`,
+            detail: 'RFC 8301 says verifiers must not treat signatures from keys under 1024 bits as valid. This key does not work, whatever the record looks like. Generate a 2048-bit replacement.',
+          });
+        } else if (bits < 2048) {
+          out.push({
+            level: 'warn',
+            title: `${bits}-bit RSA key — legal, but weaker than it should be`,
+            detail: 'RFC 8301 sets 1024 as the floor and says signers should use 2048. Some providers still generate 1024-bit keys by default. Worth rotating when the provider allows it.',
+          });
+        } else {
+          out.push({
+            level: 'good',
+            title: `${bits}-bit RSA key`,
+            detail: 'At or above the 2048 bits RFC 8301 asks signers to use.',
+          });
+        }
+      }
+    }
+
+    // Testing mode is the flag people forget, and it makes DKIM decorative.
+    const t = get('t');
+    if (t) {
+      const flags = t.value.split(':').map((s) => s.trim().toLowerCase()).filter(Boolean);
+      if (flags.includes('y')) {
+        out.push({
+          level: 'warn',
+          title: 't=y — this selector is in testing mode',
+          detail: 'Verifiers are told to treat the mail as though it were unsigned even when the signature verifies, so this key protects nothing. It is meant for the first days of a rollout. Remove t=y once you have confirmed signatures verify.',
+        });
+      }
+      if (flags.includes('s')) {
+        out.push({
+          level: 'good',
+          title: 't=s — subdomains may not use this key',
+          detail: 'The signature’s i= domain must equal d= exactly, so a subdomain cannot use this key. A deliberate tightening, and worth knowing about if subdomain mail suddenly stops verifying.',
+        });
+      }
+      const unknown = flags.filter((f) => f !== 'y' && f !== 's');
+      if (unknown.length) {
+        out.push({
+          level: 'warn',
+          title: `Unrecognised t flag: ${unknown.join(', ')}`,
+          detail: 'RFC 6376 defines y and s. Verifiers ignore flags they do not know, so a typo here silently does nothing.',
+        });
+      }
+    }
+
+    // rsa-sha1 is prohibited, so a key restricted to sha1 cannot be used at all.
+    const h = get('h');
+    if (h && h.value) {
+      const hashes = h.value.split(':').map((s) => s.trim().toLowerCase()).filter(Boolean);
+      if (hashes.length && !hashes.includes('sha256')) {
+        out.push({
+          level: 'bad',
+          title: `h=${h.value} excludes sha256`,
+          detail: 'RFC 8301 prohibits rsa-sha1, so a key restricted to sha1 cannot produce a signature verifiers will accept. Remove the h tag or set h=sha256.',
+        });
+      }
+    }
+
+    const s = get('s');
+    if (s && s.value) {
+      const services = s.value.split(':').map((x) => x.trim().toLowerCase()).filter(Boolean);
+      if (!services.includes('*') && !services.includes('email')) {
+        out.push({
+          level: 'warn',
+          title: `s=${s.value} does not include email`,
+          detail: 'The service-type tag restricts what the key may be used for. Without email (or *), verifiers should not use this key for mail.',
+        });
+      }
+    }
+
+    return out;
+  }
+
+  // ----------------------------------------------------------- rendering
+
+  const PALETTE = {
+    good: { bg: 'var(--teal-100)', fg: 'var(--brand-hover)', mark: '✓' },
+    warn: { bg: '#fef3c7', fg: '#92400e', mark: '!' },
+    bad: { bg: 'var(--status-danger-bg)', fg: 'var(--status-danger-fg)', mark: '×' },
+  };
+
+  function findingRow(f: Finding) {
+    const row = document.createElement('li');
+    row.style.cssText = 'display:flex; gap:12px; padding:14px 16px; border-top:1px solid var(--surface-sunken);';
+
+    const badge = document.createElement('span');
+    badge.textContent = PALETTE[f.level].mark;
+    badge.setAttribute('aria-hidden', 'true');
+    badge.style.cssText = `flex:0 0 auto; width:22px; height:22px; margin-top:1px; border-radius:var(--radius-pill); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; background:${PALETTE[f.level].bg}; color:${PALETTE[f.level].fg};`;
+
+    const body = document.createElement('div');
+    body.style.cssText = 'min-width:0;';
+
+    const heading = document.createElement('div');
+    heading.textContent = f.title;
+    heading.style.cssText = 'font-size:var(--text-base); font-weight:600; color:var(--text-body); overflow-wrap:anywhere;';
+
+    const detail = document.createElement('div');
+    detail.textContent = f.detail;
+    detail.style.cssText = 'margin-top:3px; font-size:var(--text-sm); line-height:1.55; color:var(--gray-700); overflow-wrap:anywhere;';
+
+    body.append(heading, detail);
+
+    if (f.link) {
+      const a = document.createElement('a');
+      a.href = f.link.href;
+      a.textContent = f.link.label + ' →';
+      a.style.cssText = 'display:inline-block; margin-top:6px; font-size:var(--text-sm); font-weight:600;';
+      body.appendChild(a);
+    }
+
+    row.append(badge, body);
+    return row;
+  }
+
+  function heading(text: string) {
+    const h = document.createElement('h2');
+    h.textContent = text;
+    h.style.cssText = "font-family:'Space Grotesk',sans-serif; font-size:var(--text-lg); font-weight:600; letter-spacing:-0.01em; margin:0 0 12px; overflow-wrap:anywhere;";
+    return h;
+  }
+
+  function recordBlock(record: string) {
+    const pre = document.createElement('pre');
+    pre.textContent = record;
+    pre.style.cssText = "margin:0 0 20px; padding:14px 16px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-page); font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.6; color:var(--gray-800); white-space:pre-wrap; overflow-wrap:anywhere;";
+    return pre;
+  }
+
+  function list(rows: HTMLElement[]) {
+    const ul = document.createElement('ul');
+    ul.style.cssText = 'list-style:none; margin:0; padding:0; border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);';
+    rows.forEach((r) => ul.appendChild(r));
+    return ul;
+  }
+
+  // ------------------------------------------------------------ the check
+
+  /** The DKIM key record at a selector, or null when there is no key there. */
+  async function fetchKey(domain: string, selector: string): Promise<string | null> {
+    const records = (await lookupTxt(`${selector}._domainkey.${domain}`)).filter(isDkimRecord);
+    return records.length ? records[0] : null;
+  }
+
+  function readInputs(): { domain: string; selector: string } | null {
+    clearError();
+    const domain = normalizeDomain(domainInput.value);
+    if (!domain) { showError('Enter a domain to check.'); return null; }
+    if (!LOOKS_LIKE_DOMAIN.test(domain)) {
+      showError(`"${domain}" does not look like a domain name. Enter something like yourdomain.com.`);
+      return null;
+    }
+    domainInput.value = domain;
+    // A pasted `s1._domainkey.example.com` in the selector box is just the
+    // selector with the rest of the name attached.
+    const selector = selectorInput.value.trim().toLowerCase().replace(/\._domainkey.*$/, '');
+    selectorInput.value = selector;
+    return { domain, selector };
+  }
+
+  async function runSelector() {
+    const input = readInputs();
+    if (!input) return;
+    const { domain, selector } = input;
+    if (!selector) { showError('Enter a selector, or use "Try common selectors".'); return; }
+
+    checkBtn.disabled = true;
+    checkBtn.textContent = 'Checking…';
+    try {
+      const record = await fetchKey(domain, selector);
+      results.textContent = '';
+
+      if (!record) {
+        results.appendChild(heading(`No DKIM key at ${selector}._domainkey.${domain}`));
+        results.appendChild(list([findingRow({
+          level: 'bad',
+          title: 'Nothing at that selector',
+          detail: 'No TXT record there declares itself a DKIM key or carries a p tag. Either the selector is wrong — check the s= tag in a DKIM-Signature header of a message you sent — or the key was never published.',
+          link: { href: '/glossary/dkim-selector/', label: 'How selectors work' },
+        })]));
+      } else {
+        results.appendChild(heading(`DKIM key at ${selector}._domainkey.${domain}`));
+        results.appendChild(recordBlock(record));
+        const findings = await check(record);
+        const order = { bad: 0, warn: 1, good: 2 };
+        results.appendChild(list(
+          [...findings].sort((a, b) => order[a.level] - order[b.level]).map(findingRow),
+        ));
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('domain', domain);
+      url.searchParams.set('selector', selector);
+      window.history.replaceState(null, '', url);
+      results.style.display = 'block';
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+      showError(errorText(e, 'Something went wrong looking that up.'));
+    } finally {
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Check selector';
+    }
+  }
+
+  async function runDiscovery() {
+    const input = readInputs();
+    if (!input) return;
+    const { domain } = input;
+
+    discoverBtn.disabled = true;
+    discoverBtn.textContent = 'Searching…';
+    try {
+      const found = (
+        await Promise.all(
+          COMMON_SELECTORS.map(async (selector) => {
+            try {
+              const record = await fetchKey(domain, selector);
+              return record ? { selector, record } : null;
+            } catch {
+              return null;
+            }
+          }),
+        )
+      ).filter((x): x is { selector: string; record: string } => x !== null);
+
+      results.textContent = '';
+      results.appendChild(heading(
+        found.length
+          ? `${found.length} of ${COMMON_SELECTORS.length} common selectors have a key on ${domain}`
+          : `None of the ${COMMON_SELECTORS.length} common selectors have a key on ${domain}`,
+      ));
+
+      const note = document.createElement('p');
+      note.textContent = found.length
+        ? 'Choose one to check it in full. This only proves these selectors exist — a domain can use any name, so there may be others.'
+        : 'That does not mean the domain has no DKIM: selectors can be named anything. Read the s= tag from a DKIM-Signature header of a message you sent, and check that name directly.';
+      note.style.cssText = 'margin:0 0 14px; font-size:var(--text-sm); line-height:1.55; color:var(--text-faint);';
+      results.appendChild(note);
+
+      if (found.length) {
+        const rows = found.map(({ selector, record }) => {
+          const li = document.createElement('li');
+          li.style.cssText = 'border-top:1px solid var(--surface-sunken);';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.style.cssText = "display:block; width:100%; text-align:left; padding:13px 16px; border:0; background:transparent; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-body);";
+          button.textContent = selector;
+          const preview = document.createElement('div');
+          preview.textContent = record.slice(0, 60) + (record.length > 60 ? '…' : '');
+          preview.style.cssText = 'margin-top:3px; font-size:12px; color:var(--text-faint); overflow-wrap:anywhere;';
+          button.appendChild(preview);
+          button.addEventListener('click', () => { selectorInput.value = selector; runSelector(); });
+          li.appendChild(button);
+          return li;
+        });
+        results.appendChild(list(rows));
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('domain', domain);
+      url.searchParams.delete('selector');
+      window.history.replaceState(null, '', url);
+      results.style.display = 'block';
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+      showError(errorText(e, 'Something went wrong searching for selectors.'));
+    } finally {
+      discoverBtn.disabled = false;
+      discoverBtn.textContent = 'Try common selectors';
+    }
+  }
+
+  checkBtn.addEventListener('click', runSelector);
+  discoverBtn.addEventListener('click', runDiscovery);
+  for (const el of [domainInput, selectorInput]) {
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') runSelector();
+    });
+  }
+  $('sampleBtn').addEventListener('click', () => {
+    domainInput.value = 'github.com';
+    selectorInput.value = 'google';
+    runSelector();
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const initialDomain = params.get('domain');
+  if (initialDomain) {
+    domainInput.value = initialDomain;
+    const initialSelector = params.get('selector');
+    if (initialSelector) { selectorInput.value = initialSelector; runSelector(); }
+    else runDiscovery();
+  }
+</script>
