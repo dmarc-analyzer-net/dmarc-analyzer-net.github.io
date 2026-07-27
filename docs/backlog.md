@@ -259,9 +259,18 @@ primary source; where a line number is given it was accurate in July 2026.
       expands every `include:`/`redirect=` and counts against the 10-DNS-lookup
       limit — exceeding it is a `permerror` that fails silently, and it is the
       most common way a working SPF setup dies. Shared DoH code lives in
-      `src/lib/doh.ts`. Still to add: DKIM lookup (`dkim checker` 6,600/mo —
-      needs a selector, so it also needs a list of common ones to try, and
-      decoding the key to report its bit length is the differentiating check).
+      `src/lib/doh.ts`. And the **DKIM checker** (`dkim checker` 6,600/mo), which
+      decodes the key via `crypto.subtle` to report its real bit length, catches
+      revoked keys (empty `p=`) and testing mode (`t=y`), and offers a list of
+      common selectors verified against live DNS. All five Cluster F tools are
+      now live; keyword coverage for the cluster is complete.
+
+      Two things worth remembering if these are extended. A DKIM record is only
+      recognised by `v=DKIM1` **or** a `p=` tag — several large domains publish a
+      wildcard TXT, so "a TXT exists at this name" would report a key at every
+      selector (zendesk.com is the live example). And key length must come from
+      decoding, not from the base64's length: `MIGf…` is 1024-bit and `MIIBIj…`
+      is 2048-bit, which is a distinction no string check should be making.
 - [ ] (todo) Add MDX (`npx astro add mdx`) if guides need interactive/embedded components (callouts, tabbed code, a record checker).
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
 - [ ] (todo) Add a blog/changelog collection to announce releases and roadmap progress.

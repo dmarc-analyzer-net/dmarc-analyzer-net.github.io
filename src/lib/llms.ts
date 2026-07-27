@@ -142,6 +142,13 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'DKIM record checker',
+          url: `${SITE}/tools/dkim-checker/`,
+          description:
+            'Browser-based tool that decodes a DKIM selector’s public key to report its real bit length, and flags revoked keys and testing mode.',
+          body: '',
+        },
+        {
           title: 'Free DMARC report analyzer',
           url: `${SITE}/tools/dmarc-report-analyzer/`,
           description: 'Browser-based tool for reading a single DMARC aggregate report.',
