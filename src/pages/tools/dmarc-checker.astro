@@ -139,10 +139,7 @@ const schema = {
   };
 
   /** The subset of the DNS-over-HTTPS JSON response this tool reads. */
-  type DohResponse = {
-    Status?: number;
-    Answer?: { name: string; type: number; data: string }[];
-  };
+  import { errorText, lookupTxt, LOOKS_LIKE_DOMAIN, normalizeDomain } from '../../lib/doh';
 
   type Tag = { name: string; value: string };
 
@@ -156,11 +153,6 @@ const schema = {
   const errorMsg = $('errorMsg');
   const results = $('results');
 
-  /** A thrown DOMException carries a message without being an Error subclass,
-   *  so narrowing with `instanceof Error` would lose those messages. */
-  const errorText = (e: unknown, fallback: string) =>
-    (e as { message?: string } | null | undefined)?.message || fallback;
-
   const showError = (msg: string) => {
     errorMsg.textContent = msg;
     errorMsg.style.display = 'block';
@@ -168,65 +160,7 @@ const schema = {
   };
   const clearError = () => { errorMsg.style.display = 'none'; };
 
-  // ---------------------------------------------------------------- DNS
-
-  const RESOLVERS = [
-    'https://cloudflare-dns.com/dns-query?type=TXT&name=',
-    'https://dns.google/resolve?type=TXT&name=',
-  ];
-
-  /**
-   * A TXT record arrives as one or more quoted strings. Anything over 255 bytes
-   * is chunked by the protocol and must be concatenated with no separator —
-   * joining with a space would corrupt a long `rua` list.
-   */
-  function txtValue(data: string): string {
-    const parts = data.match(/"(?:\\.|[^"\\])*"/g);
-    if (!parts) return data.trim();
-    return parts.map((p) => p.slice(1, -1).replace(/\\(.)/g, '$1')).join('');
-  }
-
-  /** TXT records at `name`, or [] when the name does not exist. */
-  async function lookupTxt(name: string): Promise<string[]> {
-    let lastError: unknown;
-    for (const base of RESOLVERS) {
-      try {
-        const res = await fetch(base + encodeURIComponent(name), {
-          headers: { accept: 'application/dns-json' },
-        });
-        if (!res.ok) throw new Error(`Resolver responded ${res.status}.`);
-        const json = (await res.json()) as DohResponse;
-        // 3 is NXDOMAIN: a definitive "no such name", not a failure to try the
-        // next resolver over. 0 is NOERROR, which may still carry no answers
-        // (the name exists with other record types).
-        if (json.Status === 3) return [];
-        if (json.Status !== 0) throw new Error(`DNS lookup failed (rcode ${json.Status}).`);
-        return (json.Answer ?? []).filter((a) => a.type === 16).map((a) => txtValue(a.data));
-      } catch (e) {
-        lastError = e;
-      }
-    }
-    throw new Error(errorText(lastError, 'Could not reach a DNS resolver. Check your connection and try again.'));
-  }
-
   // ------------------------------------------------------------- parsing
-
-  /** Accept whatever someone pastes — a URL, an email address, `_dmarc.x.com`. */
-  function normalizeDomain(input: string): string {
-    let d = input.trim().toLowerCase();
-    d = d.replace(/^[a-z][a-z0-9+.-]*:\/\//, '');   // scheme
-    d = d.replace(/^[^/@]*@/, '');                   // an email address
-    d = d.split(/[/?#]/)[0];                         // path, query, fragment
-    d = d.replace(/:\d+$/, '');                      // port
-    d = d.replace(/\.$/, '');                        // root label
-    d = d.replace(/^_dmarc\./, '');                  // the lookup name itself
-    return d;
-  }
-
-  // Deliberately permissive: rejecting anything that is not ASCII would turn
-  // away internationalized domains that the resolver handles perfectly well.
-  // Structure is all we insist on; the resolver is the real authority.
-  const LOOKS_LIKE_DOMAIN = /^(?=.{1,253}$)[^\s.@/:]+(\.[^\s.@/:]+)+$/;
 
   function parseTags(record: string): Tag[] {
     return record.split(';').map((s) => s.trim()).filter(Boolean).map((s) => {
@@ -639,7 +573,8 @@ const schema = {
   }
 
   async function run(raw: string) {
-    const domain = normalizeDomain(raw);
+    // Strip a pasted `_dmarc.` so the lookup name resolves back to the domain.
+    const domain = normalizeDomain(raw, /^_dmarc\./);
     clearError();
 
     if (!domain) { showError('Enter a domain to check.'); return; }
