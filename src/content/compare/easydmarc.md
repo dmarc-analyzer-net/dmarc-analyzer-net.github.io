@@ -7,21 +7,26 @@ publishDate: 2026-07-23
 ---
 
 EasyDMARC is a polished, approachable hosted platform with a broad set of tools.
-Like every commercial option it's **cloud-only**, with plans that **cap domains**
-and scale by **message volume**, and your reports are processed in its cloud.
-DMARC Analyzer trades hosted convenience for ownership: open source, self-hosted,
-unlimited domains, and data on your own infrastructure.
+It is vendor-hosted, with a free plan for a single domain and paid tiers that
+**cap domains** and scale by **message volume**. DMARC Analyzer trades hosted
+convenience for ownership: open source, self-hosted, unlimited domains, and data
+on your own infrastructure.
 
 ## Side by side
 
+*EasyDMARC's plans as published in July 2026; check their pricing page for
+current terms.*
+
 | | DMARC Analyzer | EasyDMARC |
 |---|---|---|
-| Hosting | Self-hosted | Cloud SaaS |
+| Hosting | Self-hosted | Vendor cloud |
 | Open source | Yes (Apache-2.0) | No |
-| Pricing model | Free; unlimited domains | Tiered; domain caps + message volume |
+| Free tier | Everything, unlimited domains | Yes — 1 domain, 14 days of history |
+| Paid plans | None | From ~$36/month, capped by domains + volume |
+| History retained | As long as you keep it | 3 months to 3 years, by plan |
 | Your report data | Stays on your infrastructure | Processed in the vendor's cloud |
-| Agencies / many clients | Yes, self-hosted multi-tenant | Yes (paid) |
-| Getting started | Docker on your server | SaaS signup |
+| Agencies / many clients | Yes, self-hosted multi-tenant | Yes, on paid plans |
+| Wider tool suite (BIMI, MTA-STS, TLS-RPT) | — | Yes |
 
 ## Where EasyDMARC fits
 
