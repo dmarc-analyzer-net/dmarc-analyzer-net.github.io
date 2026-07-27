@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 // Persistent docs navigation, grouped by `section` and ordered by `order`.
 // Section order is fixed here rather than alphabetical so the docs read as a
 // sequence (install -> configure -> operate).
-const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'] as const;
+const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 interface Props {
   /** Slug of the page being viewed, so it can be marked current. */

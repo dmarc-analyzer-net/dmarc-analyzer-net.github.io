@@ -23,7 +23,7 @@ const { Content, headings } = await render(entry);
 const path = `/docs/${entry.id}/`;
 
 // Prev/next within the reading sequence (section, then order).
-const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'];
+const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'];
 const sequence = [...ordered].sort((a, b) => {
   const s = SECTION_ORDER.indexOf(a.data.section) - SECTION_ORDER.indexOf(b.data.section);
   return s !== 0 ? s : a.data.order - b.data.order;
