@@ -1,0 +1,712 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+
+const title = 'DMARC record checker';
+const description =
+  'Free DMARC checker: look up any domain\u2019s DMARC record, validate every tag, and find the problems that stop reports arriving \u2014 including third-party reporting addresses that were never authorized.';
+const path = '/tools/dmarc-checker/';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'DMARC Record Checker',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any (web browser)',
+  description,
+  url: new URL(path, Astro.site).href,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+<BaseLayout current="tools" title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Tools', href: '/tools/' },
+          { label: 'DMARC record checker', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">DMARC record checker</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Look up a domain's DMARC record, validate every tag against RFC 7489, and find the problems that quietly stop reports arriving. <strong>The lookup runs from your browser</strong> against public DNS — no account, nothing stored.</p>
+      </div>
+    </section>
+
+    <section style="max-width:900px; margin:0 auto; padding:28px 32px;">
+      <!-- Tool -->
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+        <label for="domainInput" style="display:block; font-size:var(--text-sm); font-weight:600; color:var(--gray-800); margin-bottom:8px;">Domain</label>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          <input id="domainInput" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false"
+            placeholder="yourdomain.com"
+            style="flex:1 1 260px; min-width:0; height:40px; font-family:'JetBrains Mono',monospace; font-size:14px; padding:0 12px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-page); color:var(--gray-800);" />
+          <button id="checkBtn" class="btn-primary" style="height:40px; padding:0 20px; border:0; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50); font-size:var(--text-base); font-weight:600; cursor:pointer;">Check</button>
+          <button id="sampleBtn" class="btn-ghost" style="height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body); font-size:var(--text-base); font-weight:500; cursor:pointer;">Try an example</button>
+        </div>
+        <p style="margin:12px 2px 0; font-size:12.5px; color:var(--text-faint);">Queries the <code class="mono">_dmarc</code> TXT record over DNS-over-HTTPS (Cloudflare, falling back to Google). Only the domain name is sent, to the resolver — never to us.</p>
+      </div>
+
+      <p id="errorMsg" style="display:none; margin:14px 2px 0; font-size:var(--text-base); color:var(--status-danger-fg);"></p>
+
+      <!-- Results -->
+      <div id="results" style="display:none; margin-top:28px;"></div>
+    </section>
+
+    <!-- SEO / explanatory content -->
+    <section style="max-width:760px; margin:0 auto; padding:24px 32px 8px;">
+      <div class="prose">
+        <h2>What this DMARC checker looks at</h2>
+        <p>
+          A DMARC record is a single TXT record at
+          <code>_dmarc.yourdomain.com</code>. This checker fetches it, then works
+          through it tag by tag:
+        </p>
+        <ul>
+          <li><strong>Is there exactly one record?</strong> Two records that both start with <code>v=DMARC1</code> are treated by receivers as <em>no record at all</em> — a surprisingly common outcome of two teams each adding one.</li>
+          <li><strong>Is it published at the right name?</strong> If nothing is found at <code>_dmarc</code>, we check whether the record was accidentally published at the domain root instead.</li>
+          <li><strong>Is every tag valid?</strong> <code>p</code>, <code>sp</code>, <code>rua</code>, <code>ruf</code>, <code>adkim</code>, <code>aspf</code>, <code>pct</code>, <code>fo</code>, <code>ri</code> and <code>rf</code> are each checked for a legal value, with duplicates and unrecognised tags flagged.</li>
+          <li><strong>Will reports actually arrive?</strong> A record can be flawless and still send you nothing — see below.</li>
+        </ul>
+
+        <h2>The silent failure: external destination authorization</h2>
+        <p>
+          If your <code>rua</code> address is at a different domain from the one
+          publishing the record — a reporting service, or your agency's mailbox —
+          that domain has to opt in. It does so by publishing its own TXT record
+          at <code>yourdomain.com._report._dmarc.theirdomain.com</code>. Without
+          it, conforming receivers simply will not send your reports there
+          (<a href="https://www.rfc-editor.org/rfc/rfc7489#section-7.1" rel="nofollow">RFC 7489 §7.1</a>).
+        </p>
+        <p>
+          Nothing bounces and nothing warns you. The record looks perfect and the
+          reports never come. This checker performs that second lookup for every
+          external <code>rua</code> and <code>ruf</code> address it finds.
+        </p>
+
+        <h2>What a healthy record looks like</h2>
+        <p>Publishing your first one? Start in monitoring mode:</p>
+        <pre><code>v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com</code></pre>
+        <p>And once the reports show your legitimate senders all aligning:</p>
+        <pre><code>v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com; adkim=s; aspf=s</code></pre>
+        <p>
+          The route between those two records is the whole job, and it is driven
+          entirely by what the aggregate reports tell you — see
+          <a href="/guides/from-monitoring-to-enforcement/">from monitoring to enforcement</a>.
+        </p>
+
+        <h2>Checking the record is the easy part</h2>
+        <p>
+          A checker tells you the record is well-formed. It cannot tell you
+          whether the 4% of mail failing DMARC last Tuesday was a spoofer or your
+          own invoicing system — that answer only lives in the daily
+          <a href="/glossary/dmarc-aggregate-report/">aggregate reports</a>, one
+          from every provider, as XML. Reading those by hand across a handful of
+          domains stops being feasible almost immediately.
+        </p>
+        <p>
+          That is what <a href="/">DMARC Analyzer</a> does: it collects the
+          reports from a mailbox, parses them, and shows you the sending sources
+          per domain over time. It is
+          <a href="/free-dmarc-analyzer/">free and open source</a>, and it is
+          self-hosted, so the reports stay on your own infrastructure. If you
+          just want to read one report right now, the
+          <a href="/tools/dmarc-report-analyzer/">report analyzer</a> does that in
+          your browser.
+        </p>
+      </div>
+
+      <RelatedLinks links={[
+        { label: 'No DMARC record found', href: '/guides/no-dmarc-record-found/', note: 'What the message means and how to fix it.' },
+        { label: 'DMARC policy not enabled', href: '/guides/dmarc-policy-not-enabled/', note: 'Why p=none reads as "not enabled".' },
+        { label: 'Publish your first DMARC record', href: '/guides/publish-your-first-dmarc-record/', note: 'The safe starting record, step by step.' },
+        { label: 'Quarantine vs reject', href: '/glossary/dmarc-quarantine-vs-reject/', note: 'Choosing the policy to move to.' },
+      ]} />
+
+      <Cta />
+    </section>
+</BaseLayout>
+
+<script>
+  /** One finding in the results list. */
+  type Finding = {
+    level: 'good' | 'warn' | 'bad';
+    title: string;
+    detail: string;
+    link?: { href: string; label: string };
+  };
+
+  /** The subset of the DNS-over-HTTPS JSON response this tool reads. */
+  type DohResponse = {
+    Status?: number;
+    Answer?: { name: string; type: number; data: string }[];
+  };
+
+  type Tag = { name: string; value: string };
+
+  // Every id below is a static element in this page's own markup, so a null
+  // would be a template bug rather than a runtime condition.
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+    document.getElementById(id) as T;
+
+  const domainInput = $<HTMLInputElement>('domainInput');
+  const checkBtn = $<HTMLButtonElement>('checkBtn');
+  const errorMsg = $('errorMsg');
+  const results = $('results');
+
+  /** A thrown DOMException carries a message without being an Error subclass,
+   *  so narrowing with `instanceof Error` would lose those messages. */
+  const errorText = (e: unknown, fallback: string) =>
+    (e as { message?: string } | null | undefined)?.message || fallback;
+
+  const showError = (msg: string) => {
+    errorMsg.textContent = msg;
+    errorMsg.style.display = 'block';
+    results.style.display = 'none';
+  };
+  const clearError = () => { errorMsg.style.display = 'none'; };
+
+  // ---------------------------------------------------------------- DNS
+
+  const RESOLVERS = [
+    'https://cloudflare-dns.com/dns-query?type=TXT&name=',
+    'https://dns.google/resolve?type=TXT&name=',
+  ];
+
+  /**
+   * A TXT record arrives as one or more quoted strings. Anything over 255 bytes
+   * is chunked by the protocol and must be concatenated with no separator —
+   * joining with a space would corrupt a long `rua` list.
+   */
+  function txtValue(data: string): string {
+    const parts = data.match(/"(?:\\.|[^"\\])*"/g);
+    if (!parts) return data.trim();
+    return parts.map((p) => p.slice(1, -1).replace(/\\(.)/g, '$1')).join('');
+  }
+
+  /** TXT records at `name`, or [] when the name does not exist. */
+  async function lookupTxt(name: string): Promise<string[]> {
+    let lastError: unknown;
+    for (const base of RESOLVERS) {
+      try {
+        const res = await fetch(base + encodeURIComponent(name), {
+          headers: { accept: 'application/dns-json' },
+        });
+        if (!res.ok) throw new Error(`Resolver responded ${res.status}.`);
+        const json = (await res.json()) as DohResponse;
+        // 3 is NXDOMAIN: a definitive "no such name", not a failure to try the
+        // next resolver over. 0 is NOERROR, which may still carry no answers
+        // (the name exists with other record types).
+        if (json.Status === 3) return [];
+        if (json.Status !== 0) throw new Error(`DNS lookup failed (rcode ${json.Status}).`);
+        return (json.Answer ?? []).filter((a) => a.type === 16).map((a) => txtValue(a.data));
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw new Error(errorText(lastError, 'Could not reach a DNS resolver. Check your connection and try again.'));
+  }
+
+  // ------------------------------------------------------------- parsing
+
+  /** Accept whatever someone pastes — a URL, an email address, `_dmarc.x.com`. */
+  function normalizeDomain(input: string): string {
+    let d = input.trim().toLowerCase();
+    d = d.replace(/^[a-z][a-z0-9+.-]*:\/\//, '');   // scheme
+    d = d.replace(/^[^/@]*@/, '');                   // an email address
+    d = d.split(/[/?#]/)[0];                         // path, query, fragment
+    d = d.replace(/:\d+$/, '');                      // port
+    d = d.replace(/\.$/, '');                        // root label
+    d = d.replace(/^_dmarc\./, '');                  // the lookup name itself
+    return d;
+  }
+
+  // Deliberately permissive: rejecting anything that is not ASCII would turn
+  // away internationalized domains that the resolver handles perfectly well.
+  // Structure is all we insist on; the resolver is the real authority.
+  const LOOKS_LIKE_DOMAIN = /^(?=.{1,253}$)[^\s.@/:]+(\.[^\s.@/:]+)+$/;
+
+  function parseTags(record: string): Tag[] {
+    return record.split(';').map((s) => s.trim()).filter(Boolean).map((s) => {
+      const eq = s.indexOf('=');
+      return eq === -1
+        ? { name: s.toLowerCase(), value: '' }
+        : { name: s.slice(0, eq).trim().toLowerCase(), value: s.slice(eq + 1).trim() };
+    });
+  }
+
+  const POLICIES = ['none', 'quarantine', 'reject'];
+  const KNOWN_TAGS = ['v', 'p', 'sp', 'rua', 'ruf', 'adkim', 'aspf', 'pct', 'fo', 'ri', 'rf'];
+
+  /** Report addresses, as published: `mailto:a@b.com!10m` may repeat, comma-separated. */
+  function reportUris(value: string): string[] {
+    return value.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  /** The domain part of a `mailto:` URI, or '' for anything else. */
+  function mailtoDomain(uri: string): string {
+    const m = /^mailto:([^!]+)/i.exec(uri.trim());
+    if (!m) return '';
+    const at = m[1].lastIndexOf('@');
+    return at === -1 ? '' : m[1].slice(at + 1).trim().toLowerCase().replace(/\.$/, '');
+  }
+
+  /** Same domain, or one inside the other. Deliberately not a public-suffix
+   *  comparison — this only decides whether to run an extra lookup, and the
+   *  extra lookup is harmless when it turns out to be unnecessary. */
+  function related(a: string, b: string): boolean {
+    return a === b || a.endsWith('.' + b) || b.endsWith('.' + a);
+  }
+
+  // -------------------------------------------------------------- checks
+
+  function checkTags(record: string): Finding[] {
+    const out: Finding[] = [];
+    const tags = parseTags(record);
+    const seen = new Map<string, number>();
+    tags.forEach((t) => seen.set(t.name, (seen.get(t.name) ?? 0) + 1));
+
+    const get = (name: string) => tags.find((t) => t.name === name);
+
+    // v — the record is only a DMARC record if this is right.
+    if (!tags.length || tags[0].name !== 'v' || tags[0].value !== 'DMARC1') {
+      out.push({
+        level: 'bad',
+        title: 'The record does not start with v=DMARC1',
+        detail: 'Receivers discard anything whose first tag is not exactly v=DMARC1. The value is case-sensitive.',
+      });
+    }
+
+    // p — required, and the whole point of the record.
+    const p = get('p');
+    if (!p) {
+      out.push({
+        level: 'bad',
+        title: 'No p tag',
+        detail: 'The policy tag is required. Without it the record is not a valid policy record and receivers will ignore it.',
+        link: { href: '/guides/publish-your-first-dmarc-record/', label: 'Publish a valid record' },
+      });
+    } else if (!POLICIES.includes(p.value.toLowerCase())) {
+      out.push({
+        level: 'bad',
+        title: `p=${p.value} is not a valid policy`,
+        detail: 'The only legal values are none, quarantine and reject.',
+      });
+    } else {
+      const value = p.value.toLowerCase();
+      if (value === 'reject') {
+        out.push({
+          level: 'good',
+          title: 'p=reject — full enforcement',
+          detail: 'Mail that fails DMARC is rejected outright. This is the end state.',
+        });
+      } else if (value === 'quarantine') {
+        out.push({
+          level: 'warn',
+          title: 'p=quarantine — partial enforcement',
+          detail: 'Failing mail goes to spam rather than being refused. A reasonable staging post, but not the destination.',
+          link: { href: '/glossary/dmarc-quarantine-vs-reject/', label: 'Quarantine vs reject' },
+        });
+      } else {
+        out.push({
+          level: 'warn',
+          title: 'p=none — monitoring only',
+          detail: 'This record collects reports but does not protect the domain. Nothing is blocked, and anyone can still send mail as you.',
+          link: { href: '/guides/from-monitoring-to-enforcement/', label: 'How to move to enforcement' },
+        });
+      }
+      // The ABNF in RFC 7489 puts p immediately after v. Most receivers are
+      // lenient about it; some strict parsers are not.
+      const index = tags.indexOf(p);
+      if (index > 1) {
+        out.push({
+          level: 'warn',
+          title: 'p is not the second tag',
+          detail: 'RFC 7489 places p immediately after v. Most receivers accept any order, but strict parsers can reject the record.',
+        });
+      }
+    }
+
+    // rua — no reports means no visibility, which is the reason to do any of this.
+    const rua = get('rua');
+    if (!rua || !rua.value) {
+      out.push({
+        level: 'warn',
+        title: 'No rua address — you receive no reports',
+        detail: 'Without a rua tag no provider sends you aggregate reports, so you cannot see who is sending as your domain or whether enforcement would break anything.',
+        link: { href: '/glossary/dmarc-aggregate-report/', label: 'What aggregate reports contain' },
+      });
+    } else {
+      const uris = reportUris(rua.value);
+      const bad = uris.filter((u) => !/^(mailto|https?):/i.test(u));
+      out.push({
+        level: bad.length ? 'warn' : 'good',
+        title: bad.length ? 'rua contains an address that is not a URI' : `Aggregate reports go to ${uris.length} address${uris.length === 1 ? '' : 'es'}`,
+        detail: bad.length
+          ? `Each rua value must be a URI, almost always mailto:. Not a URI: ${bad.join(', ')}`
+          : uris.join(', '),
+      });
+    }
+
+    // ruf — optional, and mostly theoretical in practice.
+    const ruf = get('ruf');
+    if (ruf && ruf.value) {
+      out.push({
+        level: 'good',
+        title: 'ruf is set (failure reports)',
+        detail: `Very few providers send failure reports, and those that do may redact them, so expect little traffic here. They can also contain message content — treat the mailbox as sensitive. Addresses: ${reportUris(ruf.value).join(', ')}`,
+      });
+    }
+
+    // pct — a partial rollout that is easy to forget about.
+    const pct = get('pct');
+    if (pct) {
+      const n = Number(pct.value);
+      if (!/^\d+$/.test(pct.value) || n < 0 || n > 100) {
+        out.push({ level: 'bad', title: `pct=${pct.value} is not valid`, detail: 'pct must be a whole number between 0 and 100.' });
+      } else if (n !== 100) {
+        out.push({
+          level: 'warn',
+          title: `pct=${n} — the policy applies to only ${n}% of failing mail`,
+          detail: 'The other ' + (100 - n) + '% is treated as the next policy down. Useful while rolling out; easy to leave behind and forget.',
+        });
+      }
+    }
+
+    // sp — an enforcing parent with exempt subdomains is a real gap.
+    const sp = get('sp');
+    if (sp) {
+      if (!POLICIES.includes(sp.value.toLowerCase())) {
+        out.push({ level: 'bad', title: `sp=${sp.value} is not a valid policy`, detail: 'The only legal values are none, quarantine and reject.' });
+      } else if (sp.value.toLowerCase() === 'none' && p && p.value.toLowerCase() !== 'none') {
+        out.push({
+          level: 'warn',
+          title: 'sp=none exempts every subdomain',
+          detail: 'The organizational domain is enforcing but subdomains are not, so mail can still be spoofed from any name under it. Remove sp to make subdomains inherit p.',
+        });
+      }
+    }
+
+    // adkim / aspf — relaxed by default; strict is a deliberate choice.
+    for (const name of ['adkim', 'aspf']) {
+      const tag = get(name);
+      if (!tag) continue;
+      const value = tag.value.toLowerCase();
+      if (value !== 'r' && value !== 's') {
+        out.push({ level: 'bad', title: `${name}=${tag.value} is not valid`, detail: 'Alignment mode must be r (relaxed) or s (strict).' });
+      } else if (value === 's') {
+        out.push({
+          level: 'good',
+          title: `${name}=s — strict alignment`,
+          detail: name === 'adkim'
+            ? 'The DKIM signing domain must match the From domain exactly; a subdomain will not do.'
+            : 'The SPF-authenticated domain must match the From domain exactly; a subdomain will not do.',
+          link: { href: '/glossary/dmarc-alignment/', label: 'How alignment works' },
+        });
+      }
+    }
+
+    // fo — pointless without somewhere to send the failure reports.
+    const fo = get('fo');
+    if (fo) {
+      const parts = fo.value.split(':').map((s) => s.trim().toLowerCase());
+      const invalid = parts.filter((s) => !['0', '1', 'd', 's'].includes(s));
+      if (invalid.length) {
+        out.push({ level: 'bad', title: `fo=${fo.value} is not valid`, detail: 'fo takes 0, 1, d or s, colon-separated — for example fo=1 or fo=d:s.' });
+      } else if (!ruf || !ruf.value) {
+        out.push({ level: 'warn', title: 'fo is set but there is no ruf address', detail: 'fo only controls when failure reports are generated. With no ruf tag there is nowhere to send them, so the tag does nothing.' });
+      }
+    }
+
+    // ri — legal to set, largely ignored in practice.
+    const ri = get('ri');
+    if (ri && !/^\d+$/.test(ri.value)) {
+      out.push({ level: 'bad', title: `ri=${ri.value} is not valid`, detail: 'The reporting interval is a number of seconds.' });
+    } else if (ri && ri.value !== '86400') {
+      out.push({ level: 'warn', title: `ri=${ri.value} may be ignored`, detail: 'Most providers send aggregate reports once a day regardless of what ri asks for.' });
+    }
+
+    // rf — one legal value.
+    const rf = get('rf');
+    if (rf && rf.value.toLowerCase() !== 'afrf') {
+      out.push({ level: 'bad', title: `rf=${rf.value} is not valid`, detail: 'The only defined report format is afrf.' });
+    }
+
+    // Duplicates and typos — both usually mean an edit went wrong.
+    for (const [name, count] of seen) {
+      if (count > 1) {
+        out.push({ level: 'bad', title: `The ${name} tag appears ${count} times`, detail: 'A tag may only appear once. Which one wins is up to the receiver, so behaviour varies by provider.' });
+      }
+    }
+    const unknown = [...seen.keys()].filter((n) => !KNOWN_TAGS.includes(n));
+    if (unknown.length) {
+      out.push({
+        level: 'warn',
+        title: `Unrecognised tag${unknown.length === 1 ? '' : 's'}: ${unknown.join(', ')}`,
+        detail: 'Receivers ignore tags they do not know, so this is harmless — but it is usually a typo for a real tag, in which case the setting you meant is not applied.',
+      });
+    }
+
+    return out;
+  }
+
+  /**
+   * A report address outside the record's own domain only works if that domain
+   * opts in, by publishing a DMARC record at
+   * `<sender>._report._dmarc.<destination>` — RFC 7489 §7.1. When it is missing,
+   * nothing bounces: the reports simply never arrive.
+   */
+  async function checkExternalDestinations(domain: string, record: string): Promise<Finding[]> {
+    const tags = parseTags(record);
+    const destinations = new Set<string>();
+    for (const name of ['rua', 'ruf']) {
+      const tag = tags.find((t) => t.name === name);
+      if (!tag) continue;
+      for (const uri of reportUris(tag.value)) {
+        const d = mailtoDomain(uri);
+        if (d && !related(d, domain)) destinations.add(d);
+      }
+    }
+
+    const checks = [...destinations].map(async (dest): Promise<Finding> => {
+      const name = `${domain}._report._dmarc.${dest}`;
+      try {
+        const records = await lookupTxt(name);
+        const authorized = records.some((r) => /^\s*v\s*=\s*DMARC1\b/i.test(r));
+        return authorized
+          ? {
+              level: 'good',
+              title: `${dest} has authorized reports for ${domain}`,
+              detail: `Found the authorization record at ${name}.`,
+            }
+          : {
+              level: 'bad',
+              title: `${dest} has not authorized reports for ${domain}`,
+              detail: `No DMARC record at ${name}, so conforming receivers will not send your reports to ${dest}. Ask them to publish a TXT record there containing v=DMARC1; — or use an address at your own domain.`,
+            };
+      } catch {
+        return {
+          level: 'warn',
+          title: `Could not verify the reporting authorization for ${dest}`,
+          detail: `The lookup for ${name} failed. Try again — an unverified result here is not the same as a missing record.`,
+        };
+      }
+    });
+
+    return await Promise.all(checks);
+  }
+
+  // ------------------------------------------------------------ rendering
+
+  const PALETTE = {
+    good: { bg: 'var(--teal-100)', fg: 'var(--brand-hover)', mark: '\u2713' },
+    warn: { bg: '#fef3c7', fg: '#92400e', mark: '!' },
+    bad: { bg: 'var(--status-danger-bg)', fg: 'var(--status-danger-fg)', mark: '\u00d7' },
+  };
+
+  function findingRow(f: Finding) {
+    const row = document.createElement('li');
+    row.style.cssText = 'display:flex; gap:12px; padding:14px 16px; border-top:1px solid var(--surface-sunken);';
+
+    const badge = document.createElement('span');
+    badge.textContent = PALETTE[f.level].mark;
+    badge.setAttribute('aria-hidden', 'true');
+    badge.style.cssText = `flex:0 0 auto; width:22px; height:22px; margin-top:1px; border-radius:var(--radius-pill); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; background:${PALETTE[f.level].bg}; color:${PALETTE[f.level].fg};`;
+
+    const body = document.createElement('div');
+    body.style.cssText = 'min-width:0;';
+
+    const heading = document.createElement('div');
+    heading.textContent = f.title;
+    heading.style.cssText = 'font-size:var(--text-base); font-weight:600; color:var(--text-body); overflow-wrap:anywhere;';
+
+    const detail = document.createElement('div');
+    detail.textContent = f.detail;
+    detail.style.cssText = 'margin-top:3px; font-size:var(--text-sm); line-height:1.55; color:var(--gray-700); overflow-wrap:anywhere;';
+
+    body.append(heading, detail);
+
+    if (f.link) {
+      const a = document.createElement('a');
+      a.href = f.link.href;
+      a.textContent = f.link.label + ' \u2192';
+      a.style.cssText = 'display:inline-block; margin-top:6px; font-size:var(--text-sm); font-weight:600;';
+      body.appendChild(a);
+    }
+
+    row.append(badge, body);
+    return row;
+  }
+
+  function heading(text: string) {
+    const h = document.createElement('h2');
+    h.textContent = text;
+    h.style.cssText = "font-family:'Space Grotesk',sans-serif; font-size:var(--text-lg); font-weight:600; letter-spacing:-0.01em; margin:0 0 12px;";
+    return h;
+  }
+
+  function recordBlock(record: string) {
+    const pre = document.createElement('pre');
+    pre.textContent = record;
+    pre.style.cssText = "margin:0 0 20px; padding:14px 16px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-page); font-family:'JetBrains Mono',monospace; font-size:13px; line-height:1.6; color:var(--gray-800); white-space:pre-wrap; overflow-wrap:anywhere;";
+    return pre;
+  }
+
+  function verdictBanner(findings: Finding[]) {
+    const bad = findings.filter((f) => f.level === 'bad').length;
+    const warn = findings.filter((f) => f.level === 'warn').length;
+    const level: Finding['level'] = bad ? 'bad' : warn ? 'warn' : 'good';
+    const text = bad
+      ? `${bad} problem${bad === 1 ? '' : 's'} to fix${warn ? `, ${warn} to look at` : ''}`
+      : warn
+        ? `Valid, with ${warn} thing${warn === 1 ? '' : 's'} to look at`
+        : 'Valid, with nothing to flag';
+
+    const box = document.createElement('div');
+    box.style.cssText = `display:flex; align-items:center; gap:10px; padding:12px 16px; margin-bottom:16px; border-radius:var(--radius-lg); background:${PALETTE[level].bg}; color:${PALETTE[level].fg}; font-size:var(--text-base); font-weight:600;`;
+    box.textContent = text;
+    return box;
+  }
+
+  function renderFindings(record: string, findings: Finding[], domain: string) {
+    results.textContent = '';
+    results.appendChild(heading(`DMARC record for ${domain}`));
+    results.appendChild(recordBlock(record));
+    results.appendChild(verdictBanner(findings));
+
+    const order = { bad: 0, warn: 1, good: 2 };
+    const list = document.createElement('ul');
+    list.style.cssText = 'list-style:none; margin:0; padding:0; border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);';
+    [...findings]
+      .sort((a, b) => order[a.level] - order[b.level])
+      .forEach((f) => list.appendChild(findingRow(f)));
+    results.appendChild(list);
+    results.style.display = 'block';
+  }
+
+  function renderSingle(title: string, findings: Finding[]) {
+    results.textContent = '';
+    results.appendChild(heading(title));
+    const list = document.createElement('ul');
+    list.style.cssText = 'list-style:none; margin:0; padding:0; border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);';
+    findings.forEach((f) => list.appendChild(findingRow(f)));
+    results.appendChild(list);
+    results.style.display = 'block';
+  }
+
+  // ----------------------------------------------------------- the check
+
+  /** Nothing at `_dmarc`. Explain why, and catch the two near-misses that
+   *  account for most of them: the record at the wrong name, and a subdomain
+   *  whose parent carries the policy. */
+  async function reportMissing(domain: string) {
+    const findings: Finding[] = [{
+      level: 'bad',
+      title: `No DMARC record at _dmarc.${domain}`,
+      detail: 'Nothing at that name starts with v=DMARC1, so receivers have no policy to apply and you receive no reports.',
+      link: { href: '/guides/no-dmarc-record-found/', label: 'How to fix this' },
+    }];
+
+    // Published at the root instead of _dmarc — looks right in the DNS panel
+    // and does nothing at all.
+    try {
+      const atRoot = (await lookupTxt(domain)).filter((r) => /^\s*v\s*=\s*DMARC1\b/i.test(r));
+      if (atRoot.length) {
+        findings.push({
+          level: 'bad',
+          title: 'The record is published at the wrong name',
+          detail: `A DMARC record exists on ${domain} itself, but it has to be at _dmarc.${domain}. Move it there: the host or name field should be _dmarc, not @. Found: ${atRoot[0]}`,
+        });
+      }
+    } catch {
+      // A failed extra lookup should not replace the finding above.
+    }
+
+    const labels = domain.split('.');
+    if (labels.length > 2) {
+      const parent = labels.slice(1).join('.');
+      findings.push({
+        level: 'warn',
+        title: `Check the parent domain too — ${parent}`,
+        detail: `Subdomains without their own record inherit the organizational domain's policy (its sp tag, or p when sp is absent). ${domain} may already be covered by ${parent}.`,
+        link: { href: `?domain=${encodeURIComponent(parent)}`, label: `Check ${parent}` },
+      });
+    }
+
+    renderSingle(`No DMARC record for ${domain}`, findings);
+  }
+
+  async function run(raw: string) {
+    const domain = normalizeDomain(raw);
+    clearError();
+
+    if (!domain) { showError('Enter a domain to check.'); return; }
+    if (!LOOKS_LIKE_DOMAIN.test(domain)) {
+      showError(`"${domain}" does not look like a domain name. Enter something like yourdomain.com.`);
+      return;
+    }
+
+    domainInput.value = domain;
+    checkBtn.disabled = true;
+    checkBtn.textContent = 'Checking\u2026';
+
+    try {
+      const records = (await lookupTxt(`_dmarc.${domain}`))
+        .filter((r) => /^\s*v\s*=\s*DMARC1\b/i.test(r));
+
+      if (records.length === 0) {
+        await reportMissing(domain);
+      } else if (records.length > 1) {
+        renderSingle(`${records.length} DMARC records for ${domain}`, [{
+          level: 'bad',
+          title: 'More than one DMARC record is published',
+          detail: `A domain may publish exactly one. When receivers find several they treat the domain as having none at all, so the policy is not applied and no reports are sent. Delete all but one. Found: ${records.join('  |  ')}`,
+          link: { href: '/guides/no-dmarc-record-found/', label: 'Why this reads as "no record"' },
+        }]);
+      } else {
+        const record = records[0];
+        const findings = checkTags(record);
+        renderFindings(record, findings, domain);
+        // The external-destination lookups are a second DNS round trip. Show
+        // the tag results first rather than making everyone wait for them.
+        const external = await checkExternalDestinations(domain, record);
+        if (external.length) renderFindings(record, findings.concat(external), domain);
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.set('domain', domain);
+      window.history.replaceState(null, '', url);
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (e) {
+      showError(errorText(e, 'Something went wrong looking that up.'));
+    } finally {
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Check';
+    }
+  }
+
+  checkBtn.addEventListener('click', () => run(domainInput.value));
+  domainInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') run(domainInput.value);
+  });
+  $('sampleBtn').addEventListener('click', () => {
+    domainInput.value = 'github.com';
+    run('github.com');
+  });
+
+  // The "check the parent domain" link is a query string, not a route: handle
+  // it here so it re-runs in place instead of reloading the page.
+  results.addEventListener('click', (e) => {
+    const a = (e.target as HTMLElement | null)?.closest('a');
+    if (!a || !a.getAttribute('href')?.startsWith('?domain=')) return;
+    e.preventDefault();
+    const next = new URL(a.href).searchParams.get('domain');
+    if (next) { domainInput.value = next; run(next); }
+  });
+
+  // Shareable results: /tools/dmarc-checker/?domain=example.com runs on load.
+  const initial = new URLSearchParams(window.location.search).get('domain');
+  if (initial) { domainInput.value = initial; run(initial); }
+</script>

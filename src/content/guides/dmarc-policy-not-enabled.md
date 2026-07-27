@@ -70,7 +70,9 @@ A fortnight of clean reports across a full billing cycle is a reasonable bar.
 
 ## "Not enabled" but you meant to enable it
 
-A few things that cause the warning even when you thought you were enforcing:
+A few things that cause the warning even when you thought you were enforcing.
+Our [DMARC record checker](/tools/dmarc-checker/) tests for all of them at once
+and shows the record it actually found:
 
 - **The record is on the wrong host.** DMARC must live at
   `_dmarc.yourdomain.com`, not the root. If your DNS host appends the domain
