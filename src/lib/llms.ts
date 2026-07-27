@@ -12,7 +12,7 @@ export const SITE = 'https://dmarc-analyzer.net';
 export const REPO = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
 
 /** Matches the docs sidebar ordering — docs read in sequence, unlike the rest. */
-const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'] as const;
+const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 export type Item = {
   title: string;

@@ -6,7 +6,7 @@ import Icon from '../../components/Icon.astro';
 import Cta from '../../components/Cta.astro';
 
 const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
-const SECTION_ORDER = ['Getting started', 'Configuration', 'Operations'] as const;
+const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 const entries = await getCollection('docs', ({ data }) => !data.draft);
 const sections = SECTION_ORDER.map((section) => ({

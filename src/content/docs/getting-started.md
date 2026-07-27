@@ -61,12 +61,16 @@ imported without you doing anything.
 
 ## What you'll see once data lands
 
-- **Dashboard** — compliance rate, volume trend, worst domains, who's reporting.
+- **Dashboard** — compliance rate, volume trend, and the domains that need
+  attention.
 - **Domains** — every domain with its published policy and enforcement posture.
-- **Domain detail** — per-sending-source breakdown, the guided
+- **Domain detail** — per-sending-source breakdown, who's reporting, the guided
   path to enforcement, and record inspection comparing your live DNS against what
   reporters observed.
 - **Threats** — sources sending mail as your domains that failed both SPF and DKIM.
+
+Each screen — including what the status labels like *Spoofing* actually mean —
+is documented in [Using the console](/docs/using-the-console/).
 
 Analytics windows anchor to your **newest report**, not to today's date. If a
 mailbox is backfilling old data, "last 30 days" means the 30 days before the most

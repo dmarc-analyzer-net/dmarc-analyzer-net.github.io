@@ -93,7 +93,7 @@ const docs = defineCollection({
     seoTitle: z.string().optional(),
     title: z.string().max(65),
     description: z.string().min(50).max(160),
-    section: z.enum(['Getting started', 'Configuration', 'Operations']),
+    section: z.enum(['Getting started', 'Using the console', 'Configuration', 'Operations']),
     order: z.number(),
     draft: z.boolean().default(false),
   }).refine(titleBudget(38), { message: budgetMessage(38) }),
