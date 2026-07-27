@@ -128,6 +128,13 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'DMARC record generator',
+          url: `${SITE}/tools/dmarc-generator/`,
+          description:
+            'Browser-based form that builds a valid DMARC record, omitting any tag left at its default, and explains what the result will do to mail.',
+          body: '',
+        },
+        {
           title: 'Free DMARC report analyzer',
           url: `${SITE}/tools/dmarc-report-analyzer/`,
           description: 'Browser-based tool for reading a single DMARC aggregate report.',

@@ -1,0 +1,421 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+
+const title = 'DMARC record generator';
+const description =
+  'Free DMARC record generator: build a valid DMARC TXT record from a short form, with the defaults left out, and see what each tag will do before you publish it.';
+const path = '/tools/dmarc-generator/';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'DMARC Record Generator',
+  applicationCategory: 'SecurityApplication',
+  operatingSystem: 'Any (web browser)',
+  description,
+  url: new URL(path, Astro.site).href,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+
+// One place to define the form, so the markup and the tag order stay in step.
+const label = 'display:block; font-size:var(--text-sm); font-weight:600; color:var(--gray-800); margin-bottom:6px;';
+const field = 'width:100%; height:38px; padding:0 10px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-page); color:var(--gray-800); font-size:var(--text-base);';
+const mono = `${field} font-family:'JetBrains Mono',monospace; font-size:13px;`;
+const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--text-faint);';
+---
+<BaseLayout current="tools" title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Tools', href: '/tools/' },
+          { label: 'DMARC record generator', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">DMARC record generator</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Answer a few questions and get a valid DMARC record, with every default left out so the record says only what you meant. Nothing is sent anywhere — this page does the work.</p>
+      </div>
+    </section>
+
+    <section style="max-width:900px; margin:0 auto; padding:28px 32px;">
+      <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px;">
+          <div>
+            <label style={label} for="domain">Your domain</label>
+            <input id="domain" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="yourdomain.com" style={mono} />
+            <p style={help}>Used to build the record name and to spot a reporting address that lives somewhere else.</p>
+          </div>
+
+          <div>
+            <label style={label} for="policy">Policy (<code class="mono">p</code>)</label>
+            <select id="policy" style={field}>
+              <option value="none" selected>none — monitor only, nothing is blocked</option>
+              <option value="quarantine">quarantine — failing mail goes to spam</option>
+              <option value="reject">reject — failing mail is refused</option>
+            </select>
+            <p style={help}>Publishing your first record? Choose <code class="mono">none</code>. It is not a weak choice, it is the only safe one until you have read the reports.</p>
+          </div>
+
+          <div>
+            <label style={label} for="rua">Aggregate reports to (<code class="mono">rua</code>)</label>
+            <input id="rua" type="text" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="dmarc@yourdomain.com" style={mono} />
+            <p style={help}>The mailbox that receives the daily XML. Comma-separate for more than one. Leave empty and you get no reports at all.</p>
+          </div>
+
+          <div>
+            <label style={label} for="sp">Subdomain policy (<code class="mono">sp</code>)</label>
+            <select id="sp" style={field}>
+              <option value="" selected>Inherit the policy above (recommended)</option>
+              <option value="none">none — subdomains are exempt</option>
+              <option value="quarantine">quarantine</option>
+              <option value="reject">reject</option>
+            </select>
+            <p style={help}>Omitting <code class="mono">sp</code> makes subdomains follow <code class="mono">p</code>, which is almost always what you want.</p>
+          </div>
+        </div>
+
+        <details style="margin-top:20px; border-top:1px solid var(--surface-sunken); padding-top:16px;">
+          <summary style="cursor:pointer; font-size:var(--text-base); font-weight:600; color:var(--gray-800);">Advanced tags</summary>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:18px;">
+            <div>
+              <label style={label} for="pct">Percentage (<code class="mono">pct</code>)</label>
+              <input id="pct" type="number" min="1" max="100" value="100" style={field} />
+              <p style={help}>Applies the policy to a share of failing mail while you roll out. The remainder is not exempt — it drops to the next weaker policy.</p>
+            </div>
+            <div>
+              <label style={label} for="adkim">DKIM alignment (<code class="mono">adkim</code>)</label>
+              <select id="adkim" style={field}>
+                <option value="r" selected>Relaxed — subdomains count (default)</option>
+                <option value="s">Strict — exact domain match only</option>
+              </select>
+            </div>
+            <div>
+              <label style={label} for="aspf">SPF alignment (<code class="mono">aspf</code>)</label>
+              <select id="aspf" style={field}>
+                <option value="r" selected>Relaxed — subdomains count (default)</option>
+                <option value="s">Strict — exact domain match only</option>
+              </select>
+            </div>
+            <div>
+              <label style={label} for="ruf">Failure reports to (<code class="mono">ruf</code>)</label>
+              <input id="ruf" type="text" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="(usually leave empty)" style={mono} />
+              <p style={help}>Few providers send these, and those that do may include message content. Treat the mailbox as sensitive.</p>
+            </div>
+            <div>
+              <label style={label} for="fo">Report options (<code class="mono">fo</code>)</label>
+              <select id="fo" style={field}>
+                <option value="" selected>Default — only when everything fails</option>
+                <option value="1">1 — whenever any check fails</option>
+                <option value="d">d — on DKIM failure</option>
+                <option value="s">s — on SPF failure</option>
+                <option value="d:s">d:s — on either failure</option>
+              </select>
+              <p style={help}>Only affects failure reports, so it does nothing without <code class="mono">ruf</code>.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <!-- Output -->
+      <div style="margin-top:24px;">
+        <div style="display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-lg); font-weight:600; letter-spacing:-0.01em; margin:0;">Your record</h2>
+          <button id="copyBtn" class="btn-ghost" style="height:34px; padding:0 14px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body); font-size:var(--text-sm); font-weight:600; cursor:pointer;">Copy record</button>
+        </div>
+
+        <div style="border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);">
+          <div style="display:grid; grid-template-columns:auto 1fr; gap:0;">
+            <div style="padding:12px 16px; background:var(--surface-page); border-right:1px solid var(--border-default); font-size:var(--text-sm); font-weight:600; color:var(--text-secondary); white-space:nowrap;">Type</div>
+            <div class="mono" style="padding:12px 16px; font-size:13px; color:var(--gray-800);">TXT</div>
+            <div style="padding:12px 16px; background:var(--surface-page); border-right:1px solid var(--border-default); border-top:1px solid var(--border-default); font-size:var(--text-sm); font-weight:600; color:var(--text-secondary); white-space:nowrap;">Name</div>
+            <div id="outName" class="mono" style="padding:12px 16px; border-top:1px solid var(--border-default); font-size:13px; color:var(--gray-800); overflow-wrap:anywhere;">_dmarc</div>
+            <div style="padding:12px 16px; background:var(--surface-page); border-right:1px solid var(--border-default); border-top:1px solid var(--border-default); font-size:var(--text-sm); font-weight:600; color:var(--text-secondary); white-space:nowrap;">Value</div>
+            <div id="outValue" class="mono" style="padding:12px 16px; border-top:1px solid var(--border-default); font-size:13px; line-height:1.6; color:var(--gray-800); overflow-wrap:anywhere;"></div>
+          </div>
+        </div>
+
+        <p id="copied" role="status" style="visibility:hidden; margin:10px 2px 0; font-size:var(--text-sm); font-weight:600; color:var(--brand-hover);">Copied.</p>
+
+        <!-- What the record will do, and anything worth knowing before publishing -->
+        <ul id="notes" style="list-style:none; margin:14px 0 0; padding:0; display:grid; gap:8px;"></ul>
+      </div>
+    </section>
+
+    <!-- SEO / explanatory content -->
+    <section style="max-width:760px; margin:0 auto; padding:24px 32px 8px;">
+      <div class="prose">
+        <h2>Why the record is shorter than you expected</h2>
+        <p>
+          Most generators emit every tag, including the ones set to their
+          defaults — <code>pct=100; adkim=r; aspf=r; fo=0; rf=afrf;
+          ri=86400</code>. That is valid, and it is also six tags of noise that
+          say nothing. This one omits any tag whose value is the default, because
+          a record you can read at a glance is a record you can review a year
+          from now.
+        </p>
+        <p>
+          The one exception worth knowing: leaving out <code>sp</code> is not the
+          same as setting <code>sp=none</code>. Omitted, subdomains inherit
+          <code>p</code>; set to <code>none</code>, they are exempt. That
+          difference is a common way an enforcing domain turns out to be
+          spoofable through a subdomain.
+        </p>
+
+        <h2>Where to publish it</h2>
+        <p>
+          Add a <strong>TXT</strong> record at your DNS host with the name
+          <code>_dmarc</code> — most panels append your domain automatically, so
+          typing the full <code>_dmarc.yourdomain.com</code> is how you end up
+          with <code>_dmarc.yourdomain.com.yourdomain.com</code> and a record no
+          receiver will ever find. If your host requires the full name, use it;
+          if the field is pre-filled with your domain, just <code>_dmarc</code>.
+        </p>
+        <p>
+          Per-provider steps, including the exact field names, are under
+          <a href="/dmarc-for/">DMARC setup</a>. Once it has propagated, confirm
+          it resolves with the
+          <a href="/tools/dmarc-checker/">record checker</a>.
+        </p>
+
+        <h2>Start at p=none, and mean it</h2>
+        <p>
+          A record is not a policy decision so much as the start of one.
+          <code>p=none</code> asks providers to report without changing
+          delivery, which is what lets you discover the sending sources you had
+          forgotten — the invoicing system, the ticketing tool, the mail relay a
+          team set up years ago. Going straight to <code>p=reject</code> before
+          that inventory exists is how legitimate mail disappears.
+        </p>
+        <p>
+          The route from there is in
+          <a href="/guides/from-monitoring-to-enforcement/">monitoring to
+          enforcement</a>, and it is driven entirely by the reports.
+        </p>
+
+        <h2>The record is the easy part</h2>
+        <p>
+          Publishing takes five minutes. Reading the
+          <a href="/glossary/dmarc-aggregate-report/">aggregate reports</a> that
+          start arriving — one from every provider, every day, as XML — is the
+          part that decides whether you ever reach enforcement. Across more than
+          a couple of domains it stops being something you do by hand.
+        </p>
+        <p>
+          That is what <a href="/">DMARC Analyzer</a> is for: it collects the
+          reports, parses them, and shows the sending sources per domain over
+          time. It is <a href="/free-dmarc-analyzer/">free and open source</a>,
+          and <a href="/self-hosted-dmarc-monitoring/">self-hosted</a>, so the
+          reports stay on your infrastructure.
+        </p>
+      </div>
+
+      <RelatedLinks links={[
+        { label: 'Publish your first DMARC record', href: '/guides/publish-your-first-dmarc-record/', note: 'The full walkthrough, with the gotchas.' },
+        { label: 'DMARC record checker', href: '/tools/dmarc-checker/', note: 'Confirm it resolves once published.' },
+        { label: 'Quarantine vs reject', href: '/glossary/dmarc-quarantine-vs-reject/', note: 'What each policy actually does to mail.' },
+        { label: 'Monitoring to enforcement', href: '/guides/from-monitoring-to-enforcement/', note: 'How to move off p=none safely.' },
+      ]} />
+
+      <Cta />
+    </section>
+</BaseLayout>
+
+<script>
+  type Note = { level: 'good' | 'warn' | 'bad'; text: string };
+
+  // Every id below is a static element in this page's own markup, so a null
+  // would be a template bug rather than a runtime condition.
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+    document.getElementById(id) as T;
+
+  const domain = $<HTMLInputElement>('domain');
+  const policy = $<HTMLSelectElement>('policy');
+  const rua = $<HTMLInputElement>('rua');
+  const ruf = $<HTMLInputElement>('ruf');
+  const sp = $<HTMLSelectElement>('sp');
+  const pct = $<HTMLInputElement>('pct');
+  const adkim = $<HTMLSelectElement>('adkim');
+  const aspf = $<HTMLSelectElement>('aspf');
+  const fo = $<HTMLSelectElement>('fo');
+
+  const outName = $('outName');
+  const outValue = $('outValue');
+  const notes = $('notes');
+  const copied = $('copied');
+
+  /** Accept a pasted URL or email address, not just a bare hostname. */
+  function normalizeDomain(input: string): string {
+    let d = input.trim().toLowerCase();
+    d = d.replace(/^[a-z][a-z0-9+.-]*:\/\//, '');
+    d = d.replace(/^[^/@]*@/, '');
+    d = d.split(/[/?#]/)[0];
+    d = d.replace(/:\d+$/, '');
+    d = d.replace(/\.$/, '');
+    d = d.replace(/^_dmarc\./, '');
+    return d;
+  }
+
+  /** Report addresses as typed, normalised to `mailto:` URIs. */
+  function uris(raw: string): string[] {
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) => (/^(mailto|https?):/i.test(s) ? s : `mailto:${s}`));
+  }
+
+  /** The domain of a `mailto:` URI, ignoring any `!size` limit. */
+  function mailtoDomain(uri: string): string {
+    const m = /^mailto:([^!]+)/i.exec(uri);
+    if (!m) return '';
+    const at = m[1].lastIndexOf('@');
+    return at === -1 ? '' : m[1].slice(at + 1).trim().toLowerCase().replace(/\.$/, '');
+  }
+
+  const related = (a: string, b: string) =>
+    !!a && !!b && (a === b || a.endsWith('.' + b) || b.endsWith('.' + a));
+
+  /**
+   * Tags whose value equals the DMARC default are omitted rather than emitted.
+   * `sp` is the exception the copy calls out: absent means "inherit p", which is
+   * not the same as any value we could write.
+   */
+  function build() {
+    const d = normalizeDomain(domain.value);
+    const p = policy.value;
+    const ruaUris = uris(rua.value);
+    const rufUris = uris(ruf.value);
+    const pctValue = pct.value.trim();
+    const pctNumber = Number(pctValue);
+    // Empty is not invalid — it means "leave pct out", which is the default of
+    // 100 anyway. A number input also swallows non-numeric text before we see
+    // it, so what actually reaches here is an out-of-range number.
+    const pctEmpty = pctValue === '';
+    const pctValid = pctEmpty || (/^\d+$/.test(pctValue) && pctNumber >= 0 && pctNumber <= 100);
+
+    const tags = [`v=DMARC1`, `p=${p}`];
+    if (sp.value) tags.push(`sp=${sp.value}`);
+    if (ruaUris.length) tags.push(`rua=${ruaUris.join(',')}`);
+    if (rufUris.length) tags.push(`ruf=${rufUris.join(',')}`);
+    if (pctValid && !pctEmpty && pctNumber !== 100) tags.push(`pct=${pctNumber}`);
+    if (adkim.value === 's') tags.push('adkim=s');
+    if (aspf.value === 's') tags.push('aspf=s');
+    if (fo.value) tags.push(`fo=${fo.value}`);
+
+    const record = tags.join('; ');
+    outValue.textContent = record;
+    outName.textContent = d ? `_dmarc.${d}` : '_dmarc';
+
+    // ---- What this record will do, and what to know before publishing ----
+    const out: Note[] = [];
+
+    if (p === 'none') {
+      out.push({ level: 'warn', text: 'p=none means nothing is blocked. This is the right first record — it collects reports so you can see who sends as you — but it is not protection yet.' });
+    } else if (p === 'quarantine') {
+      out.push({ level: 'good', text: 'Mail that fails DMARC will be sent to spam. Publish this only once the reports show your legitimate senders aligning.' });
+    } else {
+      out.push({ level: 'good', text: 'Mail that fails DMARC will be refused outright. This is the end state — and it is unforgiving of a sender you have not accounted for yet.' });
+    }
+
+    if (!ruaUris.length) {
+      out.push({ level: 'bad', text: 'With no rua address you will receive no reports, so you will never learn whether enforcement is safe. This is the one field worth not skipping.' });
+    } else {
+      const external = ruaUris
+        .map(mailtoDomain)
+        .filter((dest) => dest && !related(dest, d));
+      for (const dest of new Set(external)) {
+        out.push({
+          level: 'warn',
+          text: `${dest} is not your domain, so it has to authorize your reports by publishing a TXT record at ${d || 'yourdomain.com'}._report._dmarc.${dest} containing v=DMARC1;. Without it, receivers will not send reports there — and nothing bounces to tell you.`,
+        });
+      }
+    }
+
+    if (sp.value === 'none' && p !== 'none') {
+      out.push({ level: 'warn', text: 'sp=none exempts every subdomain while the organizational domain enforces, so mail can still be spoofed from any name under it. Leave sp unset unless you specifically need this.' });
+    }
+
+    if (!pctValid) {
+      out.push({ level: 'bad', text: `pct must be a whole number from 0 to 100 — "${pctValue}" was left out of the record.` });
+    } else if (!pctEmpty && pctNumber !== 100) {
+      out.push({ level: 'warn', text: `pct=${pctNumber} applies the policy to ${pctNumber}% of failing mail. The rest is not exempt: it drops to the next weaker policy. Easy to leave in place and forget.` });
+    }
+
+    if (rufUris.length) {
+      out.push({ level: 'warn', text: 'Failure reports can contain message content and recipient addresses. Few providers send them, and the mailbox needs treating as sensitive.' });
+    }
+    if (fo.value && !rufUris.length) {
+      out.push({ level: 'warn', text: 'fo only controls when failure reports are generated. With no ruf address there is nowhere to send them, so this tag will do nothing.' });
+    }
+
+    if (adkim.value === 's' || aspf.value === 's') {
+      out.push({ level: 'warn', text: 'Strict alignment requires the authenticated domain to match the From domain exactly — a subdomain will no longer pass. Check your reports before turning this on.' });
+    }
+
+    // A DNS panel will accept a long value, but a single TXT string cannot
+    // exceed 255 bytes; past that the record has to be split into chunks.
+    const bytes = new TextEncoder().encode(record).length;
+    if (bytes > 255) {
+      out.push({ level: 'warn', text: `This record is ${bytes} bytes. A single TXT string tops out at 255, so your DNS host has to split it into chunks — most do automatically, but check that it resolves afterwards.` });
+    }
+
+    render(out);
+  }
+
+  const PALETTE = {
+    good: { bg: 'var(--teal-100)', fg: 'var(--brand-hover)', mark: '✓' },
+    warn: { bg: '#fef3c7', fg: '#92400e', mark: '!' },
+    bad: { bg: 'var(--status-danger-bg)', fg: 'var(--status-danger-fg)', mark: '×' },
+  };
+
+  function render(items: Note[]) {
+    notes.textContent = '';
+    for (const n of items) {
+      const li = document.createElement('li');
+      li.style.cssText = 'display:flex; gap:10px; align-items:flex-start;';
+
+      const badge = document.createElement('span');
+      badge.textContent = PALETTE[n.level].mark;
+      badge.setAttribute('aria-hidden', 'true');
+      badge.style.cssText = `flex:0 0 auto; width:20px; height:20px; margin-top:1px; border-radius:var(--radius-pill); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:${PALETTE[n.level].bg}; color:${PALETTE[n.level].fg};`;
+
+      const text = document.createElement('span');
+      text.textContent = n.text;
+      text.style.cssText = 'font-size:var(--text-sm); line-height:1.55; color:var(--gray-700); overflow-wrap:anywhere;';
+
+      li.append(badge, text);
+      notes.appendChild(li);
+    }
+  }
+
+  for (const el of [domain, policy, rua, ruf, sp, pct, adkim, aspf, fo]) {
+    el.addEventListener('input', build);
+    el.addEventListener('change', build);
+  }
+
+  $('copyBtn').addEventListener('click', async () => {
+    const text = outValue.textContent ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+      copied.textContent = 'Copied.';
+    } catch {
+      // Clipboard access needs a secure context and can be blocked outright, so
+      // select the value instead — the user can still copy it by hand rather
+      // than being told nothing happened.
+      const range = document.createRange();
+      range.selectNodeContents(outValue);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      copied.textContent = 'Selected — press Ctrl/Cmd+C to copy.';
+    }
+    copied.style.visibility = 'visible';
+    window.setTimeout(() => { copied.style.visibility = 'hidden'; }, 4000);
+  });
+
+  build();
+</script>

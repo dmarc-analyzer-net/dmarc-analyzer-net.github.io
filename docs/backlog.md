@@ -73,6 +73,17 @@ Keep claims truthful to the intended end state.
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
 - [x] (done) Build `Cta.astro` — closing call-to-action band, wired into the guide, provider, and comparison templates (glossary intentionally omits it).
 - [ ] (todo) Build remaining content components: `Faq.astro` (FAQPage), `Callout.astro`, `Toc.astro` — need MDX or `.astro` usage since they can't embed in plain Markdown.
+- [ ] (todo) **Make the decorative copy icons copy.** Two places render a copy
+      icon with no click handler behind it: the homepage hero's quick-start line
+      (`index.astro`) and every `Terminal.astro` block. A copy affordance that
+      does nothing on click is worse than no affordance — people try it, get no
+      feedback, and paste whatever was already on the clipboard. Working
+      implementation to lift from `tools/dmarc-generator.astro`, including the
+      fallback: `navigator.clipboard` needs a secure context and can be refused,
+      so on rejection select the text and say so rather than failing silently.
+      `Terminal.astro` also needs to decide *what* a block-level button copies —
+      probably the `cmd` lines only, without the `$` prefix or the `ok`/`out`
+      lines.
 - [x] (done) Add JSON-LD structured data: `Organization` + `WebSite` + `SoftwareApplication` + `FAQPage` on home; `Article` + `BreadcrumbList` on guides; `DefinedTerm` + `BreadcrumbList` on glossary.
 - [x] (done) Set up Astro content collections for `guides` and `glossary` with Zod schemas (title/description length guards), `[...slug]` templates, and listing index pages.
 - [~] (in-progress) Ship the glossary foundation (Cluster A): initial 6 terms live (DMARC, SPF, DKIM, alignment, aggregate report/RUA, policy). Still to add: BIMI, MTA-STS, TLS-RPT, ARC, remaining policy tags (`pct`, `sp`, `adkim`, `aspf`, `ruf`, `fo`).
@@ -242,7 +253,13 @@ primary source; where a line number is given it was accurate in July 2026.
       `rua`/`ruf` destinations against their `_report._dmarc` authorization
       records. That last check is the differentiator: it is the failure mode that
       produces a perfect-looking record and no reports, and nothing bounces to
-      tell you. Still to add: record generator, SPF checker, DKIM lookup.
+      tell you. Also live: the **record generator** (`dmarc generator` 1,300/mo),
+      which omits every tag left at its default and explains what the result does
+      to mail. Still to add: SPF checker (`spf checker` 5,400/mo — the valuable
+      part is recursively expanding `include:` and counting against the 10-DNS-
+      lookup limit, since exceeding it is a permerror that fails silently) and
+      DKIM lookup (`dkim checker` 6,600/mo — needs a selector, so it also needs a
+      list of common ones to try).
 - [ ] (todo) Add MDX (`npx astro add mdx`) if guides need interactive/embedded components (callouts, tabbed code, a record checker).
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
 - [ ] (todo) Add a blog/changelog collection to announce releases and roadmap progress.

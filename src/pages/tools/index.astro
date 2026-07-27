@@ -9,6 +9,11 @@ const tools = [
     note: 'Look up a domain’s DMARC record and validate every tag — including whether third-party reporting addresses were ever authorized to receive your reports.',
   },
   {
+    href: '/tools/dmarc-generator/',
+    name: 'DMARC record generator',
+    note: 'Build a valid DMARC record from a short form, with the defaults left out — plus a plain reading of what it will do to your mail.',
+  },
+  {
     href: '/tools/dmarc-report-analyzer/',
     name: 'DMARC report analyzer',
     note: 'Paste or upload an aggregate (RUA) report and get a readable, per-source breakdown. Runs entirely in your browser.',
@@ -17,7 +22,7 @@ const tools = [
 ---
 <BaseLayout current="tools"
   title="Free DMARC tools — DMARC Analyzer"
-  description="Free, in-browser DMARC tools: a record checker and an aggregate (RUA) report analyzer. Open source, no account, and nothing you paste or upload leaves the page."
+  description="Free, in-browser DMARC tools: a record checker, a record generator, and an aggregate (RUA) report analyzer. Open source, no account, nothing leaves the page."
   path="/tools/"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
@@ -41,6 +46,6 @@ const tools = [
           </li>
         ))}
       </ul>
-      <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">More tools (a record generator, SPF and DKIM lookups) are on the way.</p>
+      <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">More tools (SPF and DKIM lookups) are on the way.</p>
     </section>
 </BaseLayout>
