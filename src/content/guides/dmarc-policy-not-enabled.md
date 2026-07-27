@@ -82,7 +82,10 @@ A few things that cause the warning even when you thought you were enforcing:
 - **A subdomain has its own weaker policy** — or none, falling back to `sp=`. A
   root at `p=reject; sp=none` is still flagged for subdomains.
 - **`pct=` is below 100.** Some checkers report partial enforcement as not
-  enabled, and it does mean most failing mail isn't getting the policy you think.
+  enabled. Note what the unselected share actually gets, though: it is not
+  exempted, it drops to the next weaker policy. At `p=reject; pct=25` the other
+  three quarters are quarantined, not delivered — see [what `pct=` actually
+  does](/glossary/dmarc-quarantine-vs-reject/#what-pct-actually-does).
 - **You're reading a cached answer.** Give DNS an hour before concluding the
   change didn't take.
 

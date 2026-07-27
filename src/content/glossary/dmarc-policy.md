@@ -17,9 +17,14 @@ tells receiving servers what to do with mail that fails
 
 ## Useful modifiers
 
-- **`pct=`** applies the policy to a percentage of failing mail (e.g. `pct=25`)
-  — a way to ramp `quarantine` or `reject` gradually.
-- **`sp=`** sets a separate policy for subdomains.
+- **`pct=`** applies the policy to a percentage of failing mail (e.g. `pct=25`),
+  sampled per message. Mail *not* selected is not exempted — it drops to the next
+  weaker policy, so `p=reject; pct=25` quarantines the other three quarters rather
+  than delivering them. That makes it a real ramp for `quarantine` and a
+  misleading one for `reject`: see [what `pct=` actually
+  does](/glossary/dmarc-quarantine-vs-reject/#what-pct-actually-does).
+- **`sp=`** sets a separate policy for subdomains. With no `sp=`, subdomains
+  inherit `p=`.
 
 Moving from `none` to `reject` safely is a process, not a flip of a switch — see
 [from monitoring to enforcement](/guides/from-monitoring-to-enforcement/).
