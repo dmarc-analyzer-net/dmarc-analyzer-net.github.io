@@ -34,6 +34,10 @@ That is the whole thing. `p=none` is the [policy](/glossary/dmarc-policy/) that
 means "monitor only" — no message is quarantined or rejected. `rua=` is where
 reports are sent.
 
+Need something other than the default record — a subdomain policy, strict
+alignment, a staged `pct=`? The [record generator](/tools/dmarc-generator/)
+builds it and tells you what each choice will do to your mail.
+
 ## Step 4 — Wait for reports
 
 Reports start arriving within about 24 hours, one per provider per day. Each one
