@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Cta from '../components/Cta.astro';
+import JsonLd from '../components/JsonLd.astro';
+import RelatedLinks from '../components/RelatedLinks.astro';
+
+const title = 'Migrating from parsedmarc';
+const description =
+  'What moving from parsedmarc actually involves: which history comes across, which does not, and how to run both against the same mailbox while you decide.';
+const path = '/parsedmarc-alternative/';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  url: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Migrating from parsedmarc', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-4xl); line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:22px 0 20px; max-width:760px;">Migrating from parsedmarc.</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Not a pitch — the mechanics. What comes across, what doesn't, and how to run both at once until you're sure.</p>
+      </div>
+    </section>
+
+    <section style="max-width:760px; margin:0 auto; padding:36px 32px 8px;">
+      <div class="prose">
+        <h2>First: you may not want to</h2>
+        <p>
+          People leave parsedmarc for one reason, and it is rarely the parser —
+          it is the stack around it. Dashboards mean standing up and maintaining
+          Elasticsearch or OpenSearch plus Kibana or Grafana, and that is a lot
+          of infrastructure to keep alive for a few XML files a day.
+        </p>
+        <p>Three cases where you should stay exactly where you are:</p>
+        <ul>
+          <li><strong>You need forensic (RUF) reports.</strong> parsedmarc parses them. We do not.</li>
+          <li><strong>You need SMTP TLS (TLS-RPT) reports.</strong> Same — parsedmarc reads them, we are DMARC-only for now.</li>
+          <li><strong>You already run a search stack, or you want a parser to feed your own pipeline.</strong> parsedmarc writes to OpenSearch, Splunk, PostgreSQL, Kafka, S3, Microsoft Sentinel, Graylog, syslog or a webhook. That flexibility is the whole point of it, and we deliberately do not compete there — you get one application with one database.</li>
+        </ul>
+        <p>
+          The full feature-by-feature table is on the
+          <a href="/compare/parsedmarc/">parsedmarc comparison</a>. This page
+          assumes you have read it and want to know what moving costs.
+        </p>
+
+        <h2>The mailbox is the migration path</h2>
+        <p>
+          There is no export from parsedmarc to import here. The report data you
+          need is already somewhere better: the mailbox the providers delivered
+          it to. DMARC Analyzer connects to that mailbox over IMAP and parses
+          the reports itself.
+        </p>
+        <p>Three properties of that ingestion make the move much easier than it sounds:</p>
+        <ul>
+          <li><strong>The first sync reads the entire mailbox</strong>, not just new mail. However far back your reports go, that becomes your history on day one.</li>
+          <li><strong>It never modifies the mailbox.</strong> Nothing is deleted, moved, flagged or marked read. It only reads.</li>
+          <li><strong>Re-reading a report is a no-op.</strong> Reports are stored with a uniqueness constraint on the report's own identity, so ingesting the same one twice changes nothing.</li>
+        </ul>
+        <p>
+          Taken together: you can point this at the mailbox parsedmarc is already
+          reading, today, without touching your parsedmarc install. Both run.
+          Neither interferes. You compare them on the same data for a week and
+          then decide.
+        </p>
+
+        <h2>What does not come across</h2>
+        <p>
+          Whatever is only in parsedmarc's data store. If you have three years in
+          Elasticsearch but your mailbox only keeps ninety days, you get ninety
+          days — there is no import endpoint, and inventing one that reconciled
+          another tool's schema would be a worse idea than saying this plainly.
+        </p>
+        <p>Two practical consequences:</p>
+        <ul>
+          <li><strong>Check your mailbox retention before you decommission anything.</strong> If a rule deletes reports after parsedmarc processes them, turn it off and let the mailbox refill first.</li>
+          <li><strong>If the old history genuinely matters</strong>, keep the parsedmarc install read-only alongside for as long as you need it. Nothing forces a cutover date.</li>
+        </ul>
+
+        <h2>What you decommission</h2>
+        <p>
+          This is the part that motivated the move. After the cutover, the search
+          cluster, its dashboards, its heap tuning and its disk go away. What
+          replaces them is one container and a PostgreSQL database — see
+          <a href="/docs/choose-your-deployment/">choosing a deployment</a>, and
+          <a href="/docs/kubernetes/">the Helm chart</a> if you would rather run
+          it on Kubernetes.
+        </p>
+
+        <h2>The actual steps</h2>
+        <ol>
+          <li><a href="/docs/install/">Start it with Docker</a> — prebuilt image, no build step.</li>
+          <li>Create a client and <a href="/docs/mailbox-setup/">add the mailbox source</a>, pointing at the same mailbox parsedmarc reads.</li>
+          <li>Let the first sync run. It reads everything in the mailbox, so this takes longer than later syncs will.</li>
+          <li>Compare against your existing dashboards on the same period. This is the step worth not rushing.</li>
+          <li>When you are satisfied, stop parsedmarc and retire the search stack.</li>
+        </ol>
+
+        <h2>What you gain, specifically</h2>
+        <ul>
+          <li><strong>Per-client multi-tenancy.</strong> parsedmarc is not built to keep many clients' data separate; this is built around that, with read-only client access. It is the substantive difference for agencies and MSPs.</li>
+          <li><strong>Dashboards you do not maintain.</strong> The console ships with the app rather than being imported into a stack you operate.</li>
+          <li><strong>Alerting and digests</strong> without a separate rules engine — see <a href="/docs/alerts-and-notifications/">alerts and notifications</a>.</li>
+          <li><strong>The same licence and the same principle</strong> — Apache-2.0, self-hosted, <a href="/free-dmarc-analyzer/">no per-domain pricing</a>. You are not trading open source for convenience.</li>
+        </ul>
+
+        <blockquote>
+          <p>
+            Named products are trademarks of their respective owners.
+            Comparisons reflect our understanding at the time of writing and may
+            change; corrections welcome.
+          </p>
+        </blockquote>
+      </div>
+
+      <RelatedLinks links={[
+        { label: 'parsedmarc comparison', href: '/compare/parsedmarc/', note: 'The feature-by-feature table.' },
+        { label: 'Open-source DMARC analyzers', href: '/compare/open-source-dmarc-analyzer/', note: 'The wider self-hostable field, including lighter options.' },
+        { label: 'Self-hosted DMARC monitoring', href: '/self-hosted-dmarc-monitoring/', note: 'What running it yourself actually costs.' },
+        { label: 'Set up a mailbox source', href: '/docs/mailbox-setup/', note: 'Connecting to the mailbox your reports land in.' },
+      ]} />
+
+      <Cta title="Same principle, less to run" text="Open source and self-hosted like parsedmarc — but a finished multi-tenant application in one container, with no search cluster to keep alive." />
+    </section>
+</BaseLayout>

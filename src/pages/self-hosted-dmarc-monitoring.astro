@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Cta from '../components/Cta.astro';
+import JsonLd from '../components/JsonLd.astro';
+import RelatedLinks from '../components/RelatedLinks.astro';
+
+const title = 'Self-hosted DMARC monitoring';
+const description =
+  'Self-hosted DMARC monitoring on your own infrastructure: what your aggregate reports reveal, what running it yourself costs, and whether that trade is worth it.';
+const path = '/self-hosted-dmarc-monitoring/';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  url: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+  <JsonLd slot="head" schema={schema} />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Self-hosted DMARC monitoring', href: path },
+        ]} />
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-4xl); line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:22px 0 20px; max-width:760px;">Self-hosted DMARC monitoring, on <span style="color:var(--brand);">your</span> infrastructure.</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Your DMARC reports are a map of how your organisation sends mail. Self-hosting keeps that map in-house — one container, your database, your backups.</p>
+      </div>
+    </section>
+
+    <section style="max-width:760px; margin:0 auto; padding:36px 32px 8px;">
+      <div class="prose">
+        <h2>What you are actually handing over</h2>
+        <p>
+          "DMARC reports don't contain message content" is true, and it is the
+          reason the question gets waved away. But an
+          <a href="/glossary/dmarc-aggregate-report/">aggregate report</a> is a
+          census of your sending infrastructure, and a year of them is a very
+          good one:
+        </p>
+        <ul>
+          <li><strong>Every IP that sends as you</strong> — your mail servers, and the ones you forgot about.</li>
+          <li><strong>Every SaaS vendor in your stack that sends mail</strong> — payroll, CRM, ticketing, invoicing, the marketing tool one team signed up for. Sending sources are a reasonable proxy for what a company buys.</li>
+          <li><strong>Volumes over time</strong>, per source — which reveals seasonality, growth, and when something changed.</li>
+          <li><strong>Your subdomain structure</strong>, including internal names that never appear in public DNS.</li>
+        </ul>
+        <p>
+          None of that is catastrophic to share, and plenty of organisations
+          reasonably decide a hosted service is fine. But it is worth knowing
+          what the decision is, rather than assuming there is no data in play.
+          Self-hosting means the answer to "who else has this?" is nobody.
+        </p>
+
+        <h2>Where regulated environments land</h2>
+        <p>
+          Aggregate reports are mostly infrastructure metadata, not personal
+          data — but "mostly" is doing work in that sentence, and a self-hosted
+          install is a much shorter conversation with a DPO than a new
+          sub-processor is. There is no vendor to add to the register, no
+          transfer to assess, and retention is a setting rather than a support
+          ticket. The specifics — what is stored, what counts as personal data,
+          how erasure works — are in
+          <a href="/docs/data-protection/">data protection and GDPR</a>.
+        </p>
+
+        <h2>What self-hosting costs you</h2>
+        <p>
+          It is not free in effort, and a page that pretended otherwise would be
+          setting you up badly. Running this yourself means:
+        </p>
+        <ul>
+          <li><strong>You own uptime.</strong> Nobody is paged when ingestion stops. The app has <a href="/docs/monitoring/">health endpoints and mailbox-health alerts</a> for exactly this, but you have to wire them into something that wakes you up.</li>
+          <li><strong>You own backups.</strong> A database you never restored is not a backup — see <a href="/docs/upgrading-and-backup/">upgrading and backup</a>.</li>
+          <li><strong>You own patching.</strong> New image, new database migrations, occasional breaking changes at a major version.</li>
+          <li><strong>You own the perimeter.</strong> Putting it behind TLS and not exposing PostgreSQL is on you — <a href="/docs/reverse-proxy/">reverse proxy</a> and <a href="/docs/security/">security</a> cover both.</li>
+        </ul>
+        <p>
+          That is genuinely a real cost. It is also the same cost you are already
+          paying for everything else you run, which is why it lands very
+          differently depending on whether you already operate infrastructure.
+        </p>
+
+        <h2>Who should self-host, and who should not</h2>
+        <ul>
+          <li><strong>Self-host if</strong> you already run containers, you handle client data under contract, you have more domains than a per-domain price makes comfortable, or your data-residency answer needs to be "our own servers."</li>
+          <li><strong>Do not self-host if</strong> one person handles email part-time, there is nowhere to run a container, and nobody wants to own a database. A hosted tool's free tier is the better call — the <a href="/compare/best-dmarc-monitoring-tools/">buyer's guide</a> covers those honestly.</li>
+        </ul>
+
+        <h2>What running it looks like</h2>
+        <p>
+          One container plus PostgreSQL, started with
+          <code>docker compose up</code>. It connects to a mailbox over IMAP,
+          reads the reports providers send there, and builds the dashboards from
+          them. There is a
+          <a href="/docs/kubernetes/">maintained Helm chart</a> if you would
+          rather run it on Kubernetes, and
+          <a href="/docs/choose-your-deployment/">choosing a deployment</a> walks
+          through bundled versus external PostgreSQL and one container versus
+          two.
+        </p>
+        <p>
+          Ingestion is read-only: it never deletes, moves or flags anything in
+          the mailbox. That matters more than it sounds — it means you can point
+          it at a mailbox something else is already reading and compare the two
+          for as long as you like before committing.
+        </p>
+
+        <h2>Self-hosted does not have to mean assembled</h2>
+        <p>
+          The usual objection to self-hosting DMARC is the stack: a parser here,
+          a search cluster there, dashboards to import and maintain.
+          <a href="/">DMARC Analyzer</a> is a finished application instead — the
+          console, the ingestion, the alerting and the multi-tenancy in one
+          image, <a href="/free-dmarc-analyzer/">free and open source</a> under
+          Apache-2.0. If you want to see how it sits against the other
+          self-hostable options, including the lighter ones, that is the
+          <a href="/compare/open-source-dmarc-analyzer/">open-source
+          roundup</a>.
+        </p>
+      </div>
+
+      <RelatedLinks links={[
+        { label: 'Open-source DMARC analyzers', href: '/compare/open-source-dmarc-analyzer/', note: 'How the self-hostable options actually differ.' },
+        { label: 'Install with Docker', href: '/docs/install/', note: 'The prebuilt image, running in a few minutes.' },
+        { label: 'Data protection and GDPR', href: '/docs/data-protection/', note: 'What is stored, and how retention works.' },
+        { label: 'Free DMARC analyzer', href: '/free-dmarc-analyzer/', note: 'Unlimited domains, and why there is no tier.' },
+      ]} />
+
+      <Cta title="Keep your report data in-house" text="DMARC Analyzer is open source and self-hosted — one container, unlimited domains, and every aggregate report stays on infrastructure you control." />
+    </section>
+</BaseLayout>
