@@ -73,17 +73,24 @@ Keep claims truthful to the intended end state.
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
 - [x] (done) Build `Cta.astro` — closing call-to-action band, wired into the guide, provider, and comparison templates (glossary intentionally omits it).
 - [ ] (todo) Build remaining content components: `Faq.astro` (FAQPage), `Callout.astro`, `Toc.astro` — need MDX or `.astro` usage since they can't embed in plain Markdown.
-- [ ] (todo) **Make the decorative copy icons copy.** Two places render a copy
-      icon with no click handler behind it: the homepage hero's quick-start line
-      (`index.astro`) and every `Terminal.astro` block. A copy affordance that
-      does nothing on click is worse than no affordance — people try it, get no
-      feedback, and paste whatever was already on the clipboard. Working
-      implementation to lift from `tools/dmarc-generator.astro`, including the
-      fallback: `navigator.clipboard` needs a secure context and can be refused,
-      so on rejection select the text and say so rather than failing silently.
-      `Terminal.astro` also needs to decide *what* a block-level button copies —
-      probably the `cmd` lines only, without the `$` prefix or the `ok`/`out`
-      lines.
+- [x] (done) **Make the decorative copy icons copy.** Both are real buttons now,
+      wired through `src/lib/clipboard.ts`. `Terminal.astro` copies its `cmd`
+      lines only, without the `$` this component adds.
+
+      Reported by a reader, and the dead button turned out to be the *smaller*
+      half of it: the hero advertised `curl -fsSL -o compose.yml … && docker
+      compose up -d`, which could never have worked. `compose.yml` declares
+      `DMARC_ENCRYPTION_KEY` with `${VAR:?message}`, so `docker compose up -d`
+      exits 1 before starting anything when `.env` is absent — confirmed by
+      running it. The hero and the terminal now carry all three commands, and
+      `TerminalLine.copyText` lets a line display an abbreviated URL while the
+      clipboard gets the runnable one.
+
+      The rule worth keeping: **what is copied must be what runs.** All three
+      copy paths were checked against it — async API, the `execCommand`
+      fallback, and the last-resort select, which expands the abbreviated
+      preview to the full command first (and needs `white-space: pre-wrap`, or
+      the newlines collapse and the selection is one unrunnable line).
 - [x] (done) Add JSON-LD structured data: `Organization` + `WebSite` + `SoftwareApplication` + `FAQPage` on home; `Article` + `BreadcrumbList` on guides; `DefinedTerm` + `BreadcrumbList` on glossary.
 - [x] (done) Set up Astro content collections for `guides` and `glossary` with Zod schemas (title/description length guards), `[...slug]` templates, and listing index pages.
 - [~] (in-progress) Ship the glossary foundation (Cluster A): initial 6 terms live (DMARC, SPF, DKIM, alignment, aggregate report/RUA, policy). Still to add: BIMI, MTA-STS, TLS-RPT, ARC, remaining policy tags (`pct`, `sp`, `adkim`, `aspf`, `ruf`, `fo`).
