@@ -75,9 +75,12 @@ These are the exact strings the code emits:
 | `Auto-closed N stale running mailbox sync runs older than M minutes` | Syncs are hanging past their timeout |
 | `Failed to send "…" to N recipient(s)` | SMTP delivery failed — alert and digest email is not going out |
 
-On email specifically: an alert with **Emailed: no** in the console means no
-recipient covered it or SMTP is unconfigured — the [test
-email](/docs/configuration/#who-gets-notified) settles which in one click.
+On email specifically: an alert with **Emailed: no** on the [Alerts
+screen](/docs/alerts-and-notifications/) means no recipient covered it or SMTP
+is unconfigured — the [test
+email](/docs/configuration/#who-gets-notified) settles which in one click. Note
+the division of labour: the in-app alert engine watches your *DMARC data*; this
+page is about watching the *service itself*. You want both.
 
 ## The database
 

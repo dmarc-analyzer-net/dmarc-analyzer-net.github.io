@@ -64,4 +64,6 @@ None of this leaves the building until SMTP is configured — host, port, from
 address. Alerts and digests are silently email-less without it, which is the
 most common "notifications don't work" cause. Settings and the delivery
 checklist are in the [configuration
-reference](/docs/configuration/#who-gets-notified).
+reference](/docs/configuration/#who-gets-notified), and the operator's side —
+alerting on the service itself rather than on DMARC data — is in
+[monitoring](/docs/monitoring/).

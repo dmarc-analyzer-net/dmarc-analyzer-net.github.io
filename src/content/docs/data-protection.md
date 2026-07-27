@@ -85,6 +85,7 @@ server IP addresses and authentication outcomes; retention — the per-client
 window you configured; recipients — none beyond your own infrastructure and
 the notification emails you set up.
 
-Give clients read access through a `client_viewer` account scoped to their own
-data rather than exports — cross-tenant access fails closed, returning 404 for
-anything not granted.
+Give clients read access through a [`client_viewer`
+account](/docs/clients-users-and-audit/) scoped to their own data rather than
+exports — cross-tenant access fails closed, returning 404 for anything not
+granted.
