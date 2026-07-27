@@ -18,7 +18,14 @@ REPO="dmarc-analyzer-net/DmarcAnalyzerApp"
 WANTED="${1:-}"
 
 if [ -z "$WANTED" ]; then
-  WANTED=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
+  # Anonymous API calls are rate-limited per IP, and CI runners share addresses,
+  # so authenticate when a token is available. GitHub Actions exposes one for
+  # free; locally this is simply unset and the call stays anonymous.
+  auth=()
+  [ -n "${GITHUB_TOKEN:-}" ] && auth=(-H "Authorization: Bearer $GITHUB_TOKEN")
+
+  WANTED=$(curl -fsSL ${auth[@]+"${auth[@]}"} \
+    "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null \
     | jq -r '.tag_name // empty' | sed 's/^v//')
   [ -n "$WANTED" ] || { echo "Could not read the latest release from GitHub; pass a version explicitly."; exit 2; }
   echo "Latest release: $WANTED"
