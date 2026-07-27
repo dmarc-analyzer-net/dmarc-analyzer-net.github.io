@@ -234,7 +234,15 @@ primary source; where a line number is given it was accurate in July 2026.
 
 ## Parking Lot
 
-- [~] (in-progress) Free tools as backlink magnets (Cluster F) under `/tools`: the DMARC aggregate-report (RUA) analyzer is live — fully client-side, parses pasted XML plus `.gz`/`.zip`, nothing uploaded. Still to add: DMARC record checker + generator, SPF checker, DKIM lookup — client-side via DNS-over-HTTPS (Cloudflare/Google), kept to a JS island.
+- [~] (in-progress) Free tools as backlink magnets (Cluster F) under `/tools`.
+      Live: the aggregate-report (RUA) analyzer (client-side XML/`.gz`/`.zip`,
+      nothing uploaded) and the **record checker** (`dmarc checker` 6,600/mo,
+      `dmarc lookup` 1,600/mo) — DNS-over-HTTPS against Cloudflare with a Google
+      fallback, validating every RFC 7489 tag and, unusually, verifying external
+      `rua`/`ruf` destinations against their `_report._dmarc` authorization
+      records. That last check is the differentiator: it is the failure mode that
+      produces a perfect-looking record and no reports, and nothing bounces to
+      tell you. Still to add: record generator, SPF checker, DKIM lookup.
 - [ ] (todo) Add MDX (`npx astro add mdx`) if guides need interactive/embedded components (callouts, tabbed code, a record checker).
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
 - [ ] (todo) Add a blog/changelog collection to announce releases and roadmap progress.

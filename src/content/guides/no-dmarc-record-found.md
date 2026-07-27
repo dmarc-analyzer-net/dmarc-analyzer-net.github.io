@@ -46,6 +46,9 @@ resolving the way you expect:
 dig +short TXT _dmarc.yourdomain.com
 ```
 
+No terminal to hand? Our [DMARC record checker](/tools/dmarc-checker/) runs the
+same lookup from your browser and names the problem it finds.
+
 You want exactly one string starting `v=DMARC1`. Three results worth
 recognising:
 
@@ -110,7 +113,10 @@ yourdomain.com._report._dmarc.agency.com   TXT   v=DMARC1
 ```
 
 Without it, standards-compliant receivers won't send the reports. Agencies
-centralising many clients' reports into one mailbox hit this constantly. Once
+centralising many clients' reports into one mailbox hit this constantly — and
+because nothing bounces, the record looks perfect while the reports never come.
+The [record checker](/tools/dmarc-checker/) performs that second lookup for every
+external `rua=` address it finds, which is the fastest way to rule this out. Once
 they do arrive, something has to parse the XML and aggregate it across domains —
 that's what [DMARC Analyzer](/) does, self-hosted and without per-domain pricing.
 

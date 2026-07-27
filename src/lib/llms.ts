@@ -107,6 +107,13 @@ export async function buildSections(): Promise<Section[]> {
       optional: true,
       items: [
         {
+          title: 'DMARC record checker',
+          url: `${SITE}/tools/dmarc-checker/`,
+          description:
+            'Browser-based tool that looks up a domain’s DMARC record, validates every tag, and verifies that external reporting addresses are authorized.',
+          body: '',
+        },
+        {
           title: 'Free DMARC report analyzer',
           url: `${SITE}/tools/dmarc-report-analyzer/`,
           description: 'Browser-based tool for reading a single DMARC aggregate report.',
