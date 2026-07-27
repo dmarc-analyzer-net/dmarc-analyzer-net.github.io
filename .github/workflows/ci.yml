@@ -1,4 +1,5 @@
-# Quality gate for the site: build it, then crawl the built output.
+# Quality gate for the site: check the version pins, build it, then crawl the
+# built output.
 #
 # Deliberately crawls the *local preview* rather than production, so a broken
 # link, a duplicate title or a page missing from the sitemap fails the pull
@@ -22,6 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
+      # Cheap and independent of the build, so it runs first — a stale version
+      # pin should fail in seconds rather than after a full build and crawl.
+      - name: Documentation version check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/check-doc-versions.sh
 
       - uses: actions/setup-node@v5
         with:
