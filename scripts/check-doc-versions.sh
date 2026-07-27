@@ -37,6 +37,11 @@ older_than() {
   [ "$1" != "$WANTED" ] && [ "$(printf '%s\n%s\n' "$1" "$WANTED" | sort -V | head -1)" = "$1" ]
 }
 
+# Deliberately historical references are not staleness. "On 0.2.1 and earlier this
+# was a bug" must keep naming 0.2.1 — bumping it would make the sentence false. The
+# app repo's VersionReferenceTests carves out the same cases for the same reason.
+HISTORICAL='(and|or) earlier|was a bug|releases/tag/v|previous release|superseded|upgrading fixes'
+
 fail=0
 while IFS=: read -r file line text; do
   [ -n "${file:-}" ] || continue
@@ -48,7 +53,8 @@ while IFS=: read -r file line text; do
     fi
   done
 done < <(grep -rnE '[0-9]+\.[0-9]+\.[0-9]+' src/content/docs src/pages 2>/dev/null \
-         | grep -vE 'Apache-2\.0|GPL-[0-9]|CC-BY|RFC ?[0-9]{4}|postgres:1[0-9]')
+         | grep -vE 'Apache-2\.0|GPL-[0-9]|CC-BY|RFC ?[0-9]{4}|postgres:1[0-9]' \
+         | grep -viE "$HISTORICAL")
 
 if [ "$fail" -eq 0 ]; then
   echo "No documentation points at a release older than $WANTED."
