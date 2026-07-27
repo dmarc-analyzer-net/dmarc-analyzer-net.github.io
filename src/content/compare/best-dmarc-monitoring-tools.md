@@ -29,16 +29,23 @@ same [aggregate reports](/glossary/dmarc-aggregate-report/) — and more on
 
 ## The landscape at a glance
 
-| Tool | Hosting | Open source | Pricing model |
-|---|---|---|---|
-| **DMARC Analyzer** | Self-hosted | Yes | Free, unlimited domains |
-| dmarcian | Cloud | No | Domains + volume |
-| EasyDMARC | Cloud | No | Domains + volume |
-| PowerDMARC | Cloud | No | Domains + volume |
-| Valimail | Cloud | No | Enterprise, quote-based |
-| DMARCwise | Cloud (EU) | No | Per organisation, by domain count |
-| DMARCeye | Cloud | No | Per domain, per month |
-| parsedmarc | Self-hosted | Yes | Free (runs on your search stack) |
+*Plans and prices as published in July 2026. Free tiers in particular change
+often — check each vendor before deciding.*
+
+| Tool | Hosting | Open source | Free tier | Pricing model |
+|---|---|---|---|---|
+| **DMARC Analyzer** | Self-hosted | Yes | Everything, unlimited domains | Free |
+| dmarcian | Vendor cloud, regional instances | No | Personal use, 2 domains | Domains + volume |
+| EasyDMARC | Vendor cloud | No | 1 domain, 14 days history | Domains + volume |
+| PowerDMARC | Vendor cloud; on-premise on enterprise terms | No | Trial | Domains + volume |
+| Valimail | Vendor cloud | No | Monitor, self-service | Enforce from $5,000/yr |
+| DMARCwise | Vendor cloud (EU) | No | Yes, limited history | Per organisation, by domain count |
+| DMARCeye | Vendor cloud | No | Yes, limited history | Per domain, per month |
+| parsedmarc | Self-hosted | Yes | Everything | Free |
+
+Two things this table deliberately does not show, because we would lose them:
+every hosted platform here offers vendor support with an SLA, and most manage
+BIMI, MTA-STS and TLS-RPT alongside DMARC. We do neither.
 
 ## Hosted platforms
 
@@ -62,10 +69,16 @@ a few price per organisation instead.
 
 ## Free hosted options
 
-For simple needs: **Postmark's DMARC digests** email you a weekly summary, and
-generic DNS utilities offer one-off record lookups. Good for a single domain;
-limited for ongoing, multi-domain monitoring. For a free option you fully own,
-DMARC Analyzer is [free and self-hosted](/free-dmarc-analyzer/).
+More of the market is free-to-start than the pricing column suggests. dmarcian,
+EasyDMARC and Valimail all run free tiers, and they are genuinely usable — the
+catch is caps rather than cost: a domain or two, and a short retention window,
+which is the part that bites once you want to compare this quarter to last.
+**Postmark's DMARC digests** remain the simplest option of all, emailing a weekly
+summary for a single domain.
+
+For a free option with no caps that you fully own, DMARC Analyzer is [free and
+self-hosted](/free-dmarc-analyzer/) — with the honest trade that you run the
+server.
 
 ## Open-source & self-hosted
 
