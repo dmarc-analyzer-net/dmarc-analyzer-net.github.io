@@ -109,7 +109,9 @@ See [upgrading](/docs/upgrading-and-backup/#pinning-a-version).
 
 The container speaks plain HTTP on 8080. For anything internet-facing, terminate
 TLS in front of it (Caddy, nginx, Traefik) and forward to the `app` container.
-Sessions use a `Secure` cookie, so the browser must reach the app over HTTPS.
+Sessions work over plain HTTP on a private network, but the traffic and the
+session cookie are then unencrypted — put TLS in front of anything beyond a
+network you fully trust.
 
 There is one setting to get right that is easy to miss: without it, **every entry
 in your audit trail records the proxy's address instead of the real caller**. See

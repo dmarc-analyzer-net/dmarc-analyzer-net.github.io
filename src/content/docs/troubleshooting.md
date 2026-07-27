@@ -116,24 +116,36 @@ selector.
 
 ## The login form accepts my password and returns me to the login page
 
-No error, no failed-login entry that helps, just a loop. Almost always TLS.
+No error, no failed-login entry that helps, just a loop.
 
-The session cookie is always marked `Secure`, and browsers accept a `Secure`
-cookie over `http://` only on `localhost`. So sign-in works at
-`http://localhost:8080` and silently fails at `http://dmarc.internal:8080` or
-`http://10.0.5.7:8080` — the server sets the cookie, the browser discards it, and
-the next request arrives unauthenticated.
+**On 0.2.1 and earlier this was a bug, and upgrading fixes it.** The session cookie
+was always marked `Secure`, and browsers accept a `Secure` cookie over `http://`
+only on `localhost` — so sign-in worked at `http://localhost:8080` and silently
+failed at `http://dmarc.internal:8080` or `http://10.0.5.7:8080`. The server set
+the cookie, the browser discarded it, and the next request arrived
+unauthenticated. The flag now follows the request scheme, so plain HTTP on a LAN
+signs in normally.
 
-Fix it by reaching the console over HTTPS: put a [reverse
-proxy](/docs/reverse-proxy/) in front of it, even on a private network or VPN. To
-confirm the diagnosis without setting one up, tunnel to it and use `localhost`:
+If you are on a newer version and still looping, the usual cause is a **reverse
+proxy that terminates TLS without telling the app**. The browser is on `https://`,
+the app sees `http://`, and it issues a cookie the browser then treats
+inconsistently. Set:
+
+```bash
+Network__UseForwardedHeaders=true
+Network__TrustedNetworks__0=172.16.0.0/12   # or your proxy's address
+```
+
+`X-Forwarded-Proto` is what tells the app the original request was HTTPS. The
+[reverse proxy guide](/docs/reverse-proxy/) has working configs — and the same
+setting stops your audit trail recording the proxy instead of the caller.
+
+To separate a cookie problem from a credentials problem without changing anything,
+tunnel in and use `localhost`, which browsers always treat as a secure origin:
 
 ```bash
 ssh -L 8080:localhost:8080 you@the-host   # then open http://localhost:8080
 ```
-
-If you are already behind a proxy and still looping, check that the proxy actually
-terminates TLS and that the browser address bar says `https://`.
 
 ## I can't sign in / lost the admin account
 
