@@ -81,6 +81,147 @@ Keep claims truthful to the intended end state.
 - [ ] (todo) Run a technical SEO crawl of `dmarc-analyzer.net` with [Screaming Frog SEO Spider](https://www.screamingfrog.co.uk/seo-spider/user-guide/general/#linux) and fix what it finds. Install on Linux by downloading the `.deb` and `sudo apt-get install ./screamingfrogseospider_<version>_amd64.deb`, then run `screamingfrogseospider`. The free version's 500-URL cap is ample (the site is well under that), so a one-off GUI crawl costs nothing; headless/CLI (`--crawl --headless --export-tabs`), saved crawls, scheduling, JS rendering and the GSC/PSI integrations are licence-only (£199/yr), so only buy in if we want this automated in CI. Look for: broken internal links, redirect chains, orphan pages, duplicate/missing titles + meta descriptions, missing/duplicate H1s, thin pages, canonical and hreflang issues, oversized images, and pages missing from the sitemap.
 - [ ] (todo) Plan a dropdown/mega-menu in `Header.astro` — the flat nav now carries Features, Guides, Glossary, Setup, Compare, Tools, How it works and Docs, which is at the limit of what fits; group before adding more.
 
+## Content accuracy (from the July 2026 docs review)
+
+A full review of every content page against the RFCs and the shipped code. The
+[deployment-docs errors](#deployment-docs), the `pct=` fallback rule, the
+competitor claims, and the missing console/monitoring/data-protection pages were
+fixed at the time (PRs #37, #38, #40–43). What follows is what was found and
+*not* fixed, ordered by how much harm it does. Every item was verified against a
+primary source; where a line number is given it was accurate in July 2026.
+
+### Corrections — statements that are wrong
+
+- [ ] (todo) **`dmarc-for/google-workspace.md` inverts Google's DKIM behaviour.**
+      Line ~56 says Workspace "does **not** sign with DKIM until you generate a
+      key". It always signs — with a Google-owned default key and
+      `d=<domain>.<datestamp>.gappssmtp.com`, which is valid but never *aligns*.
+      The troubleshooting row that follows ("`dkim=none` on all mail → Start
+      authentication was never clicked") is therefore wrong about the symptom
+      too: you see `dkim=pass` with a `gappssmtp.com` domain, conclude DKIM is
+      fine, and never find the alignment problem. `microsoft-365.md:124` already
+      handles its `onmicrosoft.com` equivalent correctly — copy that treatment.
+- [ ] (todo) **`glossary/mta-sts.md:16` names the wrong actor.** "MTA-STS makes
+      receivers reject that fallback" — it is the *sending* MTA that fetches the
+      policy and refuses to deliver (RFC 8461 §5). The receiver publishes; it
+      cannot enforce. Line 10 of the same page gets it right, so the page
+      contradicts itself six lines apart.
+- [ ] (todo) **`guides/fix-dmarc-failure.md` has the forwarding mechanism
+      backwards** (~line 86): it says forwarding "changes the envelope, which
+      breaks SPF". Plain forwarding breaks SPF precisely because it does *not* —
+      the forwarder relays the original `MAIL FROM` from its own unlisted IP
+      (RFC 7208 §10.3). Forwarders that *do* rewrite (SRS) make SPF pass for
+      their domain, which then fails alignment. A reader who believes the stated
+      mechanism concludes SRS fixes DMARC.
+- [ ] (todo) **`glossary/dmarc.md:3` — the meta description says DMARC acts on
+      mail that "fails SPF and DKIM".** Mail can pass both and still fail DMARC
+      through non-alignment; the page body gets this right. This string is the
+      `<meta description>`, the index card *and* the `DefinedTerm` JSON-LD, so
+      the wrong version is the one that reaches search results.
+- [ ] (todo) **`guides/fix-dmarc-failure.md` links "ARC" to `/glossary/dkim/`.**
+      There is no ARC entry; the link resolves but lands somewhere that never
+      mentions the term. Either write the entry (below) or unlink.
+- [ ] (todo) **`dmarc-for/godaddy.md` models the mistake it warns about.** Lines
+      26–27 tell readers to remove the stale `secureserver.net` include after
+      migrating to GoDaddy-resold M365; line ~57 then shows a combined example
+      stacking both. Keeping it authorises GoDaddy's whole shared mail
+      infrastructure to send as the domain.
+- [ ] (todo) **`dmarc-for/godaddy.md:129` overstates what forwarding
+      overwrites.** GoDaddy domain forwarding manages the root `A` and `www`
+      CNAME, not TXT records — so "records vanish" sends readers chasing
+      forwarding instead of the doubled-hostname mistake the same page documents
+      correctly.
+- [ ] (todo) **`guides/dmarc-policy-not-enabled.md:43` claims only `p=reject`
+      clears the warning.** The warning is literally "Quarantine/**Reject**
+      policy not enabled"; `p=quarantine` satisfies it. Same page, line ~89,
+      promises cPanel instructions under `/dmarc-for/` — only Google Workspace,
+      Microsoft 365 and GoDaddy exist.
+- [ ] (todo) **`guides/no-dmarc-record-found.md:86` contradicts itself in one
+      sentence** — "DMARC lookups do **not** walk up to the parent domain" and
+      then describes the receiver doing exactly that. RFC 7489 §6.6.3 defines one
+      step to the organizational domain; it is *checkers* that report on the
+      exact name queried.
+
+### Omissions — true as far as they go
+
+- [ ] (todo) **The `_report._dmarc` external-destination rule is missing from
+      all three `/dmarc-for` pages.** Every reader of those pages will point
+      `rua=` at an analyzer on another domain, which RFC 7489 §7.1 requires the
+      destination domain to authorise. `guides/no-dmarc-record-found.md:104`
+      covers it correctly, so the provider pages are the outlier — and this is
+      the difference between our own product receiving data and silently
+      receiving none. Add the agency wildcard form
+      (`*._report._dmarc.agency.com`) while there.
+- [ ] (todo) **`guides/spf-record-syntax.md` omits `exists` from both the
+      mechanism table and the lookup-counting list** (RFC 7208 §4.6.4 names
+      `include`, `a`, `mx`, `ptr`, `exists` and `redirect`). It also omits the
+      separate 10-name sub-limits on `mx`/`ptr` — a domain with 12 MX hosts
+      permerrors while showing a term count of 1. `fix-dmarc-failure.md:125`
+      says "under 10" where the limit is 10.
+- [ ] (todo) **No page gives DKIM's DNS location.** `guides/spf-dkim-dmarc.md`
+      is the foundational explainer and never states
+      `<selector>._domainkey.<domain>` — the word "selector" does not appear on
+      it at all, though `/glossary/dkim-selector/` exists and no guide links to
+      it. The same page overstates DKIM as proving the message "came from your
+      domain"; RFC 6376 §1 is explicit that it asserts responsibility, not origin.
+- [ ] (todo) **`sp=` inheritance is stated on three pages and all three omit the
+      default** — absent `sp=`, subdomains inherit `p=`
+      (`dmarc-policy-not-enabled.md:82`, `no-dmarc-record-found.md:88`,
+      `fix-dmarc-failure.md:96`). `np=` (RFC 9091) appears nowhere on the site.
+- [ ] (todo) **No page mentions the Gmail/Yahoo/Outlook bulk-sender
+      requirements** (Feb 2024 onward) — the strongest present-day reason a
+      reader needs any of this, absent from all eight guides.
+- [ ] (todo) **`glossary/bimi.md` frames the VMC as a Gmail quirk** (line ~65)
+      when every major provider that displays BIMI requires one, and never
+      mentions that **Outlook does not support BIMI at all** — which for a B2B
+      sender changes the whole cost/benefit.
+- [ ] (todo) **`glossary/dmarc-aggregate-report.md` omits the `_report._dmarc`
+      requirement, gzip delivery, and `ri=` being advisory.**
+
+### New pages worth writing
+
+- [ ] (todo) **A DMARC tag reference.** `fo`, `ruf`, `ri`, `rf` and `np` appear
+      **nowhere in the content tree**; `sp`, `adkim` and `aspf` are scattered
+      across four pages at differing accuracy. One "every tag, its default, and
+      whether you need it" page fixes several items above at once — highest-value
+      single addition.
+- [ ] (todo) **Glossary entries for ARC and TLS-RPT.** Both are named as
+      backlog items already; ARC is the mislinked term above, and
+      `mta-sts.md:69` devotes a section to TLS-RPT with nothing to link to.
+- [ ] (todo) **A forwarding / mailing-lists / ARC guide.** Currently one
+      paragraph with a broken link. Covers why lists break DKIM, From-rewriting,
+      what ARC does and doesn't buy, and why forwarding failures must not gate
+      enforcement — the enforcement guide's exit criterion is otherwise
+      unachievable.
+- [ ] (todo) **Cloudflare under `/dmarc-for`** — a *dependency* of the existing
+      three rather than a sibling: proxying a `selector1._domainkey` CNAME
+      breaks M365 DKIM outright, and Cloudflare's SPF flattening interacts with
+      the 10-lookup advice on all three pages.
+
+### Structure
+
+- [ ] (todo) **The four content collections barely link to each other.** From a
+      sweep of 205 internal links: **docs → glossary: 0** (no doc page defines
+      *alignment*, *RUA* or *selector*); **guides → docs: 0** (six of eight
+      guides link to the marketing home page instead); **compare → docs: 0**, and
+      compare is a pure sink nothing links into. The educational corpus already
+      ranks and dead-ends — this is the highest-leverage SEO *and* usability
+      change available.
+- [ ] (todo) **"Related links" on guides and compare are `all.slice(0, 3)`** —
+      collection order, not topical relatedness. Only the glossary uses curated
+      `related` frontmatter.
+- [ ] (todo) **Near-orphans with no editorial inbound links:**
+      `/docs/security/`, `/glossary/bimi/`, `/glossary/mta-sts/`,
+      `/dmarc-for/godaddy/`, `/brand/`, and `/free-dmarc-analyzer/` (absent from
+      nav *and* footer).
+- [ ] (todo) **Docs have no version marker.** A reader on `0.2.0` and one on
+      `edge` see identical pages, and `README.md` explicitly tells people `edge`
+      is unreleased. Consider an "applies to" field or a docs-version selector.
+- [ ] (todo) **`SECTION_ORDER` is duplicated in four files**
+      (`DocsSidebar.astro`, `docs/index.astro`, `docs/[...slug].astro`,
+      `lib/llms.ts`) — it taxes every structural change; adding the "Using the
+      console" section meant editing all four.
+
 ## Low Priority
 
 - [~] (in-progress) Add per-provider setup pages (Cluster C) under `/dmarc-for` (content collection + shared template + index): Google Workspace, Microsoft 365, and GoDaddy are live. Still to add: Cloudflare, Amazon SES, SendGrid, Mailchimp, Mailgun, Klaviyo, Zoho, Postmark — plus companion "why <provider> is failing DMARC" pages where the demand exists.
