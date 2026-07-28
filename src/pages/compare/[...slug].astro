@@ -17,6 +17,7 @@ export async function getStaticPaths() {
 const { entry, all } = Astro.props;
 const { Content } = await render(entry);
 const path = `/compare/${entry.id}/`;
+const image = `/open-graph/compare/${entry.id}.png`;
 
 // Alphabetically by competitor, as on the index. An unsorted slice took whatever
 // order the filesystem handed getCollection, which made the build non-reproducible.
@@ -33,7 +34,7 @@ const articleSchema = {
   '@type': 'Article',
   headline: entry.data.title,
   description: entry.data.description,
-  image: new URL('/og.png', Astro.site).href,
+  image: new URL(image, Astro.site).href,
   datePublished: published,
   dateModified: modified,
   author: { '@type': 'Organization', name: 'DMARC Analyzer' },
@@ -41,7 +42,7 @@ const articleSchema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="compare" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} ogType="article" publishedTime={published} modifiedTime={modified}>
+<BaseLayout current="compare" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} image={image} ogType="article" publishedTime={published} modifiedTime={modified}>
   <JsonLd slot="head" schema={articleSchema} />
     <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
