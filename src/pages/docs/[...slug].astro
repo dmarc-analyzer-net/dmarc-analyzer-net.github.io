@@ -49,12 +49,7 @@ const schema = {
 <BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={schema} />
     <div class="docs-shell" style={`max-width:${showToc ? 1280 : 1160}px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;`}>
-      <aside class="docs-aside" style="position:sticky; top:88px;">
-        <h2 class="docs-aside-heading">All documentation</h2>
-        <DocsSidebar current={entry.id} />
-      </aside>
-
-      <article style="min-width:0;">
+      <article style="min-width:0; order:2;">
         <Breadcrumbs items={[
           { label: 'Home', href: '/' },
           { label: 'Docs', href: '/docs/' },
@@ -90,5 +85,10 @@ const schema = {
           {showToc && <Toc headings={headings} maxDepth={3} />}
         </div>
       </article>
+
+      <aside class="docs-aside" style="position:sticky; top:88px; order:1;">
+        <h2 class="docs-aside-heading">All documentation</h2>
+        <DocsSidebar current={entry.id} />
+      </aside>
     </div>
 </BaseLayout>
