@@ -39,3 +39,9 @@ If you'd rather **self-host**, monitor **unlimited domains** without tier limits
 and keep client data on infrastructure you control, DMARC Analyzer is the
 open-source alternative. If a checker flags problems, our guide on
 [why email fails DMARC](/guides/fix-dmarc-failure/) walks through the fixes.
+
+Worth being plain about the overlap: if you only have one domain to watch and
+don't mind a 14-day report window, EasyDMARC's free tier gets you a hosted
+dashboard with zero setup. Self-hosting buys unlimited domains and unlimited
+history, not necessarily a faster start — that trade only pays off once you
+have more than one domain, or want the data to never leave your own server.

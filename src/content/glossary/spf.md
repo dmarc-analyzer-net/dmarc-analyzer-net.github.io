@@ -45,3 +45,12 @@ The practical consequence is that `ip4:`/`ip6:` ranges are free while every
 includes with the address ranges behind them, or to drop senders you no longer
 use. The [SPF record checker](/tools/spf-checker/) expands every include
 recursively and gives you the real count.
+
+## One record per domain, not one per sender
+
+A domain may publish only **one** `v=spf1` TXT record. Adding a second one for
+a new sender — a common result of onboarding a new mail platform without
+touching the existing record — leaves two SPF records at the same name, and
+receivers `permerror` that exactly as they would a record over the lookup
+limit. The fix is a single record combining every sender with `include:`, not
+a second one alongside the first.

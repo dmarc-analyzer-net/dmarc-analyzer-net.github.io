@@ -46,3 +46,12 @@ Because the selector is part of the lookup, a domain can publish several keys at
 once, which is what makes rotation possible without downtime: publish the new
 selector, switch signing to it, then retire the old key once no mail in flight
 still references it.
+
+## Why some changes break the signature and others don't
+
+The `c=` tag sets how forgiving verification is about changes made in
+transit. `simple` breaks over almost any change to whitespace or line
+endings; `relaxed` (the common default) tolerates that but still breaks if a
+header's actual value changes. Neither survives a footer inserted *into* the
+signed body — which is the other half of why a mailing list can fail DKIM
+while a plain forward, which never touches signed content, does not.

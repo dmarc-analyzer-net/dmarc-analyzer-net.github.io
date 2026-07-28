@@ -54,6 +54,17 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
           domain with the <a href="/tools/dmarc-checker/">record checker</a>, which
           verifies external destinations for you.
         </p>
+        <p>
+          One more thing every provider shares: publishing a record in the
+          control panel is instant, but DNS catching up is not. A resolver
+          caches what it already has for the record's TTL, so a checker
+          showing the old value right after you save is usually just cache,
+          not a mistake — it can take anywhere from a few minutes to 48 hours
+          to be visible everywhere. Query
+          <a href="https://dns.google/resolve?name=_dmarc.yourdomain.com&amp;type=TXT">Google's
+          resolver</a> directly if you want the least-cached answer available,
+          rather than waiting out the TTL blind.
+        </p>
       </div>
     </section>
 </BaseLayout>

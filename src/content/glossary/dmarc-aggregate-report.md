@@ -54,3 +54,11 @@ Each `<record>` in the XML groups messages by source and reports the
 Reading these by hand across many domains does not scale — which is what a
 self-hosted analyzer like [DMARC Analyzer](/) is for. See
 [how to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report/).
+
+## Providers don't all implement the schema identically
+
+Some omit optional tags like `<email>`; report file names aren't always built
+exactly as specified either, which occasionally breaks tooling that parses
+the filename instead of the XML inside it. None of that makes the report
+invalid — it just means a parser written for one provider's exact output can
+quietly drop rows from another's.

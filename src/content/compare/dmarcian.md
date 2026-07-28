@@ -40,3 +40,10 @@ value **open source you can audit and run yourself**, DMARC Analyzer is built fo
 exactly that. New to DMARC? Start by
 [publishing your first record](/guides/publish-your-first-dmarc-record/) and
 [reading the reports](/guides/how-to-read-a-dmarc-aggregate-report/).
+
+Worth being plain about the overlap: dmarcian's free tier covers personal use
+on up to two domains, and you get a vendor-run dashboard with none of the setup
+this project asks of you. If that fits — a couple of personal domains, no need
+to self-host — it's a perfectly reasonable place to stop looking. Where DMARC
+Analyzer earns its keep is past that: more domains, client work, or data that
+has to stay on infrastructure you control.

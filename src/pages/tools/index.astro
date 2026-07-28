@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
+import Cta from '../../components/Cta.astro';
 
 const tools = [
   {
@@ -57,5 +58,26 @@ const tools = [
         ))}
       </ul>
       <p style="font-size:var(--text-sm); color:var(--text-faint); margin:24px 2px 0;">Everything here runs client-side and is <a href="https://github.com/dmarc-analyzer-net/dmarc-analyzer-net.github.io">open source</a>, like the application itself.</p>
+
+      <div class="prose" style="margin-top:44px; max-width:720px;">
+        <h2>Why there's no server behind these</h2>
+        <p>
+          The three checkers look up DNS directly from your browser over
+          DNS-over-HTTPS, and the generator and report analyzer never make a
+          network request at all — a DMARC record is built from form fields you
+          typed, and a report is XML you already have. There's no backend to send
+          any of it to, which means there's nothing here that could log a domain
+          you looked up or a report you pasted in, by accident or otherwise.
+        </p>
+        <p>
+          The trade-off is real: a DNS-over-HTTPS resolver still sees the
+          lookup, and very large aggregate reports can make a phone's browser tab
+          slow to parse. For a quick check on a domain you don't control, or a
+          one-off report from a client, that's the right trade. Running the same
+          checks continuously, across a portfolio of domains, is what the
+          self-hosted <a href="/">DMARC Analyzer</a> application is for.
+        </p>
+      </div>
+      <Cta />
     </section>
 </BaseLayout>

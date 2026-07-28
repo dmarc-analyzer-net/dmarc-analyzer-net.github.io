@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Icon from '../../components/Icon.astro';
+import Cta from '../../components/Cta.astro';
 
 const entries = (await getCollection('compare', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.competitor.localeCompare(b.data.competitor),
@@ -33,5 +34,29 @@ const entries = (await getCollection('compare', ({ data }) => !data.draft)).sort
           </li>
         ))}
       </ul>
+
+      <!-- The one pattern that holds across every entry above, not repeated in
+           each page's own table. -->
+      <div class="prose" style="margin-top:44px; max-width:720px;">
+        <h2>The pattern across every alternative</h2>
+        <p>
+          Every commercial platform above is vendor-hosted and priced by
+          <strong>domain count and message volume</strong> — the more domains you
+          watch and the more mail they send, the more the bill grows. DMARC
+          Analyzer is the one constant on the other side of every comparison:
+          <a href="/self-hosted-dmarc-monitoring/">self-hosted</a>,
+          <a href="/free-dmarc-analyzer/">free</a>, and unmetered, because there's
+          no vendor infrastructure whose cost has to be recovered per domain.
+        </p>
+        <p>
+          That's a trade, not a free lunch: you run the server, and support is
+          the <a href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp">issue
+          tracker</a> rather than an SLA. Each page above is honest about where
+          the vendor-hosted option is genuinely the better fit — usually a single
+          domain, a need for vendor support, or a wider bundled tool suite you'd
+          rather not assemble yourself.
+        </p>
+      </div>
+      <Cta />
     </section>
 </BaseLayout>

@@ -42,3 +42,9 @@ outright, and skip per-domain billing**, DMARC Analyzer is built around exactly
 that multi-tenant, self-hosted model. See the
 [per-provider setup guides](/dmarc-for/) for onboarding client domains, and a guide
 to [running DMARC across many client domains](/guides/dmarc-multiple-client-domains/).
+
+Worth being plain about the trade: PowerDMARC bundles BIMI, MTA-STS and TLS-RPT
+management alongside DMARC, and handles forensic (RUF) reports — ground this
+project doesn't cover. If you want one vendor and one bill for the full
+protocol stack, and you're comfortable paying for that convenience, that's a
+real reason to pick them over stitching the pieces together yourself.

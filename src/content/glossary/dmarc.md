@@ -31,3 +31,21 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 [publish your first DMARC record](/guides/publish-your-first-dmarc-record/) to
 set one up, then [move to enforcement](/guides/from-monitoring-to-enforcement/)
 once the reports look clean.
+
+## Why it exists
+
+Without DMARC, an SPF or DKIM failure has no consequence for the receiver and
+no visibility for you: mail can fail authentication silently, and you have no
+way to learn that someone is sending as your domain to people who aren't you.
+DMARC closes both gaps at once — a policy for receivers to act on, and reports
+that surface every source claiming your domain, wanted or not.
+
+## What it doesn't do
+
+Three DNS records deliver less than people expect. DMARC only governs mail
+claiming your *exact* domain — a look-alike (`y0ur-company.com`, an added
+hyphen) authenticates against its own record, not yours, so DMARC has nothing
+to say about it. Passing DMARC isn't a spam filter either: a message can
+authenticate perfectly and still be mail nobody wanted. And a subdomain with no
+policy of its own follows `p=` only because [`sp=`](/glossary/dmarc-policy/)
+says so by default — it isn't automatically protected in some deeper sense.

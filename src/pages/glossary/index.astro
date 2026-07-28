@@ -18,7 +18,27 @@ const terms = (await getCollection('glossary', ({ data }) => !data.draft)).sort(
         <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:600px;">Short, precise definitions of the terms you meet while setting up and monitoring DMARC.</p>
       </div>
     </section>
-    <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
+    <section style="max-width:720px; margin:0 auto; padding:8px 32px 0;">
+      <div class="prose">
+        <h2>How these fit together</h2>
+        <p>
+          <a href="/glossary/spf/">SPF</a> and <a href="/glossary/dkim/">DKIM</a>
+          each authenticate a message on their own terms — one checks the
+          sending server, the other checks a cryptographic signature.
+          <a href="/glossary/dmarc/">DMARC</a> sits above both: it requires one
+          of them to pass <em>and</em>
+          <a href="/glossary/dmarc-alignment/">align</a> with the visible
+          <code>From:</code> address, tells receivers what to do otherwise via
+          the <a href="/glossary/dmarc-policy/">policy</a>, and reports back on
+          every source claiming your domain through
+          <a href="/glossary/dmarc-aggregate-report/">aggregate reports</a>.
+          <a href="/glossary/bimi/">BIMI</a> and
+          <a href="/glossary/mta-sts/">MTA-STS</a> build on that foundation
+          rather than replacing any part of it.
+        </p>
+      </div>
+    </section>
+    <section style="max-width:960px; margin:0 auto; padding:24px 32px 72px;">
       <div style="margin:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;">
         {terms.map((t) => (
           <a class="lift" href={`/glossary/${t.id}/`} style="display:block; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:18px 20px; color:var(--text-body) !important;">

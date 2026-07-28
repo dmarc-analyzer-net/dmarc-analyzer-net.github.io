@@ -33,3 +33,14 @@ from the current specification in favour of `t=`, though receivers still honour 
 
 Moving from `none` to `reject` safely is a process, not a flip of a switch — see
 [from monitoring to enforcement](/guides/from-monitoring-to-enforcement/).
+
+## What quarantine and reject mean in practice
+
+Both are requests, not guarantees — the receiving mail system decides how to
+carry them out. In practice, quarantine almost always lands in the spam
+folder rather than a formal hold, and reject usually means the message is
+refused during the SMTP conversation itself, before it becomes a bounce
+anyone has to handle. Most receivers honour both closely enough to treat that
+as a safe assumption, but "the report says pass and the mail still landed in
+spam" is a real thing a receiver's own filtering can still do on top of
+DMARC.
