@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
 
 const title = 'Free DMARC report analyzer';
 const description =
@@ -72,6 +73,87 @@ const schema = {
           <a href="/guides/how-to-read-a-dmarc-aggregate-report/">how to read a
           DMARC aggregate report</a>.
         </p>
+        <p>
+          It reads <strong>aggregate (RUA) reports only</strong>. Forensic
+          (RUF) reports use a different, per-message format and almost no
+          provider still sends them, so there's nothing to gain from
+          supporting it here.
+        </p>
+
+        <h2>Formats it accepts</h2>
+        <p>
+          Providers don't all deliver the XML the same way, so the tool
+          handles the three shapes it actually shows up in:
+        </p>
+        <ul>
+          <li><strong>Plain <code>.xml</code></strong> — paste it directly, or
+            drop the file.</li>
+          <li><strong><code>.xml.gz</code></strong> — the most common form.
+            The spec asks for it gzipped so a busy sending domain's daily
+            report doesn't blow past a mailbox's attachment size limit; the
+            tool decompresses it with the browser's native
+            <code>DecompressionStream</code>, no library involved.</li>
+          <li><strong><code>.zip</code></strong> — a handful of providers wrap
+            the XML in a zip instead of gzipping it. The tool reads the
+            archive's central directory and inflates the one file inside.</li>
+        </ul>
+        <p>
+          Whichever format it arrives in, decompression and parsing both
+          happen in this tab, and the file never leaves your browser. A report
+          carries no message content, but it does list every sending IP that
+          claimed your domain — infrastructure detail some teams would rather
+          not hand to a third-party server just to read a table.
+        </p>
+
+        <h2>Reading the table</h2>
+        <p>
+          Each row is one sending source, grouped by IP address:
+        </p>
+        <ul>
+          <li><strong>Messages</strong> — how many the provider saw from that
+            IP over the report's date range, not a running total.</li>
+          <li><strong>DKIM</strong> and <strong>SPF</strong> — the raw result
+            for that mechanism, straight from the report's
+            <code>policy_evaluated</code> block.</li>
+          <li><strong>Disposition</strong> — what the receiver actually did
+            with the mail: <code>none</code>, <code>quarantine</code>, or
+            <code>reject</code>, per your published
+            <a href="/glossary/dmarc-policy/">policy</a>.</li>
+          <li><strong>DMARC</strong> — pass if <strong>either</strong> DKIM or
+            SPF passed <em>and</em>
+            <a href="/glossary/dmarc-alignment/">aligned</a>; the report's raw
+            fields don't state this outright, so the tool derives it.</li>
+        </ul>
+        <p>
+          A pass in one column and a fail in the other is normal, not a bug —
+          see <a href="/glossary/dmarc-alignment/">alignment</a> for why a
+          "passing" mechanism can still not count.
+        </p>
+
+        <h2>Which rows need attention</h2>
+        <p>
+          Most reports are mostly noise once you know what to skip:
+        </p>
+        <ul>
+          <li><strong>Both pass</strong> — legitimate, aligned mail. Nothing to do.</li>
+          <li><strong>One pass, one fail</strong> — DMARC still passes; worth
+            fixing the failing mechanism before tightening policy, but not
+            urgent.</li>
+          <li><strong>Both fail, source you recognise</strong> — a real sender
+            you haven't authenticated yet. Add it to
+            <a href="/glossary/spf/">SPF</a> or set up
+            <a href="/glossary/dkim/">DKIM</a> for it.</li>
+          <li><strong>Both fail, unfamiliar source</strong> — shadow IT, or
+            someone spoofing the domain. This is the row DMARC exists to
+            surface.</li>
+        </ul>
+        <p>
+          The full walkthrough, with the forwarding and mailing-list case that
+          never quite clears up, is in
+          <a href="/guides/how-to-read-a-dmarc-aggregate-report/">how to read a
+          DMARC aggregate report</a>.
+        </p>
+
         <h2>Analyzing one report vs. many</h2>
         <p>
           This is a handy one-off reader. Doing it across many domains, every
@@ -81,6 +163,14 @@ const schema = {
           <a href="/free-dmarc-analyzer/">free and open source</a>.
         </p>
       </div>
+
+      <RelatedLinks links={[
+        { label: 'How to read a DMARC aggregate report', href: '/guides/how-to-read-a-dmarc-aggregate-report/', note: 'The full field guide this tool is built around.' },
+        { label: 'DMARC aggregate report', href: '/glossary/dmarc-aggregate-report/', note: 'What the RUA report contains, and why rua= needs authorising.' },
+        { label: 'DMARC record checker', href: '/tools/dmarc-checker/', note: 'Check the policy that decides what happens to these rows.' },
+        { label: 'DMARC for many client domains', href: '/guides/dmarc-multiple-client-domains/', note: 'Reading reports by hand stops scaling fast — the agency version of this problem.' },
+      ]} />
+
       <Cta />
     </section>
 </BaseLayout>
