@@ -24,6 +24,24 @@ export type Item = {
 
 const notDraft = ({ data }: { data: { draft?: boolean } }) => !data.draft;
 
+/**
+ * Strips MDX scaffolding out of a raw body.
+ *
+ * `entry.body` is the file's own text, so an `.mdx` page carries its `import`
+ * lines and component tags into this plain-text mirror — a reader (or a model)
+ * would get `import Callout from '../../components/Callout.astro';` as if it were
+ * prose. Component *children* are kept: that is the content. `scripts/crawl.py`
+ * cannot catch this, because llms-full.txt is neither HTML nor in the sitemap.
+ */
+const plainBody = (body: string): string =>
+  body
+    .split('\n')
+    .filter((line) => !/^\s*import\s.+\sfrom\s+['"].+['"];?\s*$/.test(line))
+    .filter((line) => !/^\s*<\/?[A-Z][A-Za-z0-9]*(\s[^>]*)?\/?>\s*$/.test(line))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
 const item = (
   entry: CollectionEntry<'guides' | 'compare' | 'providers' | 'docs'>,
   base: string,
@@ -31,7 +49,7 @@ const item = (
   title: entry.data.title,
   url: `${SITE}${base}/${entry.id}/`,
   description: entry.data.description,
-  body: entry.body ?? '',
+  body: plainBody(entry.body ?? ''),
 });
 
 /** Alphabetical by title — these have no inherent reading order. */
@@ -161,7 +179,7 @@ export async function buildSections(): Promise<Section[]> {
             title: e.data.term,
             url: `${SITE}/glossary/${e.id}/`,
             description: e.data.description,
-            body: e.body ?? '',
+            body: plainBody(e.body ?? ''),
           }))
           .sort(byTitle),
         ...compare.map((e) => item(e, '/compare')).sort(byTitle),

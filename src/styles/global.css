@@ -160,6 +160,26 @@ code,kbd,pre{font-family:var(--font-mono)}
   .prose th, .prose td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border-default); }
   .prose th { background: var(--surface-page); font-weight: 600; color: var(--gray-800); }
 
+  /* Callouts (see Callout.astro). Variant colours arrive as custom properties
+     from the component, the way the design system's Badge maps a variant onto
+     the --status-* tokens; only layout and the child-typography resets are here.
+     They have to be: a component's scoped styles never reach slotted markdown
+     children, and `.prose p` would otherwise leave a trailing 18px margin inside
+     every box. Ordered after `.prose` on purpose — `.callout code` and
+     `.prose code` tie on specificity, so source order decides. */
+  .callout {
+    display: flex; gap: 12px; margin: 0 0 18px; padding: 14px 18px;
+    background: var(--callout-bg); border-left: 3px solid var(--callout-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--gray-800);
+  }
+  .callout-body { min-width: 0; }  /* so a <pre> inside scrolls instead of blowing the row out */
+  .callout-title { margin: 0 0 6px; font-weight: 600; color: var(--callout-fg); }
+  .callout p:last-child, .callout ul:last-child,
+  .callout ol:last-child, .callout pre:last-child { margin-bottom: 0; }
+  /* Inline code inside a tinted box: the teal chip `.prose` gives it clashes on
+     amber and red, so it goes neutral on every variant. */
+  .callout code { background: var(--surface-card); border-color: var(--border-default); }
+
 .docs-aside-heading { display: none; }
 
 /* --- Responsive ---------------------------------------------------------

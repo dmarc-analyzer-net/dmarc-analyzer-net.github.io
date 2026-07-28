@@ -5,6 +5,7 @@ import LogoMark from '../components/LogoMark.astro';
 import BrowserFrame from '../components/BrowserFrame.astro';
 import Terminal from '../components/Terminal.astro';
 import JsonLd from '../components/JsonLd.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
 
 const title = 'DMARC Analyzer — Open-source DMARC monitoring for agencies';
 const description =
@@ -64,29 +65,34 @@ const appSchema = {
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 
-// Mirror of the on-page FAQ below; keep in sync if the questions change.
-const faqs = [
-  ['What is DMARC, in one sentence?', 'DMARC is an email standard that lets a domain owner tell receiving servers what to do with mail that fails authentication — monitor it, quarantine it, or reject it — and get reports on who is sending as their domain. It is how you stop others from spoofing your clients’ brands.'],
-  ['Why run it myself instead of a hosted tool?', 'Cost and control. Hosted platforms bill per domain and per message, so an agency with dozens of clients pays the most. Self-hosting removes that ceiling, keeps sensitive report data on your own infrastructure, and lets you customise the tool to your workflow.'],
-  ['How many domains can it handle?', 'There is no built-in limit. Domains are grouped by client, and the background worker scales with your database — the same install comfortably serves a handful of domains or several hundred across many clients.'],
-  ['What do I need to run it?', 'For production, Docker and a PostgreSQL database (both included in the compose file) plus a mailbox that receives your DMARC reports. For local development, .NET SDK 10 and Node.js 22+ give you hot reload on both the API and the frontend.'],
-  ['Is it really free?', 'Yes. The project is released under the Apache-2.0 licence — free to use, modify, and deploy commercially. You pay only for the infrastructure you run it on.'],
+// Rendered below *and* emitted as FAQPage JSON-LD by <Faq>, from this one array.
+const FAQS: FaqItem[] = [
+  {
+    q: 'What is DMARC, in one sentence?',
+    a: "DMARC is an email standard that lets a domain owner tell receiving servers what to do with mail that fails authentication — monitor it, quarantine it, or reject it — and get reports on who is sending as their domain. It's how you stop others from spoofing your clients' brands.",
+  },
+  {
+    q: 'Why run it myself instead of a hosted tool?',
+    a: 'Cost and control. Hosted platforms bill per domain and per message, so an agency with dozens of clients pays the most. Self-hosting removes that ceiling, keeps sensitive report data on your own infrastructure, and lets you customise the tool to your workflow.',
+  },
+  {
+    q: 'How many domains can it handle?',
+    a: 'There is no built-in limit. Domains are grouped by client, and the background worker scales with your database — the same install comfortably serves a handful of domains or several hundred across many clients.',
+  },
+  {
+    q: 'What do I need to run it?',
+    a: 'For production, Docker and a PostgreSQL database (both included in the compose file) plus a mailbox that receives your DMARC reports. For local development, .NET SDK 10 and Node.js 22+ give you hot reload on both the API and the frontend.',
+  },
+  {
+    q: 'Is it really free?',
+    a: 'Yes. The project is released under the Apache-2.0 licence — free to use, modify, and deploy commercially. You pay only for the infrastructure you run it on.',
+  },
 ];
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faqs.map(([q, a]) => ({
-    '@type': 'Question',
-    name: q,
-    acceptedAnswer: { '@type': 'Answer', text: a },
-  })),
-};
 ---
 <BaseLayout current="home" title={title} description={description} path="/">
   <JsonLd slot="head" schema={orgSchema} />
   <JsonLd slot="head" schema={websiteSchema} />
   <JsonLd slot="head" schema={appSchema} />
-  <JsonLd slot="head" schema={faqSchema} />
     <a id="top"></a>
 
       <!-- HERO -->
@@ -370,28 +376,7 @@ const faqSchema = {
           <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">FAQ</div>
           <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0;">Questions, answered plainly.</h2>
         </div>
-        <div style="display:flex; flex-direction:column; gap:0; border-top:1px solid var(--border-default);">
-          <details style="border-bottom:1px solid var(--border-default);">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:17px; font-weight:500; color:var(--text-body);">What is DMARC, in one sentence? <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
-            <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">DMARC is an email standard that lets a domain owner tell receiving servers what to do with mail that fails authentication — monitor it, quarantine it, or reject it — and get reports on who is sending as their domain. It's how you stop others from spoofing your clients' brands.</p>
-          </details>
-          <details style="border-bottom:1px solid var(--border-default);">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:17px; font-weight:500; color:var(--text-body);">Why run it myself instead of a hosted tool? <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
-            <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">Cost and control. Hosted platforms bill per domain and per message, so an agency with dozens of clients pays the most. Self-hosting removes that ceiling, keeps sensitive report data on your own infrastructure, and lets you customise the tool to your workflow.</p>
-          </details>
-          <details style="border-bottom:1px solid var(--border-default);">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:17px; font-weight:500; color:var(--text-body);">How many domains can it handle? <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
-            <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">There is no built-in limit. Domains are grouped by client, and the background worker scales with your database — the same install comfortably serves a handful of domains or several hundred across many clients.</p>
-          </details>
-          <details style="border-bottom:1px solid var(--border-default);">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:17px; font-weight:500; color:var(--text-body);">What do I need to run it? <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
-            <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">For production, Docker and a PostgreSQL database (both included in the compose file) plus a mailbox that receives your DMARC reports. For local development, .NET SDK 10 and Node.js 22+ give you hot reload on both the API and the frontend.</p>
-          </details>
-          <details style="border-bottom:1px solid var(--border-default);">
-            <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:17px; font-weight:500; color:var(--text-body);">Is it really free? <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
-            <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">Yes. The project is released under the Apache-2.0 licence — free to use, modify, and deploy commercially. You pay only for the infrastructure you run it on.</p>
-          </details>
-        </div>
+        <Faq items={FAQS} />
       </section>
 
       <!-- OPEN SOURCE / CTA -->

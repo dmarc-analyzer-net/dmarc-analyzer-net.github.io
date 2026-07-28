@@ -1,0 +1,79 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * An admonition box for content bodies. Usable in `.astro` pages and, unlike the
+ * `> **Bold lead:**` blockquote convention it generalises, inside `.mdx` content.
+ *
+ * Three variants, because the palette has exactly three admonition-grade
+ * surface/text pairs (`--status-ok|warn|danger-*`) and a fourth "tip" green is
+ * indistinguishable from `note` — `--green-100` and `--teal-100` are the same
+ * hex. `note` deliberately reproduces `.prose blockquote`, so converting an
+ * existing blockquote is a no-visual-change edit and the ones that stay behind
+ * look continuous with the ones that move.
+ *
+ * Layout and the child-typography resets live in `global.css` under `.callout`,
+ * not in a scoped <style> here: a component's scoped styles are constrained to
+ * elements in its own template and never reach slotted markdown children, and
+ * this has to reset `.prose p`'s trailing margin inside the box.
+ *
+ * Authoring note for `.mdx`: MDX only parses a component's children as markdown
+ * when they are separated from the tags by blank lines.
+ *
+ *     <Callout variant="warning">
+ *
+ *     Don't ramp `p=reject` with `pct`.
+ *
+ *     </Callout>
+ *
+ * Without the blank lines the body is treated as inline JSX and the code spans
+ * and emphasis silently don't render.
+ *
+ * `title` is plain text — an MDX attribute string is not markdown, so backticks
+ * in it render literally. Put anything that needs formatting in the body.
+ */
+const VARIANTS = {
+  note: {
+    bg: 'var(--brand-subtle)',
+    border: 'var(--teal-500)',
+    fg: 'var(--teal-800)',
+    icon: 'info',
+    label: 'Note',
+  },
+  warning: {
+    bg: 'var(--status-warn-bg)',
+    border: 'var(--status-warn-dot)',
+    fg: 'var(--status-warn-fg)',
+    icon: 'triangle-alert',
+    label: 'Warning',
+  },
+  danger: {
+    bg: 'var(--status-danger-bg)',
+    border: 'var(--status-danger-dot)',
+    fg: 'var(--status-danger-fg)',
+    icon: 'triangle-alert',
+    label: 'Important',
+  },
+} as const;
+
+interface Props {
+  variant?: keyof typeof VARIANTS;
+  /** Optional bold lead line. Plain text. */
+  title?: string;
+}
+
+const { variant = 'note', title } = Astro.props;
+const v = VARIANTS[variant];
+---
+<div
+  class="callout"
+  style={`--callout-bg:${v.bg}; --callout-border:${v.border}; --callout-fg:${v.fg};`}
+>
+  <!-- The variant carries meaning, so it gets an accessible name rather than
+       being conveyed by colour alone. -->
+  <Icon name={v.icon} title={v.label} style="font-size:17px; color:var(--callout-fg); margin-top:3px;" />
+  <div class="callout-body">
+    {title && <p class="callout-title">{title}</p>}
+    <slot />
+  </div>
+</div>

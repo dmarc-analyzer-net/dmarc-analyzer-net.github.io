@@ -5,6 +5,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import Toc from '../../components/Toc.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('guides', ({ data }) => !data.draft);
@@ -15,7 +16,7 @@ export async function getStaticPaths() {
 }
 
 const { entry, all } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const path = `/guides/${entry.id}/`;
 
 // Link to the other guides (up to 3) for internal linking.
@@ -48,6 +49,7 @@ const articleSchema = {
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
       <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 32px;">{entry.data.description}</p>
+      <Toc headings={headings} />
       <div class="prose">
         <Content />
       </div>

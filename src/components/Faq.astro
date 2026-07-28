@@ -1,0 +1,59 @@
+---
+import Icon from './Icon.astro';
+import JsonLd from './JsonLd.astro';
+
+/**
+ * FAQ accordion plus the matching FAQPage JSON-LD, from one array.
+ *
+ * These used to be written twice on the home page — a `faqs` array feeding the
+ * schema and five hand-written <details> below it, kept in step by a comment —
+ * and they had already drifted: the schema said "It is how you stop…" where the
+ * page said "It's how you stop…", with a curly apostrophe in one and a straight
+ * one in the other. Search engines read the version nobody proofreads. One array
+ * makes that impossible.
+ *
+ * The JSON-LD renders inline rather than in <head>: `slot="head"` is only
+ * resolved for a direct child of the component declaring the slot, so a slotted
+ * JsonLd here would land in the body anyway. JSON-LD is valid anywhere in the
+ * document, which is the same reason Breadcrumbs emits its BreadcrumbList
+ * inline.
+ *
+ * Answers are plain text, because that is what the schema needs — an answer
+ * containing a link would need a separate API for the two halves and would
+ * reintroduce exactly the drift this removes.
+ *
+ * The section wrapper stays with the caller: a page decides its own heading,
+ * eyebrow and padding.
+ */
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+interface Props {
+  items: FaqItem[];
+}
+
+const { items } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+---
+{items.length > 0 && (
+  <div style="display:flex; flex-direction:column; gap:0; border-top:1px solid var(--border-default);">
+    {items.map((f) => (
+      <details style="border-bottom:1px solid var(--border-default);">
+        <summary style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 4px; font-size:var(--text-lead); font-weight:500; color:var(--text-body);">{f.q} <Icon name="chevron-down" class="faq-chev" style="font-size:var(--text-lg); color:var(--brand);" /></summary>
+        <p style="font-size:var(--text-md); line-height:1.6; color:var(--gray-700); margin:0 4px 22px; max-width:680px;">{f.a}</p>
+      </details>
+    ))}
+    <JsonLd schema={schema} />
+  </div>
+)}

@@ -18,7 +18,7 @@ const budgetMessage = (budget: number) =>
 // How-to guides and longer-form articles. Authored as Markdown in
 // src/content/guides/ and rendered by src/pages/guides/[...slug].astro.
 const guides = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/guides' }),
   schema: z.object({
     /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
     seoTitle: z.string().optional(),
@@ -33,7 +33,7 @@ const guides = defineCollection({
 // Short, precise definition pages. Authored in src/content/glossary/ and
 // rendered by src/pages/glossary/[...slug].astro.
 const glossary = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/glossary' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/glossary' }),
   schema: z.object({
     term: z.string(),
     description: z.string().min(50).max(160),
@@ -46,7 +46,7 @@ const glossary = defineCollection({
 // Per-provider "set up SPF/DKIM/DMARC for X" pages. Authored in
 // src/content/dmarc-for/ and rendered by src/pages/dmarc-for/[...slug].astro.
 const providers = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/dmarc-for' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/dmarc-for' }),
   schema: z.object({
     /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
     seoTitle: z.string().optional(),
@@ -64,7 +64,7 @@ const providers = defineCollection({
 // keep every claim factual and durable (see the content style guide); the
 // template appends the trademark disclaimer automatically.
 const compare = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/compare' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/compare' }),
   schema: z.object({
     /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
     seoTitle: z.string().optional(),
@@ -87,7 +87,7 @@ const compare = defineCollection({
 // persistent sidebar. `section` groups pages in that sidebar and `order` sorts
 // them within a group — docs read in sequence, unlike the other collections.
 const docs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/docs' }),
   schema: z.object({
     /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
     seoTitle: z.string().optional(),
