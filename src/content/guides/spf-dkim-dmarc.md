@@ -111,6 +111,36 @@ domain, or to use a custom Return-Path on your subdomain.
 The last row is the most common real-world state, and the reason
 ["DMARC policy not enabled"](/guides/dmarc-policy-not-enabled/) warnings exist.
 
+## The reason this stopped being optional
+
+For years all three were best practice you could postpone. Since **February 2024**
+they are entry requirements at the two largest consumer mailbox providers, and that
+is the most concrete answer to "why do I have to care about this now".
+
+Anyone sending **more than 5,000 messages a day** to Gmail accounts must:
+
+- **Publish SPF and DKIM** for the sending domain.
+- **Publish DMARC.** Google's own wording is explicit that this is a low bar —
+  "Your DMARC enforcement policy can be set to none" — so a monitoring record
+  satisfies it. You need *a* record, not enforcement.
+- **Align.** "The domain in the sender's `From:` header must be aligned with either
+  the SPF domain or the DKIM domain" — one of the two is enough, which is why
+  [alignment](/glossary/dmarc-alignment/) is the thing to understand rather than
+  SPF and DKIM in isolation.
+- **Offer one-click unsubscribe** on marketing and promotional mail, via the
+  `List-Unsubscribe` headers. Transactional mail is out of scope.
+- **Keep the spam rate below 0.30%** as reported in Postmaster Tools.
+
+Yahoo introduced matching requirements on the same timetable, including the 0.3%
+spam-rate ceiling, and Microsoft has since added its own for high-volume senders to
+consumer Outlook accounts.
+
+Two things worth drawing out. The 5,000/day threshold is per *sending domain to that
+provider*, so it catches ordinary companies running a newsletter, not just bulk
+marketers. And "aligned SPF **or** DKIM" is a lower bar than DMARC enforcement — but
+you cannot tell whether you clear it without reading your
+[reports](/glossary/dmarc-aggregate-report/), which is the same work either way.
+
 ## How a single message flows through all three
 
 1. Your server sends a message with a DKIM signature.
