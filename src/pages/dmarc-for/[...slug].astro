@@ -37,6 +37,7 @@ const articleSchema = {
   '@type': 'Article',
   headline: entry.data.title,
   description: entry.data.description,
+  image: new URL('/og.png', Astro.site).href,
   datePublished: published,
   dateModified: modified,
   author: { '@type': 'Organization', name: 'DMARC Analyzer' },
