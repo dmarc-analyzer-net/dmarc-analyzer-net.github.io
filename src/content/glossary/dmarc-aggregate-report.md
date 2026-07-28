@@ -10,6 +10,8 @@ typically once a day — summarising all the mail it saw claiming to be from you
 domain. It does **not** contain message content; it is a statistical roll-up:
 sending IP, message count, SPF/DKIM results, and the disposition applied.
 
+## Requesting reports
+
 You request them with the `rua=` tag in your [DMARC](/glossary/dmarc/) record:
 
 ```
@@ -33,6 +35,8 @@ Three practical details that the tag alone doesn't tell you:
   [reports won't arrive if `rua=` is wrong](/guides/no-dmarc-record-found/), or
   the [agency treatment](/guides/dmarc-multiple-client-domains/) if you collect
   for domains you don't own.
+
+## What's inside a record
 
 Each `<record>` in the XML groups messages by source and reports the
 [alignment](/glossary/dmarc-alignment/) outcome:

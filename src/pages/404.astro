@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+
+const title = 'Page not found — DMARC Analyzer';
+const description =
+  'The page you were looking for doesn’t exist. Find your way back to DMARC Analyzer’s guides, glossary, or documentation.';
+
+const links = [
+  { href: '/guides/', icon: 'book-open', name: 'Guides', note: 'Walkthroughs for setting up and troubleshooting DMARC.' },
+  { href: '/glossary/', icon: 'search', name: 'Glossary', note: 'Plain-English definitions for SPF, DKIM, alignment, and more.' },
+  { href: '/docs/', icon: 'layout-dashboard', name: 'Docs', note: 'Install, configure, and operate DMARC Analyzer.' },
+  { href: '/tools/', icon: 'settings', name: 'Tools', note: 'Free browser-based DMARC, SPF, and DKIM lookups.' },
+];
+---
+<BaseLayout title={title} description={description} path="/404/">
+  <section style="max-width:720px; margin:0 auto; padding:96px 32px 32px; text-align:center;">
+    <span style="display:inline-flex; width:56px; height:56px; border-radius:var(--radius-md); background:var(--tint-red-bg); align-items:center; justify-content:center; margin-bottom:20px;">
+      <Icon name="triangle-alert" style="font-size:26px; color:var(--tint-red-fg);" />
+    </span>
+    <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:14px;">404</div>
+    <h1 style="font-size:var(--text-4xl); line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:0 0 16px;">This page doesn&rsquo;t exist.</h1>
+    <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0 auto;">
+      The link may be out of date, or the page may have moved. Here&rsquo;s where to find what you were probably looking for.
+    </p>
+  </section>
+
+  <section style="max-width:920px; margin:0 auto; padding:32px 32px 96px;">
+    <div class="grid-2" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      {links.map((link) => (
+        <a href={link.href} class="lift" style="display:flex; gap:14px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:20px; text-decoration:none;">
+          <span style="display:inline-flex; flex-shrink:0; width:36px; height:36px; border-radius:var(--radius-md); background:var(--teal-100); align-items:center; justify-content:center;">
+            <Icon name={link.icon} style="font-size:17px; color:var(--brand);" />
+          </span>
+          <span>
+            <span style="display:block; font-size:var(--text-md); font-weight:600; color:var(--gray-900); margin-bottom:4px;">{link.name}</span>
+            <span style="display:block; font-size:13.5px; line-height:1.5; color:var(--gray-700);">{link.note}</span>
+          </span>
+        </a>
+      ))}
+    </div>
+    <div style="text-align:center; margin-top:32px;">
+      <a class="btn-mint" href="/" style="display:inline-flex; align-items:center; height:40px; padding:0 20px; border-radius:var(--radius-md); background:var(--mint-400); color:var(--ink-900) !important; font-size:var(--text-base); font-weight:600;">Back to home</a>
+    </div>
+  </section>
+</BaseLayout>
