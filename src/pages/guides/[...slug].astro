@@ -19,6 +19,7 @@ export async function getStaticPaths() {
 const { entry, all } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/guides/${entry.id}/`;
+const image = `/open-graph/guides/${entry.id}.png`;
 const showToc = hasToc(headings, { maxDepth: 3 });
 
 // Link to the other guides (up to 3) for internal linking. Newest first, which is
@@ -39,6 +40,7 @@ const articleSchema = {
   '@type': 'Article',
   headline: entry.data.title,
   description: entry.data.description,
+  image: new URL(image, Astro.site).href,
   datePublished: published,
   dateModified: modified,
   author: { '@type': 'Organization', name: 'DMARC Analyzer' },
@@ -46,7 +48,7 @@ const articleSchema = {
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="guides" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} ogType="article" publishedTime={published} modifiedTime={modified}>
+<BaseLayout current="guides" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} image={image} ogType="article" publishedTime={published} modifiedTime={modified}>
   <JsonLd slot="head" schema={articleSchema} />
     <article style={`max-width:${showToc ? 1044 : 760}px; margin:0 auto; padding:40px 32px 72px;`}>
       <Breadcrumbs items={[
