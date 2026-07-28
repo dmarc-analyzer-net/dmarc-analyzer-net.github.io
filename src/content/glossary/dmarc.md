@@ -13,7 +13,10 @@ published DNS policy that builds on [SPF](/glossary/spf/) and
    fails authentication — monitor it, quarantine it, or reject it. This is the
    [DMARC policy](/glossary/dmarc-policy/).
 2. **Asks receivers to report back**, so you can see every source sending as your
-   domain — legitimate or not — via [aggregate reports](/glossary/dmarc-aggregate-report/).
+   domain — legitimate or not — via [aggregate reports](/glossary/dmarc-aggregate-report/)
+   (`rua=`). A second tag, `ruf=`, asks for per-message forensic reports; few
+   receivers still send them, which is why aggregate reports are what this
+   project — and most of the ecosystem — is built around.
 
 A message passes DMARC when SPF **or** DKIM passes *and*
 [aligns](/glossary/dmarc-alignment/) with the domain in the visible `From:`
@@ -49,3 +52,10 @@ to say about it. Passing DMARC isn't a spam filter either: a message can
 authenticate perfectly and still be mail nobody wanted. And a subdomain with no
 policy of its own follows `p=` only because [`sp=`](/glossary/dmarc-policy/)
 says so by default — it isn't automatically protected in some deeper sense.
+
+## One record per domain
+
+Like SPF, `_dmarc.yourdomain.com` may carry only one DMARC record. A second
+one — often added by a security vendor's onboarding script alongside a
+record you already had — doesn't merge with the first; it makes DMARC
+invalid at that domain, and receivers ignore both rather than picking one.

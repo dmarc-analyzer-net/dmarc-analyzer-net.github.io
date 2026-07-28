@@ -65,6 +65,14 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
           resolver</a> directly if you want the least-cached answer available,
           rather than waiting out the TTL blind.
         </p>
+        <p>
+          And unlike SPF and DKIM, which need touching for every service that
+          sends on your behalf, the DMARC record itself doesn't care how many
+          providers you use. One mailbox or ten marketing platforms sending
+          under your domain, you still publish exactly one record at
+          <code>_dmarc.yourdomain.com</code>. What changes per sender is
+          whether SPF and DKIM pass for them — DMARC just reads the result.
+        </p>
       </div>
     </section>
 </BaseLayout>
