@@ -2,7 +2,7 @@
 term: MTA-STS
 description: MTA-STS forces mail sent to your domain to use encrypted TLS, closing a downgrade-attack gap that SPF, DKIM, and DMARC don't address.
 aliases: ["MTA-STS record", "SMTP MTA Strict Transport Security"]
-related: ["dmarc", "spf", "dkim"]
+related: ["dmarc", "spf", "dkim", "tls-rpt"]
 ---
 
 **MTA-STS** (SMTP MTA Strict Transport Security) tells other mail servers that
@@ -13,7 +13,9 @@ authentication standards leave open.
 Where [SPF](/glossary/spf/), [DKIM](/glossary/dkim/), and [DMARC](/glossary/dmarc/)
 verify *who sent* a message, MTA-STS protects *how it travels*: without it, an
 attacker can strip the `STARTTLS` upgrade and force mail to be sent in plaintext
-(a downgrade attack). MTA-STS makes receivers reject that fallback.
+(a downgrade attack). MTA-STS makes the *sending* server refuse that fallback: you
+publish the policy, and the other side is the one that enforces it by declining to
+deliver over a connection it can't secure.
 
 Note the direction: MTA-STS protects mail **arriving at** your domain. It says
 nothing about mail you send — that's governed by the recipient's policy.
@@ -68,8 +70,8 @@ discover breakage from a report, not from missing mail.
 
 ## Pair it with TLS-RPT
 
-Add a **TLS-RPT** record at `_smtp._tls.yourdomain.com` to receive reports about
-TLS delivery failures:
+Add a [**TLS-RPT**](/glossary/tls-rpt/) record at `_smtp._tls.yourdomain.com` to
+receive reports about TLS delivery failures:
 
 ```
 v=TLSRPTv1; rua=mailto:tls-reports@yourdomain.com

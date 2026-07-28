@@ -61,12 +61,17 @@ action needed.
   [DKIM](/glossary/dkim/) for it.
 - **Both `fail`, unfamiliar source** — either shadow IT or someone spoofing your
   domain. This is exactly what DMARC exists to surface.
+- **Both `fail`, and the source is a forwarder or a mailing list** — legitimate
+  mail taking a route that breaks authentication. These rows never go away, so
+  they must not gate enforcement; [ARC](/glossary/arc/) explains why, and why it
+  is not the fix people hope it is.
 
 ## Doing this at scale
 
 One domain is readable by hand. A portfolio of client domains, each with dozens
 of sources and a report from every provider every day, is not — that is what a
 self-hosted analyzer like [DMARC Analyzer](/) aggregates for you, every domain in
-one dashboard. When the "both fail, legitimate" rows are
+one dashboard. The DNS and process side of running that portfolio is its own job:
+see [DMARC for many client domains](/guides/dmarc-multiple-client-domains/). When the "both fail, legitimate" rows are
 gone, you are ready to
 [move toward enforcement](/guides/from-monitoring-to-enforcement/).

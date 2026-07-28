@@ -20,8 +20,28 @@ v=spf1 include:_spf.google.com include:sendgrid.net -all
 SPF alone is easy to bypass, because it checks the hidden envelope sender, not
 the `From:` address a person sees. That gap is why
 [DMARC](/glossary/dmarc/) adds [alignment](/glossary/dmarc-alignment/) and pairs
-SPF with [DKIM](/glossary/dkim/).
+SPF with [DKIM](/glossary/dkim/). It also breaks on plain forwarding, where the
+forwarder relays your mail from an address that was never in your record.
 
-> **Watch the 10-lookup limit.** SPF permits at most 10 DNS lookups; too many
-> `include:`s cause a `permerror` and an SPF failure. Flatten or consolidate
-> includes if you hit it.
+## The 10-lookup limit
+
+A record may cause at most **10** DNS lookups while it is being evaluated. Exceed
+it and the result is `permerror`, which counts as an SPF failure — and it happens
+silently, because nothing bounces and the record still looks perfectly valid.
+
+Six terms count toward the limit, not just `include:`:
+
+| Counts | Doesn't count |
+|---|---|
+| `include:`, `a`, `mx`, `ptr`, `exists:`, `redirect=` | `ip4:`, `ip6:`, `all`, `exp=` |
+
+Two sub-limits sit underneath it and catch people out, because a term count of 1
+looks safe: evaluating `mx` must not require more than 10 address lookups, and the
+same applies to `ptr`. A domain with a dozen MX hosts therefore `permerror`s on a
+single `mx` term.
+
+The practical consequence is that `ip4:`/`ip6:` ranges are free while every
+`include:` you add is not, so the fix for a record at the limit is to replace
+includes with the address ranges behind them, or to drop senders you no longer
+use. The [SPF record checker](/tools/spf-checker/) expands every include
+recursively and gives you the real count.

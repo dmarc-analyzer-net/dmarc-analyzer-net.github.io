@@ -36,7 +36,9 @@ reports are sent.
 
 Need something other than the default record — a subdomain policy, strict
 alignment, a staged `pct=`? The [record generator](/tools/dmarc-generator/)
-builds it and tells you what each choice will do to your mail.
+builds it and tells you what each choice will do to your mail, and the
+[tag reference](/guides/dmarc-record-tags/) covers what every tag defaults to if
+you leave it out.
 
 ## Step 4 — Wait for reports
 

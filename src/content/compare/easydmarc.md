@@ -19,13 +19,13 @@ current terms.*
 
 | | DMARC Analyzer | EasyDMARC |
 |---|---|---|
-| Hosting | Self-hosted | Vendor cloud |
+| Hosting | [Self-hosted](/docs/install/) | Vendor cloud |
 | Open source | Yes (Apache-2.0) | No |
 | Free tier | Everything, unlimited domains | Yes — 1 domain, 14 days of history |
 | Paid plans | None | From ~$36/month, capped by domains + volume |
 | History retained | As long as you keep it | 3 months to 3 years, by plan |
-| Your report data | Stays on your infrastructure | Processed in the vendor's cloud |
-| Agencies / many clients | Yes, self-hosted multi-tenant | Yes, on paid plans |
+| Your report data | [Stays on your infrastructure](/docs/data-protection/) | Processed in the vendor's cloud |
+| Agencies / many clients | Yes, [self-hosted multi-tenant](/docs/clients-users-and-audit/) | Yes, on paid plans |
 | Wider tool suite (BIMI, MTA-STS, TLS-RPT) | — | Yes |
 
 ## Where EasyDMARC fits

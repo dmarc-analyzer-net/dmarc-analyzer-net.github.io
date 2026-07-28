@@ -33,5 +33,27 @@ const providers = (await getCollection('providers', ({ data }) => !data.draft)).
           </li>
         ))}
       </ul>
+
+      <!-- The one rule that applies whatever the provider, and the one most
+           likely to leave a reader with a perfect-looking record and no data. -->
+      <div class="prose" style="margin-top:44px; max-width:720px;">
+        <h2>One rule that applies to every provider</h2>
+        <p>
+          Whichever platform you use, publishing the record is only half the job:
+          reports have to reach somewhere you can read them. If the mailbox in your
+          <code>rua=</code> is on a <em>different</em> domain from the one publishing
+          the record — an analyzer you run, or your agency's inbox — that domain has
+          to authorise it with a record of its own:
+        </p>
+        <pre><code>clientdomain.com._report._dmarc.agency.com   TXT   "v=DMARC1"</code></pre>
+        <p>
+          Without it, conforming receivers silently discard the reporting request.
+          Nothing bounces, the record still validates, and the reports simply never
+          arrive — see <a href="/guides/no-dmarc-record-found/">reports won't arrive
+          if <code>rua=</code> is wrong</a> for the full treatment, or check a live
+          domain with the <a href="/tools/dmarc-checker/">record checker</a>, which
+          verifies external destinations for you.
+        </p>
+      </div>
     </section>
 </BaseLayout>
