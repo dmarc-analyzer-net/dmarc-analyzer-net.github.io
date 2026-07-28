@@ -351,12 +351,14 @@ Most of this is already handled; the rest is a few small additions.
   crawler reports a page nothing but the nav and index pages link to, which is
   the state a page ships in if you skip this.
 
-**Known gap**
-- ❌ **No `:focus-visible` styling** — `--focus-ring` is defined in `global.css`
-      and referenced nowhere, so every interactive element falls back to the
-      browser default outline, including the two `<summary>` triggers whose
-      default marker has already been removed. No `prefers-reduced-motion` block
-      either. Lighthouse scores 100 because it doesn't test for this.
+- ✅ **Keyboard focus and reduced motion.** `:focus-visible` gives every
+      interactive element a visible ring — a teal outline, mint on ink panels, and
+      the `--focus-ring` box-shadow on raised surfaces. `prefers-reduced-motion`
+      stops the transitions and transforms. Note the trap if you add a tool page:
+      `scroll-behavior: auto` in CSS does **not** override a `behavior: 'smooth'`
+      passed to `scrollIntoView()`, so use `revealResults()` from
+      `src/lib/motion.ts` rather than calling `scrollIntoView` directly.
+      Lighthouse scores 100 either way — it doesn't test for either of these.
 
 **To add**
 - [ ] **Images:** use Astro's `<Image />` (`src/assets/…`) for automatic
