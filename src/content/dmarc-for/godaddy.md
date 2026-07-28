@@ -51,11 +51,17 @@ Type: TXT   Name: @   Value: v=spf1 include:secureserver.net -all
 ```
 
 Sending from more than one service? Combine them into a **single** record —
-never two:
+never two. Here with a marketing platform alongside Microsoft 365:
 
 ```
-v=spf1 include:spf.protection.outlook.com include:secureserver.net -all
+v=spf1 include:spf.protection.outlook.com include:sendgrid.net -all
 ```
+
+What *not* to do is stack two mailbox providers. If you migrated from Professional
+Email to Microsoft 365, a record carrying both
+`include:spf.protection.outlook.com` and `include:secureserver.net` authorises
+GoDaddy's entire shared mail infrastructure to send as your domain — every tenant
+on it, not just you. Remove the include for the service you no longer use.
 
 Two SPF records is a `permerror`, which counts as an SPF failure. See [SPF
 record syntax](/guides/spf-record-syntax/) for the 10-lookup limit and how to
@@ -126,8 +132,12 @@ A result there tells you exactly what went wrong.
   [DMARC failure](/guides/fix-dmarc-failure/).
 - **Use `@` for the root** and the short subdomain (`_dmarc`,
   `selector1._domainkey`) in *Name*.
-- **Domain forwarding can overwrite records.** If GoDaddy forwarding is enabled,
-  it may manage the root's records itself and quietly replace what you added.
+- **Domain forwarding does not touch your DMARC record**, despite being the usual
+  suspect. Enabling it updates and *locks* the root `@` A record, and asks you to
+  point the `www` CNAME at `@` — both about web traffic. Your DMARC, SPF and DKIM
+  records are `TXT` and `CNAME` entries at other names, and forwarding leaves them
+  alone. So if a record you added has "vanished", check the doubled-domain mistake
+  above before blaming forwarding.
 - **TTL and propagation** — GoDaddy changes can take up to an hour, occasionally
   longer. Don't conclude a record is wrong within the first few minutes.
 - **Confirm your actual sender.** If mail also flows through a marketing

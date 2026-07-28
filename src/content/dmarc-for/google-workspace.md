@@ -51,10 +51,20 @@ sends none is better off with an explicit reject record:
 v=spf1 -all
 ```
 
-## 2. DKIM — you must generate and turn it on
+## 2. DKIM — you must generate your own key
 
-This is the step most people miss: Google Workspace does **not** sign with
-[DKIM](/glossary/dkim/) until you generate a key and start authentication.
+Workspace signs your mail with [DKIM](/glossary/dkim/) from the start, and that is
+exactly what makes this step easy to skip. Until you generate a key, Google signs
+with a **default key it owns**, whose signing domain is a `*.gappssmtp.com` name —
+something like `yourdomain-com.20260115.gappssmtp.com`.
+
+That signature is real and it passes. What it does not do is
+[align](/glossary/dmarc-alignment/): the `d=` is Google's domain, not yours, so it
+contributes nothing to DMARC. A checker reports DKIM as working, your reports show
+`dkim=pass`, and the domain still fails DMARC on every message that SPF doesn't
+rescue.
+
+So the step below is not "turn DKIM on" — it is "make the signature yours".
 
 1. In the **Google Admin console**, go to *Menu → Apps → Google Workspace →
    Gmail → Authenticate email*.
@@ -121,9 +131,10 @@ receiver, not just this one.
 
 ## Google-specific gotchas
 
-- **DKIM is off until you "Start authentication"** — generating the record isn't
-  enough, and this is the single most common cause of `dkim=none` on Workspace
-  domains.
+- **`dkim=pass` is not the same as DKIM working.** Generating the record isn't
+  enough — until you click *Start authentication*, Google keeps signing with its
+  own `*.gappssmtp.com` key, which passes and never aligns. Check `header.d=` in
+  your reports, not just the pass or fail.
 - **Google Groups and forwarding break SPF.** A forwarded message arrives from
   the forwarder's IP, so SPF fails; DKIM survives forwarding, which is why you
   want both rather than either.
@@ -138,7 +149,8 @@ receiver, not just this one.
 
 | Symptom | Usual cause |
 |---|---|
-| `dkim=none` on all mail | "Start authentication" was never clicked |
+| `dkim=pass` with `header.d=…gappssmtp.com` | Still Google's default key — "Start authentication" was never clicked |
+| `dkim=none` on all mail | Mail is leaving via a non-Google server, which the default key never signs |
 | DNS host rejects the DKIM value | 2048-bit key exceeds one 255-char TXT string |
 | `spf=permerror` | Two SPF records, or over the 10-lookup limit |
 | `spf=fail` on forwarded mail only | Expected — rely on DKIM alignment instead |

@@ -44,8 +44,12 @@ accounted for yet. Move in stages:
    [current specification has removed it](/guides/dmarc-rfc-9989/) in favour of
    `t=y`, which asks receivers to apply the policy one level weaker while you watch.
    Either way it is a temporary setting, and a checker may read it as "not enabled".
+   `p=quarantine` **already clears the warning** — read its name again:
+   *Quarantine/Reject* policy not enabled. Either value satisfies it, so if the
+   warning is what brought you here, you are done at this step. Carry on to reject
+   because it is the better end state, not because the checker is still complaining.
 3. **Move to `p=reject`** once quarantine is clean — full enforcement, and the
-   state that clears the warning:
+   end state worth aiming at:
    ```
    v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com
    ```
@@ -99,8 +103,10 @@ and shows the record it actually found:
 - **You're reading a cached answer.** Give DNS an hour before concluding the
   change didn't take.
 
-Editing on Microsoft 365, GoDaddy, or cPanel? The per-provider steps are under
-[DMARC setup](/dmarc-for/).
+Editing on Google Workspace, Microsoft 365 or GoDaddy? The per-provider steps are
+under [DMARC setup](/dmarc-for/). On anything else — cPanel, Plesk, a registrar's
+own panel — the record is the same three tags; only the form around it differs, and
+you are looking for wherever that panel lets you add a `TXT` record.
 
 ## What next
 

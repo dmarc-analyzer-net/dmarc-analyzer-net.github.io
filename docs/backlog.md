@@ -382,7 +382,7 @@ primary source; where a line number is given it was accurate in July 2026.
       rule comparing **organizational domains** rather than exact names, and blesses
       the `*._report._dmarc` wildcard explicitly — which is the form the agency guide
       relies on.
-- [ ] (todo) **`dmarc-for/google-workspace.md` inverts Google's DKIM behaviour.**
+- [x] (done) **`dmarc-for/google-workspace.md` inverted Google's DKIM behaviour.**
       Line ~56 says Workspace "does **not** sign with DKIM until you generate a
       key". It always signs — with a Google-owned default key and
       `d=<domain>.<datestamp>.gappssmtp.com`, which is valid but never *aligns*.
@@ -391,12 +391,31 @@ primary source; where a line number is given it was accurate in July 2026.
       too: you see `dkim=pass` with a `gappssmtp.com` domain, conclude DKIM is
       fine, and never find the alignment problem. `microsoft-365.md:124` already
       handles its `onmicrosoft.com` equivalent correctly — copy that treatment.
+
+      Fixed in three places (the section heading and lead, the gotcha bullet, and the
+      troubleshooting table, which gained a `dkim=pass` + `gappssmtp.com` row and had
+      its `dkim=none` row re-attributed to mail leaving via a non-Google server).
+
+      **Worth knowing how well this one is verified, because it is weaker than the
+      others in this section.** Google's documentation states it plainly — "If you
+      don't set up your own DKIM key, Gmail signs all outgoing messages with a default
+      DKIM key: `d=*.gappssmtp.com`. Messages sent from non-Google servers aren't
+      signed with the default DKIM key" — but that sentence is only reachable through
+      the search index. Google has migrated these pages from `support.google.com` to
+      `knowledge.workspace.google.com`, and the live *Set up DKIM* and *Troubleshoot
+      DKIM issues* pages no longer contain it; both were fetched and checked. DNS
+      confirms only that `gappssmtp.com` is Google-operated (`ns*.googledomains.com`) —
+      the default keys sit under `<domain>.<datestamp>.gappssmtp.com`, so probing the
+      pattern needs a real tenant's datestamp. What would settle it beyond doubt is an
+      `Authentication-Results` header from a Workspace domain that has not set up a
+      custom key. Everything else here was verified against an RFC or a vendor's live
+      documentation; this one rests on Google's own words at one remove.
 - [x] (done) **`glossary/mta-sts.md` named the wrong actor.** "MTA-STS makes
       receivers reject that fallback" — it is the *sending* MTA that fetches the
       policy and refuses to deliver (RFC 8461 §5). The receiver publishes; it
       cannot enforce. Line 10 of the same page gets it right, so the page
       contradicts itself six lines apart.
-- [ ] (todo) **`guides/fix-dmarc-failure.md` has the forwarding mechanism
+- [x] (done) **`guides/fix-dmarc-failure.md` had the forwarding mechanism
       backwards** (~line 86): it says forwarding "changes the envelope, which
       breaks SPF". Plain forwarding breaks SPF precisely because it does *not* —
       the forwarder relays the original `MAIL FROM` from its own unlisted IP
@@ -411,18 +430,18 @@ primary source; where a line number is given it was accurate in July 2026.
 - [x] (done) **`guides/fix-dmarc-failure.md` linked "ARC" to `/glossary/dkim/`.**
       There is no ARC entry; the link resolves but lands somewhere that never
       mentions the term. Either write the entry (below) or unlink.
-- [ ] (todo) **`dmarc-for/godaddy.md` models the mistake it warns about.** Lines
+- [x] (done) **`dmarc-for/godaddy.md` modelled the mistake it warns about.** Lines
       26–27 tell readers to remove the stale `secureserver.net` include after
       migrating to GoDaddy-resold M365; line ~57 then shows a combined example
       stacking both. Keeping it authorises GoDaddy's whole shared mail
       infrastructure to send as the domain.
-- [ ] (todo) **`dmarc-for/godaddy.md:129` overstates what forwarding
+- [x] (done) **`dmarc-for/godaddy.md` overstated what forwarding
       overwrites.** GoDaddy domain forwarding manages the root `A` and `www`
       CNAME, not TXT records — so "records vanish" sends readers chasing
       forwarding instead of the doubled-hostname mistake the same page documents
       correctly.
-- [ ] (todo) **`guides/dmarc-policy-not-enabled.md:43` claims only `p=reject`
-      clears the warning.** The warning is literally "Quarantine/**Reject**
+- [x] (done) **`guides/dmarc-policy-not-enabled.md` claimed only `p=reject`
+      cleared the warning.** The warning is literally "Quarantine/**Reject**
       policy not enabled"; `p=quarantine` satisfies it. Same page, line ~89,
       promises cPanel instructions under `/dmarc-for/` — only Google Workspace,
       Microsoft 365 and GoDaddy exist.

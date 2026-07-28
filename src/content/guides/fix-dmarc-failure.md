@@ -84,14 +84,29 @@ most robust way to pass DMARC because, unlike SPF, it survives most forwarding.
 
 ## Cause 4 — forwarding
 
-Auto-forwarded mail (someone forwards from `@yourdomain` to a personal Gmail)
-changes the envelope, which **breaks SPF**, and some forwarders alter the message
-enough to **break DKIM** too. The result is a DMARC failure for mail you did
+Auto-forwarded mail — someone forwards from `@yourdomain` to a personal Gmail —
+**breaks SPF**, and it is worth being precise about why, because the usual
+explanation is backwards.
+
+Plain forwarding breaks SPF *because the envelope doesn't change.* The forwarder
+relays your original `MAIL FROM` from **its own** IP address, and that IP is not in
+your SPF record, so the check fails. Nothing was rewritten; that is the problem.
+
+Forwarders that *do* rewrite the envelope — the technique is called SRS — make SPF
+**pass**, for their domain. Which then fails
+[alignment](/glossary/dmarc-alignment/), because the domain that passed is no
+longer yours. So SRS is not a fix for DMARC either; it just moves the failure one
+step along.
+
+Some forwarders also modify the message — a footer, a rewritten subject — which
+**breaks DKIM** on top. Either way the result is a DMARC failure for mail you did
 legitimately send.
 
-**Fix:** there's no perfect fix, but aligned DKIM survives most forwarding, and
-[ARC](/glossary/arc/) lets participating receivers honor a prior "pass". Don't
-tighten your policy based on forwarding failures alone — read the reports first.
+**Fix:** there's no perfect fix, but aligned DKIM survives forwarding that doesn't
+modify the message, and [ARC](/glossary/arc/) lets participating receivers honor a
+prior "pass" — read what it does and doesn't buy before relying on it. Don't
+tighten your policy based on forwarding failures alone: they never reach zero, so
+waiting for them to is not a plan.
 
 ## Cause 5 — a subdomain with no record
 
