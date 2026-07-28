@@ -79,7 +79,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const guides = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/guides' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/guides' }),
   schema: z.object({
     title: z.string().max(65),          // keep titles short for SERPs
     description: z.string().min(50).max(160),
@@ -90,7 +90,7 @@ const guides = defineCollection({
 });
 
 const glossary = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/glossary' }),
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/glossary' }),
   schema: z.object({
     term: z.string(),
     description: z.string().min(50).max(160),
@@ -162,9 +162,20 @@ automatically, and passes the same SEO checks as every other page.
 > the design tokens (`var(--text-2xl)`, `var(--font-display)`, `var(--teal-600)`…)
 > so articles match the brand. Do this **once** before writing many guides.
 
-> **Want components inside markdown?** (callouts, tabbed code, an interactive
-> record checker) install MDX: `npx astro add mdx`, then author `.mdx` files and
-> `import` components at the top.
+> **Components inside markdown:** MDX is installed, so a page that needs one can
+> be authored as `.mdx` — `import` the component under the frontmatter and use it
+> in the body. Every collection glob matches `**/*.{md,mdx}`, and the extension is
+> stripped from the entry id, so renaming `foo.md` to `foo.mdx` keeps the URL.
+> Two things to know. **Separate a component's children from its tags with blank
+> lines**, or MDX treats the body as inline JSX and code spans and emphasis
+> silently don't render. And `npm run check` does *not* type-check MDX bodies (the
+> language server handles `.mdx` frontmatter only) — `npm run build` is the only
+> gate for MDX syntax and for a wrong `import` path.
+>
+> Pinned at `@astrojs/mdx@4.x` on purpose: `astro add mdx` and
+> `npm i @astrojs/mdx` both resolve the `latest` tag, which peers on Astro 7 while
+> this site is on Astro 5 — and `astro add` skips validating the `astro` peer, so
+> it will happily install a broken tree. See the comment in `astro.config.mjs`.
 
 ---
 
@@ -274,21 +285,25 @@ Cluster A+B page) and are strong nav/menu candidates.
 
 ## 5. Components worth building first
 
-Build these once; every content page reuses them. Put them in `src/components/`.
+Build these once; every content page reuses them. They live in `src/components/`,
+and all of them now exist.
 
 | Component | Purpose |
 |---|---|
-| `Prose` / `.prose` CSS | Typographic styling for markdown article bodies |
+| `.prose` CSS | Typographic styling for markdown article bodies |
 | `Breadcrumbs.astro` | Nav + emits `BreadcrumbList` JSON-LD |
 | `RelatedLinks.astro` | Internal-linking block (huge for SEO) — link related guides/glossary |
-| `Faq.astro` | Native `<details>` accordion + emits `FAQPage` JSON-LD |
-| `Callout.astro` | Note/warning/tip boxes for guides |
+| `Faq.astro` | `<details>` accordion **and** the `FAQPage` JSON-LD, from one array of `{q, a}` |
+| `Callout.astro` | `note` / `warning` / `danger` boxes; usable in `.mdx` bodies |
 | `Cta.astro` | Reusable "get started / view on GitHub" band |
 | `JsonLd.astro` | `<script type="application/ld+json" set:html={…} />` helper |
-| `Toc.astro` | Table of contents from a guide's headings |
+| `Toc.astro` | Disclosure TOC from `headings`; on docs, guides and provider pages |
 
-As the page count grows, the flat header nav won't scale — plan a **dropdown /
-mega-menu** in `Header.astro` grouping Guides / Glossary / Tools / Compare.
+The flat header nav did stop scaling, and `Header.astro` now groups the secondary
+pages under a `Resources ▾` `<details>` dropdown — Docs, Guides, Glossary, Setup,
+Tools — leaving Features / How it works / Compare in the top row. Not a mega-menu:
+the design system asks for a grouped list and argues the point on silhouette, and
+eight destinations don't need columns and descriptions.
 
 ---
 
@@ -316,35 +331,62 @@ Most of this is already handled; the rest is a few small additions.
       context is needed"; glossary entries and comparison pages live there because
       they are the least necessary for answering a question about the product.
 
+- ✅ Responsive down to 390px — breakpoints 480/768/1024/1280, no horizontal
+      scroll on any page, mobile Lighthouse 100/100/100.
+- ✅ `public/robots.txt` pointing at `https://dmarc-analyzer.net/sitemap-index.xml`.
+- ✅ Structured data (JSON-LD) via `JsonLd.astro`: `Organization` + `WebSite` +
+      `SoftwareApplication` + `FAQPage` on the home page, `Article` +
+      `BreadcrumbList` on guides, `DefinedTerm` on glossary entries, `TechArticle`
+      on docs. Test changes with Google's
+      [Rich Results Test](https://search.google.com/test/rich-results).
+- ✅ One descriptive `<h1>` per page, H2/H3 for structure — the crawler fails CI
+      on a missing or duplicated H1.
+- ✅ Registered in Google Search Console (domain property, DNS TXT) with the
+      sitemap submitted.
+
+**Rules for every new page**
+- **Internal links** — link out to 2–4 related pages, and make sure at least one
+  *existing* page links in. Write them **with a trailing slash**
+  (`/glossary/spf/`, not `/glossary/spf`) — see *Trailing slashes* below. The
+  crawler reports a page nothing but the nav and index pages link to, which is
+  the state a page ships in if you skip this.
+
 **Known gap**
-- ❌ **No responsive CSS at all** — zero `@media` queries; every page scrolls
-      horizontally at phone widths. See the top item in `backlog.md`.
+- ❌ **No `:focus-visible` styling** — `--focus-ring` is defined in `global.css`
+      and referenced nowhere, so every interactive element falls back to the
+      browser default outline, including the two `<summary>` triggers whose
+      default marker has already been removed. No `prefers-reduced-motion` block
+      either. Lighthouse scores 100 because it doesn't test for this.
 
 **To add**
-- [ ] **`public/robots.txt`** pointing at the sitemap:
-      ```
-      User-agent: *
-      Allow: /
-      Sitemap: https://dmarc-analyzer-net.github.io/sitemap-index.xml
-      ```
-      (Update the host if/when the custom domain goes live — see README.)
-- [ ] **Structured data (JSON-LD)** via a `JsonLd` component in the `head` slot:
-      `Article` on guides, `FAQPage` on pages with FAQs, `BreadcrumbList` on nested
-      pages, `Organization` + `SoftwareApplication` on the home page. Test with
-      Google's [Rich Results Test](https://search.google.com/test/rich-results).
-- [ ] **One H1 per page**, descriptive; use H2/H3 for structure.
-- [ ] **Internal links** — every new page should link to 2–4 related pages and
-      be linked to from at least one existing page (use `RelatedLinks`). Always
-      write them **with a trailing slash** (`/glossary/spf/`, not `/glossary/spf`)
-      — see *Trailing slashes* below.
 - [ ] **Images:** use Astro's `<Image />` (`src/assets/…`) for automatic
       resize/format/lazy-loading. Always set descriptive `alt`. *(Requires
       `sharp`, which builds fine in CI.)*
 - [ ] **Per-page OG images (optional):** generate at build with
       [`astro-og-canvas`](https://github.com/delucis/astro-og-canvas) so each
       page has a title-specific share card instead of the single default.
-- [ ] **Register the site in [Google Search Console](https://search.google.com/search-console)**
-      and submit the sitemap. This is how you'll see what actually ranks.
+
+**The crawl:** `scripts/crawl.py` runs the checks a Screaming Frog audit would
+report — broken links, redirect chains, title/description/H1 problems, canonical
+mismatches, thin pages, image alt text and weight, sitemap coverage, orphans, and
+the cross-collection prose-link matrix. CI runs it on every pull request against
+the local preview, which is what catches a regression before it ships:
+
+```bash
+npm run build && npm run preview -- --port 4321 &
+python3 scripts/crawl.py http://localhost:4321 --skip-external
+```
+
+CI passes `--skip-external`, so outbound links, the production OG image and any
+drift between `dist/` and what Pages serves are never checked there. Run the full
+crawl against production by hand after a content push, or trigger the
+`SEO audit (manual)` workflow, which does the same thing from Actions:
+
+```bash
+python3 scripts/crawl.py https://dmarc-analyzer.net
+```
+
+Standard-library Python — no `npm ci`, no `node_modules`, nothing to install.
 
 **Trailing slashes:** Astro's default `build.format: "directory"` emits every
 page as `<route>/index.html`, so GitHub Pages serves it at `/features/` and

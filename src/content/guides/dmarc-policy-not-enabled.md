@@ -40,6 +40,10 @@ accounted for yet. Move in stages:
    ```
    v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
    ```
+   `pct=` still works at receivers, but the
+   [current specification has removed it](/guides/dmarc-rfc-9989/) in favour of
+   `t=y`, which asks receivers to apply the policy one level weaker while you watch.
+   Either way it is a temporary setting, and a checker may read it as "not enabled".
 3. **Move to `p=reject`** once quarantine is clean — full enforcement, and the
    state that clears the warning:
    ```
@@ -81,8 +85,12 @@ and shows the record it actually found:
   found](/guides/no-dmarc-record-found/).
 - **Two DMARC records exist.** Duplicates are treated as no policy at all, so an
   old `p=none` alongside your new `p=reject` leaves you unenforced.
-- **A subdomain has its own weaker policy** — or none, falling back to `sp=`. A
-  root at `p=reject; sp=none` is still flagged for subdomains.
+- **A subdomain has its own weaker policy** — or none, in which case it follows the
+  root's `sp=`, or the root's `p=` when no `sp=` is published. A root at
+  `p=reject; sp=none` is still flagged for subdomains. Note that `sp=` in a
+  subdomain's *own* record does nothing; it only has meaning on the organizational
+  domain. See the [tag reference](/guides/dmarc-record-tags/) for the full
+  inheritance rules.
 - **`pct=` is below 100.** Some checkers report partial enforcement as not
   enabled. Note what the unselected share actually gets, though: it is not
   exempted, it drops to the next weaker policy. At `p=reject; pct=25` the other

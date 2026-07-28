@@ -20,11 +20,11 @@ for current terms.*
 
 | | DMARC Analyzer | Valimail |
 |---|---|---|
-| Hosting | Self-hosted | Vendor cloud |
+| Hosting | [Self-hosted](/docs/install/) | Vendor cloud |
 | Open source | Yes (Apache-2.0) | No |
 | Free tier | Everything, unlimited domains | Yes — Monitor, self-service |
 | Paid plans | None | Enforce, from $5,000/year |
-| Your report data | Stays on your infrastructure | Stored in the vendor's cloud |
+| Your report data | [Stays on your infrastructure](/docs/data-protection/) | Stored in the vendor's cloud |
 | Automated enforcement | — | Yes, the core of the product |
 | Compliance certifications | Your own | Vendor-provided |
 | Support | Community | Vendor, with SLAs on paid plans |

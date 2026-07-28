@@ -40,12 +40,25 @@ examples](/guides/spf-record-syntax/) for the full breakdown.)
 ## DKIM — a signature that proves authenticity
 
 DKIM (DomainKeys Identified Mail) attaches a cryptographic **signature** to every
-message, generated with a private key only you hold. The matching public key
-lives in your DNS. The receiver verifies the signature, which proves two things:
-the message really came from your domain, and it wasn't modified in transit.
+message, generated with a private key only you hold. The matching public key lives
+in your DNS, at a name made of a **selector** you choose and the fixed label
+`_domainkey`:
 
-Unlike SPF, DKIM survives most **forwarding** — which is why aligned DKIM is the
-sturdiest way to pass DMARC.
+```
+selector1._domainkey.yourdomain.com
+```
+
+The signature names the selector in `s=` and the signing domain in `d=`, so a
+receiver knows exactly which key to fetch. Verifying it proves two things: some
+domain holding the private key **took responsibility** for the message, and the
+signed parts weren't modified in transit. Note what that is *not* — proof of where
+the message originated. A mailing list or an outbound relay can sign validly with
+its own `d=`, which is precisely why DMARC also checks
+[alignment](/glossary/dmarc-alignment/).
+
+Because the selector is part of the name, you can publish several keys at once and
+rotate without downtime. Unlike SPF, DKIM survives most **forwarding** — which is
+why aligned DKIM is the sturdiest way to pass DMARC.
 
 ## DMARC — the layer that makes them count
 
@@ -136,3 +149,6 @@ Set them up in order: confirm SPF and DKIM exist, then
 monitoring mode. If mail is already failing, see
 [why your email is failing DMARC](/guides/fix-dmarc-failure/). When your reports
 are clean, walk the [path to enforcement](/guides/from-monitoring-to-enforcement/).
+
+For the DNS detail behind any of it: [SPF record syntax](/guides/spf-record-syntax/)
+term by term, and [DMARC record tags](/guides/dmarc-record-tags/) tag by tag.

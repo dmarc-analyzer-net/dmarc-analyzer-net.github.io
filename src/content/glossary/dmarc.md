@@ -1,6 +1,6 @@
 ---
 term: DMARC
-description: DMARC tells receiving mail servers what to do with mail that fails SPF and DKIM, and reports back on who is sending as your domain.
+description: DMARC tells receiving mail servers what to do with mail that fails authentication or alignment, and reports back on who is sending as your domain.
 aliases: ["Domain-based Message Authentication, Reporting and Conformance"]
 related: ["spf", "dkim", "dmarc-alignment", "dmarc-policy", "dmarc-aggregate-report", "bimi", "mta-sts"]
 ---

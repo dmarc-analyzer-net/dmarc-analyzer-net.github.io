@@ -173,9 +173,11 @@ operation.
   representing, or its mail fails.
 
 Across a portfolio of domains, the lookup count is the thing that quietly drifts
-out of range as clients add tools. Watching every domain's SPF result in the
-aggregate reports is how you catch it before someone's invoices stop arriving —
-that's the job [DMARC Analyzer](/) does, self-hosted, with no per-domain fee.
+out of range as clients add tools — and you are not the one adding them. Watching
+every domain's SPF result in the aggregate reports is how you catch it before
+someone's invoices stop arriving — that's the job [DMARC Analyzer](/) does,
+self-hosted, with no per-domain fee, and it is one part of
+[running DMARC for many client domains](/guides/dmarc-multiple-client-domains/).
 
 ## What next
 

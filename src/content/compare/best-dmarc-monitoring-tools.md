@@ -19,7 +19,7 @@ same [aggregate reports](/glossary/dmarc-aggregate-report/) — and more on
 
 ## What to weigh
 
-- **Hosting** — cloud SaaS (fastest to start) vs self-hosted (you own the data).
+- **Hosting** — cloud SaaS (fastest to start) vs [self-hosted](/docs/install/) (you [own the data](/docs/data-protection/)).
 - **Pricing model** — most hosted tools charge by **domains and message
   volume**; costs climb as you add clients.
 - **Data location** — hosted tools process your reports in their cloud;
@@ -34,7 +34,7 @@ often — check each vendor before deciding.*
 
 | Tool | Hosting | Open source | Free tier | Pricing model |
 |---|---|---|---|---|
-| **DMARC Analyzer** | Self-hosted | Yes | Everything, unlimited domains | Free |
+| **DMARC Analyzer** | [Self-hosted](/docs/install/) | Yes | Everything, unlimited domains | Free |
 | dmarcian | Vendor cloud, regional instances | No | Personal use, 2 domains | Domains + volume |
 | EasyDMARC | Vendor cloud | No | 1 domain, 14 days history | Domains + volume |
 | PowerDMARC | Vendor cloud; on-premise on enterprise terms | No | Trial | Domains + volume |

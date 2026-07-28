@@ -1,0 +1,30 @@
+# The full crawl, against production, on demand.
+#
+# CI crawls the local preview with --skip-external, which is right for gating a
+# pull request but leaves three things unchecked: outbound links (they hit the
+# real internet and would make every PR slow and flaky), the production OG image,
+# and any drift between `dist/` and what Pages actually serves.
+#
+# Manual only — no `schedule:`. A site that changes a few times a week does not
+# need a cron job producing mail nobody reads; run this after a content push, or
+# when a link is suspected of rotting.
+#
+# No setup-node and no npm ci: the crawler is standard-library Python and needs
+# neither, which is worth keeping visible.
+name: SEO audit (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Site to crawl
+        default: https://dmarc-analyzer.net
+
+jobs:
+  crawl-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Technical SEO crawl, including outbound links
+        run: python3 scripts/crawl.py "${{ inputs.url }}"

@@ -1,5 +1,12 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+// Pinned to 4.x on purpose. `astro add mdx` (and `npm i @astrojs/mdx`) resolves
+// the `latest` tag, which is 7.x and peers on Astro 7 — and `astro add` skips
+// validating the `astro` peer, so it installs a broken tree without complaining.
+// 4.3.14 is the newest release peering on Astro ^5, and it pins the same
+// @astrojs/markdown-remark 6.3.11 that Astro 5.18 already resolves, so there is
+// no second copy of the markdown pipeline. Revisit when Astro itself moves.
+import mdx from '@astrojs/mdx';
 
 // This repo is a GitHub Pages *user/org site* (dmarc-analyzer-net.github.io),
 // so it is served from the domain root — `base` stays "/".
@@ -17,7 +24,7 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://dmarc-analyzer.net',
   trailingSlash: 'always',
-  integrations: [sitemap()],
+  integrations: [sitemap(), mdx()],
   // Dev-server only: Vite blocks Host headers not in its allowlist. When
   // previewing over SSH via a hostname (see AGENTS.md), pass the host(s) in
   // DEV_ALLOWED_HOSTS (comma-separated) so no internal hostname is committed.

@@ -65,8 +65,8 @@ independently of client retention and unaffected by legal hold.
    will file under the mailbox's default client.
 3. **Point their DMARC records** at your mailbox — `rua=` in each domain's
    record, plus the [external-destination authorization
-   record](/guides/no-dmarc-record-found/) since your mailbox is on a different
-   domain than theirs.
+   record](/guides/dmarc-multiple-client-domains/) since your mailbox is on a
+   different domain than theirs.
 4. **Add a digest recipient** scoped to the client, kind *Digest only* — that's
    the monthly email they'll actually read.
 5. **Optionally create a `client_viewer`** granted to just this client, so they

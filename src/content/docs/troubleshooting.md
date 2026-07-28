@@ -100,7 +100,9 @@ Common causes:
 
 - An unusual ZIP compression variant.
 - Something in the mailbox that isn't a DMARC report — many providers also send
-  TLS-RPT reports, and marketing mail lands in shared inboxes.
+  [TLS-RPT](/glossary/tls-rpt/) reports, and marketing mail lands in shared
+  inboxes. If TLS reports are a steady share of the failures, point their `rua=`
+  at a different mailbox so this count stays meaningful.
 
 The rest of the run still imports; failures are counted, not fatal. If a mailbox
 shows persistent failures, it's worth

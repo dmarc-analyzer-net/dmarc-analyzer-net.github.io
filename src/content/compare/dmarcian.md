@@ -20,12 +20,12 @@ terms.*
 
 | | DMARC Analyzer | dmarcian |
 |---|---|---|
-| Hosting | Self-hosted | Vendor cloud, with regional instances |
+| Hosting | [Self-hosted](/docs/install/) | Vendor cloud, with regional instances |
 | Open source | Yes (Apache-2.0) | No |
 | Free tier | Everything, unlimited domains | Yes — personal use, 2 domains |
 | Paid plans | None | From ~$24/month, by domains + volume |
-| Your report data | Stays on your infrastructure | Stored in the vendor's cloud |
-| Agencies / many clients | Yes, self-hosted multi-tenant | Yes, on paid plans |
+| Your report data | [Stays on your infrastructure](/docs/data-protection/) | Stored in the vendor's cloud |
+| Agencies / many clients | Yes, [self-hosted multi-tenant](/docs/clients-users-and-audit/) | Yes, on paid plans |
 | Support | Community | Vendor |
 
 ## Where dmarcian fits

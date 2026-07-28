@@ -22,8 +22,8 @@ by PostgreSQL, with the console included.
 | | DMARC Analyzer | parsedmarc |
 |---|---|---|
 | Open source | Yes (Apache-2.0) | Yes (Apache-2.0) |
-| Self-hosted; your data stays yours | Yes | Yes |
-| What you actually run | One container + PostgreSQL | A parser, plus whichever store and dashboard stack you choose |
+| [Self-hosted](/docs/install/); your data stays yours | Yes | Yes |
+| What you actually run | [One container + PostgreSQL](/docs/install/) | A parser, plus whichever store and dashboard stack you choose |
 | Dashboards | Built into the app | Prebuilt Kibana and Grafana dashboards you import into your own stack |
 | Aggregate (RUA) reports | Yes | Yes |
 | Forensic (RUF) reports | — | Yes |
@@ -36,14 +36,14 @@ by PostgreSQL, with the console included.
 ## Where parsedmarc fits
 
 If you want a scriptable parser to feed a data pipeline you already run, or you
-need **forensic (RUF) or TLS-RPT reports**, parsedmarc is the better tool — we
+need **forensic (RUF) or [TLS-RPT](/glossary/tls-rpt/) reports**, parsedmarc is the better tool — we
 handle aggregate reports only. It is also flexible about where data lands, and
 has years of production use behind it.
 
 ## Where DMARC Analyzer fits
 
 If you want [dashboards](/guides/how-to-read-a-dmarc-aggregate-report/) and
-[agency multi-tenancy](/dmarc-for/) as a finished application rather than
+[agency multi-tenancy](/guides/dmarc-multiple-client-domains/) as a finished application rather than
 components to assemble, DMARC Analyzer gives you the open-source, self-hosted
 model with one container to run. Per-client scoping is the substantive
 difference: parsedmarc is not built to keep many clients' data separate.

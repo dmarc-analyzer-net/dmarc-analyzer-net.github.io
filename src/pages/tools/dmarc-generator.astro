@@ -82,9 +82,17 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
           <summary style="cursor:pointer; font-size:var(--text-base); font-weight:600; color:var(--gray-800);">Advanced tags</summary>
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:18px;">
             <div>
-              <label style={label} for="pct">Percentage (<code class="mono">pct</code>)</label>
+              <label style={label} for="t">Testing mode (<code class="mono">t</code>)</label>
+              <select id="t" style={field}>
+                <option value="" selected>Off — apply the policy as published (default)</option>
+                <option value="y">y — test only, apply one level below</option>
+              </select>
+              <p style={help}>The current specification's replacement for <code class="mono">pct</code>. <code class="mono">t=y</code> asks receivers to apply the policy one step weaker than published, so <code class="mono">p=reject</code> behaves as quarantine while you watch the reports.</p>
+            </div>
+            <div>
+              <label style={label} for="pct">Percentage (<code class="mono">pct</code>) — legacy</label>
               <input id="pct" type="number" min="1" max="100" value="100" style={field} />
-              <p style={help}>Applies the policy to a share of failing mail while you roll out. The remainder is not exempt — it drops to the next weaker policy.</p>
+              <p style={help}>Applies the policy to a share of failing mail while you roll out. The remainder is not exempt — it drops to the next weaker policy. Removed by the current specification, but still honoured by receivers, so it remains usable as a ramp — see <a href="/guides/dmarc-rfc-9989/">what changed</a>.</p>
             </div>
             <div>
               <label style={label} for="adkim">DKIM alignment (<code class="mono">adkim</code>)</label>
@@ -150,12 +158,20 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
       <div class="prose">
         <h2>Why the record is shorter than you expected</h2>
         <p>
-          Most generators emit every tag, including the ones set to their
-          defaults — <code>pct=100; adkim=r; aspf=r; fo=0; rf=afrf;
-          ri=86400</code>. That is valid, and it is also six tags of noise that
-          say nothing. This one omits any tag whose value is the default, because
-          a record you can read at a glance is a record you can review a year
-          from now.
+          Most generators emit every tag, including the ones set to
+          <a href="/guides/dmarc-record-tags/">their defaults</a> —
+          <code>adkim=r; aspf=r; fo=0; t=n</code>. That is valid, and it is also
+          four tags of noise that say nothing. This one omits any tag whose value
+          is the default, because a record you can read at a glance is a record
+          you can review a year from now.
+        </p>
+        <p>
+          There is a sharper argument for it than tidiness. Those same generators
+          have spent years padding records with <code>pct=100</code>,
+          <code>rf=afrf</code> and <code>ri=86400</code> — three tags the
+          <a href="/guides/dmarc-rfc-9989/">current specification has since
+          removed</a> outright. Every one of them was noise on the day it was
+          written, and now it is noise naming a tag that no longer exists.
         </p>
         <p>
           The one exception worth knowing: leaving out <code>sp</code> is not the
@@ -238,6 +254,7 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
   const ruf = $<HTMLInputElement>('ruf');
   const sp = $<HTMLSelectElement>('sp');
   const pct = $<HTMLInputElement>('pct');
+  const t = $<HTMLSelectElement>('t');
   const adkim = $<HTMLSelectElement>('adkim');
   const aspf = $<HTMLSelectElement>('aspf');
   const fo = $<HTMLSelectElement>('fo');
@@ -302,6 +319,8 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
     if (ruaUris.length) tags.push(`rua=${ruaUris.join(',')}`);
     if (rufUris.length) tags.push(`ruf=${rufUris.join(',')}`);
     if (pctValid && !pctEmpty && pctNumber !== 100) tags.push(`pct=${pctNumber}`);
+    // t=n is the default, so only t=y is ever worth publishing.
+    if (t.value === 'y') tags.push('t=y');
     if (adkim.value === 's') tags.push('adkim=s');
     if (aspf.value === 's') tags.push('aspf=s');
     if (fo.value) tags.push(`fo=${fo.value}`);
@@ -339,10 +358,21 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
       out.push({ level: 'warn', text: 'sp=none exempts every subdomain while the organizational domain enforces, so mail can still be spoofed from any name under it. Leave sp unset unless you specifically need this.' });
     }
 
+    const ramping = pctValid && !pctEmpty && pctNumber !== 100;
     if (!pctValid) {
       out.push({ level: 'bad', text: `pct must be a whole number from 0 to 100 — "${pctValue}" was left out of the record.` });
-    } else if (!pctEmpty && pctNumber !== 100) {
-      out.push({ level: 'warn', text: `pct=${pctNumber} applies the policy to ${pctNumber}% of failing mail. The rest is not exempt: it drops to the next weaker policy. Easy to leave in place and forget.` });
+    } else if (ramping) {
+      out.push({ level: 'warn', text: `pct=${pctNumber} applies the policy to ${pctNumber}% of failing mail. The rest is not exempt: it drops to the next weaker policy. Easy to leave in place and forget — and the current specification has removed pct in favour of t, so treat it as a transitional tag rather than part of a record you intend to keep.` });
+    }
+
+    if (t.value === 'y') {
+      const weaker = p === 'reject' ? 'quarantine' : 'none';
+      out.push({
+        level: 'warn',
+        text: ramping
+          ? `You have set both t=y and pct=${pctNumber}. They are two answers to the same question — t is the current specification's, pct is the one receivers have honoured for a decade. Pick one: publishing both leaves what actually happens up to each receiver.`
+          : `t=y means the policy is not really being applied — receivers are asked to treat p=${p} as ${weaker} while you watch the reports. This is the replacement for pct=0 and it is meant to be temporary, so put a date on taking it out.`,
+      });
     }
 
     if (rufUris.length) {
@@ -392,7 +422,7 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
     }
   }
 
-  for (const el of [domain, policy, rua, ruf, sp, pct, adkim, aspf, fo]) {
+  for (const el of [domain, policy, rua, ruf, sp, pct, t, adkim, aspf, fo]) {
     el.addEventListener('input', build);
     el.addEventListener('change', build);
   }

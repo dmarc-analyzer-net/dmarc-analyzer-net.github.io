@@ -31,7 +31,7 @@ const schema = {
           { label: 'DMARC record checker', href: path },
         ]} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">DMARC record checker</h1>
-        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Look up a domain's DMARC record, validate every tag against RFC 7489, and find the problems that quietly stop reports arriving. <strong>The lookup runs from your browser</strong> against public DNS — no account, nothing stored.</p>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Look up a domain's DMARC record, validate every tag against the current DMARC specification, and find the problems that quietly stop reports arriving. <strong>The lookup runs from your browser</strong> against public DNS — no account, nothing stored.</p>
       </div>
     </section>
 
@@ -67,7 +67,7 @@ const schema = {
         <ul>
           <li><strong>Is there exactly one record?</strong> Two records that both start with <code>v=DMARC1</code> are treated by receivers as <em>no record at all</em> — a surprisingly common outcome of two teams each adding one.</li>
           <li><strong>Is it published at the right name?</strong> If nothing is found at <code>_dmarc</code>, we check whether the record was accidentally published at the domain root instead.</li>
-          <li><strong>Is every tag valid?</strong> <code>p</code>, <code>sp</code>, <code>rua</code>, <code>ruf</code>, <code>adkim</code>, <code>aspf</code>, <code>pct</code>, <code>fo</code>, <code>ri</code> and <code>rf</code> are each checked for a legal value, with duplicates and unrecognised tags flagged.</li>
+          <li><strong>Is every tag valid?</strong> <code>p</code>, <code>sp</code>, <code>np</code>, <code>rua</code>, <code>ruf</code>, <code>adkim</code>, <code>aspf</code>, <code>fo</code>, <code>t</code> and <code>psd</code> are each checked for a legal value, with duplicates and unrecognised tags flagged. So are <code>pct</code>, <code>ri</code> and <code>rf</code>, which the <a href="/guides/dmarc-rfc-9989/">current specification removed</a> but plenty of live records still carry. The <a href="/guides/dmarc-record-tags/">tag reference</a> covers what each one does and what its default is.</li>
           <li><strong>Will reports actually arrive?</strong> A record can be flawless and still send you nothing — see below.</li>
         </ul>
 
@@ -78,7 +78,7 @@ const schema = {
           that domain has to opt in. It does so by publishing its own TXT record
           at <code>yourdomain.com._report._dmarc.theirdomain.com</code>. Without
           it, conforming receivers simply will not send your reports there
-          (<a href="https://www.rfc-editor.org/rfc/rfc7489#section-7.1" rel="nofollow">RFC 7489 §7.1</a>).
+          (<a href="https://www.rfc-editor.org/rfc/rfc9990#section-4" rel="nofollow">RFC 9990 §4</a>).
         </p>
         <p>
           Nothing bounces and nothing warns you. The record looks perfect and the
@@ -130,9 +130,14 @@ const schema = {
 </BaseLayout>
 
 <script>
-  /** One finding in the results list. */
+  /** One finding in the results list.
+   *
+   *  `note` is for something true but not actionable — a tag the specification has
+   *  removed, say, which is harmless where it already sits. Deliberately excluded
+   *  from the verdict count in verdictBanner(), so notes never make a healthy record
+   *  look like it has problems. */
   type Finding = {
-    level: 'good' | 'warn' | 'bad';
+    level: 'good' | 'warn' | 'bad' | 'note';
     title: string;
     detail: string;
     link?: { href: string; label: string };
@@ -172,9 +177,15 @@ const schema = {
   }
 
   const POLICIES = ['none', 'quarantine', 'reject'];
-  const KNOWN_TAGS = ['v', 'p', 'sp', 'rua', 'ruf', 'adkim', 'aspf', 'pct', 'fo', 'ri', 'rf'];
+  // The current DMARC specification (RFC 9989) removed pct, ri and rf and added t
+  // and psd. Removed tags stay in this list on purpose: they are still published on
+  // plenty of live domains, and reporting one as "unrecognised" would be less
+  // accurate than reporting it as removed — see the findings below.
+  const KNOWN_TAGS = ['v', 'p', 'sp', 'np', 'rua', 'ruf', 'adkim', 'aspf', 'fo', 't', 'psd', 'pct', 'ri', 'rf'];
 
-  /** Report addresses, as published: `mailto:a@b.com!10m` may repeat, comma-separated. */
+  /** Report addresses, as published: `mailto:a@b.com!10m` may repeat, comma-separated.
+   *  The `!10m` size suffix is obsolete syntax in RFC 9989 and reporters ignore it,
+   *  but it is still out there, so it is parsed rather than treated as an error. */
   function reportUris(value: string): string[] {
     return value.split(',').map((s) => s.trim()).filter(Boolean);
   }
@@ -204,6 +215,11 @@ const schema = {
 
     const get = (name: string) => tags.find((t) => t.name === name);
 
+    // Looked up early because the p finding depends on it: a record with no policy
+    // but a valid rua is treated as p=none rather than ignored.
+    const rua = get('rua');
+    const hasRua = Boolean(rua?.value && /^(mailto|https?):/i.test(rua.value.trim()));
+
     // v — the record is only a DMARC record if this is right.
     if (!tags.length || tags[0].name !== 'v' || tags[0].value !== 'DMARC1') {
       out.push({
@@ -213,13 +229,17 @@ const schema = {
       });
     }
 
-    // p — required, and the whole point of the record.
+    // p — the whole point of the record. RFC 9989 downgraded it from required to
+    // recommended, and what happens without it depends on rua, so the two cases are
+    // worth separating: they lead somewhere different.
     const p = get('p');
     if (!p) {
       out.push({
         level: 'bad',
         title: 'No p tag',
-        detail: 'The policy tag is required. Without it the record is not a valid policy record and receivers will ignore it.',
+        detail: hasRua
+          ? 'The policy tag is missing. Because a valid rua address is present, receivers treat this as p=none — you will get reports, but nothing is protected and no receiver is being asked to act. Publish p explicitly rather than relying on that.'
+          : 'The policy tag is missing and there is no rua address either, so receivers apply no DMARC processing to this domain at all. The record is doing nothing.',
         link: { href: '/guides/publish-your-first-dmarc-record/', label: 'Publish a valid record' },
       });
     } else if (!POLICIES.includes(p.value.toLowerCase())) {
@@ -251,20 +271,13 @@ const schema = {
           link: { href: '/guides/from-monitoring-to-enforcement/', label: 'How to move to enforcement' },
         });
       }
-      // The ABNF in RFC 7489 puts p immediately after v. Most receivers are
-      // lenient about it; some strict parsers are not.
-      const index = tags.indexOf(p);
-      if (index > 1) {
-        out.push({
-          level: 'warn',
-          title: 'p is not the second tag',
-          detail: 'RFC 7489 places p immediately after v. Most receivers accept any order, but strict parsers can reject the record.',
-        });
-      }
+      // No tag-order check here on purpose. RFC 7489's ABNF put p immediately after
+      // v, and this tool used to warn when it wasn't — but RFC 9989's ABNF is
+      // `dmarc-version *(dmarc-sep dmarc-tag)`, so only v is positional and any
+      // order after it is legal. Warning about it would flag a non-problem.
     }
 
     // rua — no reports means no visibility, which is the reason to do any of this.
-    const rua = get('rua');
     if (!rua || !rua.value) {
       out.push({
         level: 'warn',
@@ -294,7 +307,9 @@ const schema = {
       });
     }
 
-    // pct — a partial rollout that is easy to forget about.
+    // pct — a partial rollout that is easy to forget about, and a tag the current
+    // specification has removed. Receivers still honour it, so a sub-100 value is
+    // still a live warning rather than a historical note.
     const pct = get('pct');
     if (pct) {
       const n = Number(pct.value);
@@ -304,7 +319,8 @@ const schema = {
         out.push({
           level: 'warn',
           title: `pct=${n} — the policy applies to only ${n}% of failing mail`,
-          detail: 'The other ' + (100 - n) + '% is treated as the next policy down. Useful while rolling out; easy to leave behind and forget.',
+          detail: 'The other ' + (100 - n) + '% is treated as the next policy down. Useful while rolling out; easy to leave behind and forget. Note that the current DMARC specification has removed pct in favour of t — receivers still honour it, but it is a transitional tag now.',
+          link: { href: '/guides/dmarc-rfc-9989/', label: 'What changed in the new standard' },
         });
       }
     }
@@ -319,6 +335,21 @@ const schema = {
           level: 'warn',
           title: 'sp=none exempts every subdomain',
           detail: 'The organizational domain is enforcing but subdomains are not, so mail can still be spoofed from any name under it. Remove sp to make subdomains inherit p.',
+        });
+      }
+    }
+
+    // np — policy for subdomains that do not resolve. Same three values as p, and
+    // it takes precedence over sp for those names.
+    const np = get('np');
+    if (np) {
+      if (!POLICIES.includes(np.value.toLowerCase())) {
+        out.push({ level: 'bad', title: `np=${np.value} is not a valid policy`, detail: 'The only legal values are none, quarantine and reject.' });
+      } else if (np.value.toLowerCase() === 'none' && p && p.value.toLowerCase() !== 'none') {
+        out.push({
+          level: 'warn',
+          title: 'np=none exempts non-existent subdomains',
+          detail: 'Names that do not resolve are the easiest to forge, because nobody sends legitimate mail from them. Removing np lets them follow sp, or p.',
         });
       }
     }
@@ -354,18 +385,61 @@ const schema = {
       }
     }
 
-    // ri — legal to set, largely ignored in practice.
+    // ri and rf — both removed by RFC 9989, and both were near-useless before that:
+    // ri asked for an interval providers ignored, and rf had exactly one legal value.
+    // Notes rather than warnings: nothing breaks, there is just nothing to gain.
     const ri = get('ri');
     if (ri && !/^\d+$/.test(ri.value)) {
       out.push({ level: 'bad', title: `ri=${ri.value} is not valid`, detail: 'The reporting interval is a number of seconds.' });
-    } else if (ri && ri.value !== '86400') {
-      out.push({ level: 'warn', title: `ri=${ri.value} may be ignored`, detail: 'Most providers send aggregate reports once a day regardless of what ri asks for.' });
+    } else if (ri) {
+      out.push({
+        level: 'note',
+        title: 'ri has been removed from the specification',
+        detail: 'Providers sent daily aggregate reports regardless of what ri asked for, and the current DMARC specification drops the tag. Harmless where it is already published; no reason to add it.',
+      });
     }
 
-    // rf — one legal value.
     const rf = get('rf');
     if (rf && rf.value.toLowerCase() !== 'afrf') {
-      out.push({ level: 'bad', title: `rf=${rf.value} is not valid`, detail: 'The only defined report format is afrf.' });
+      out.push({ level: 'bad', title: `rf=${rf.value} is not valid`, detail: 'The only defined report format was afrf.' });
+    } else if (rf) {
+      out.push({
+        level: 'note',
+        title: 'rf has been removed from the specification',
+        detail: 'Only one report format was ever defined, so the tag could only ever carry its own default. The current DMARC specification drops it.',
+      });
+    }
+
+    // t — the replacement for the part of pct that receivers implemented reliably.
+    const t = get('t');
+    if (t) {
+      const value = t.value.toLowerCase();
+      if (!['y', 'n'].includes(value)) {
+        out.push({ level: 'bad', title: `t=${t.value} is not valid`, detail: 'The only legal values are y and n.' });
+      } else if (value === 'y') {
+        out.push({
+          level: 'warn',
+          title: 't=y — testing mode, so the policy is not being applied',
+          detail: `Receivers are asked to apply the policy one level below the one published${p && POLICIES.includes(p.value.toLowerCase()) ? ` — so p=${p.value.toLowerCase()} behaves as ${p.value.toLowerCase() === 'reject' ? 'quarantine' : 'none'}` : ''}. This is the successor to pct=0 and is meant to be temporary: it is easy to publish while testing and forget.`,
+          link: { href: '/guides/dmarc-rfc-9989/', label: 'What t replaces' },
+        });
+      }
+    }
+
+    // psd — for public suffix operators, so on an ordinary domain it is usually a
+    // copy-paste from someone else's record rather than a deliberate choice.
+    const psd = get('psd');
+    if (psd) {
+      const value = psd.value.toLowerCase();
+      if (!['y', 'n', 'u'].includes(value)) {
+        out.push({ level: 'bad', title: `psd=${psd.value} is not valid`, detail: 'The only legal values are y, n and u.' });
+      } else if (value === 'y') {
+        out.push({
+          level: 'warn',
+          title: 'psd=y declares this a public suffix domain',
+          detail: 'This tag is for registry and public-suffix operators, telling receivers the name sits above the organizational domains beneath it. On an ordinary company domain it is almost always a mistake copied from another record, and it changes how policy is discovered for every name under you.',
+        });
+      }
     }
 
     // Duplicates and typos — both usually mean an edit went wrong.
@@ -389,7 +463,7 @@ const schema = {
   /**
    * A report address outside the record's own domain only works if that domain
    * opts in, by publishing a DMARC record at
-   * `<sender>._report._dmarc.<destination>` — RFC 7489 §7.1. When it is missing,
+   * `<sender>._report._dmarc.<destination>` — RFC 9990 §4. When it is missing,
    * nothing bounces: the reports simply never arrive.
    */
   async function checkExternalDestinations(domain: string, record: string): Promise<Finding[]> {
@@ -438,6 +512,7 @@ const schema = {
     good: { bg: 'var(--teal-100)', fg: 'var(--brand-hover)', mark: '\u2713' },
     warn: { bg: '#fef3c7', fg: '#92400e', mark: '!' },
     bad: { bg: 'var(--status-danger-bg)', fg: 'var(--status-danger-fg)', mark: '\u00d7' },
+    note: { bg: 'var(--status-neutral-bg)', fg: 'var(--status-neutral-fg)', mark: 'i' },
   };
 
   function findingRow(f: Finding) {
@@ -510,7 +585,9 @@ const schema = {
     results.appendChild(recordBlock(record));
     results.appendChild(verdictBanner(findings));
 
-    const order = { bad: 0, warn: 1, good: 2 };
+    // Problems first, then things to look at, then what is working — and notes last,
+    // since they describe something that needs no action at all.
+    const order: Record<Finding['level'], number> = { bad: 0, warn: 1, good: 2, note: 3 };
     const list = document.createElement('ul');
     list.style.cssText = 'list-style:none; margin:0; padding:0; border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-card);';
     [...findings]

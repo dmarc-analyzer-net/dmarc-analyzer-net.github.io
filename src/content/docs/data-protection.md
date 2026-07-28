@@ -158,7 +158,8 @@ ignores backup rotation is incomplete.
 You are processing report data on your clients' behalf, so the
 controller/processor relationship is between **you and each client** — this
 software adds no third party to that chain, which is precisely the
-self-hosting argument. For your Art. 30 records, the shape is: purpose —
+self-hosting argument. (For the operational side of running a portfolio, see
+[DMARC for many client domains](/guides/dmarc-multiple-client-domains/).) For your Art. 30 records, the shape is: purpose —
 email authentication monitoring and spoofing prevention; categories — sending
 server IP addresses and authentication outcomes; retention — the per-client
 window you configured, plus whatever your mailbox and, if you offload, your

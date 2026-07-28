@@ -1,0 +1,68 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+/**
+ * On-page table of contents, as a collapsed disclosure.
+ *
+ * Astro slugs markdown headings with github-slugger by default, so
+ * `headings[].slug` already matches the `id` in the rendered HTML — no rehype
+ * plugin needed. `.prose h1..h4` carries `scroll-margin-top` so an anchor jump
+ * clears the sticky header.
+ *
+ * Deliberately not wrapped in <nav>: `scripts/crawl.py` excludes nav text from
+ * its word count, so a TOC in a landmark would silently subtract 10-20 words
+ * from every page it appears on and push short ones under the thin-content
+ * threshold.
+ *
+ * `maxDepth` defaults to 2 — a flat list of h2s, which is what the docs pages
+ * shipped and what most pages want (only one guide has any h3 at all). Set it to
+ * 3 on a long reference page to nest h3s under their h2.
+ */
+interface Props {
+  /** From `const { Content, headings } = await render(entry)`. */
+  headings: MarkdownHeading[];
+  /** Render nothing below this many links — a two-item TOC is just noise. */
+  minHeadings?: number;
+  /** Deepest level listed. 2 = h2 only; 3 nests h3s under the preceding h2. */
+  maxDepth?: 2 | 3;
+  title?: string;
+}
+
+const { headings, minHeadings = 3, maxDepth = 2, title = 'On this page' } = Astro.props;
+
+type Section = MarkdownHeading & { children: MarkdownHeading[] };
+
+const sections: Section[] = [];
+for (const h of headings) {
+  if (h.depth === 2) {
+    sections.push({ ...h, children: [] });
+  } else if (h.depth === 3 && maxDepth >= 3 && sections.length) {
+    sections[sections.length - 1].children.push(h);
+  }
+}
+
+// Counts rendered links, not headings: at maxDepth 3 a page with two h2s and
+// four h3s has six entries and is worth showing.
+const count = sections.reduce((n, s) => n + 1 + s.children.length, 0);
+---
+{count >= minHeadings && (
+  <details style="margin:0 0 28px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--surface-page); padding:12px 16px;">
+    <summary style="font-size:var(--text-sm); font-weight:600; color:var(--gray-800);">{title}</summary>
+    <ul style="list-style:none; margin:10px 0 2px; padding:0;">
+      {sections.map((s) => (
+        <li style="margin:4px 0;">
+          <a href={`#${s.slug}`} style="font-size:13.5px; color:var(--brand);">{s.text}</a>
+          {s.children.length > 0 && (
+            <ul style="list-style:none; margin:4px 0 0; padding:0 0 0 14px;">
+              {s.children.map((c) => (
+                <li style="margin:4px 0;">
+                  <a href={`#${c.slug}`} style="font-size:13px; color:var(--text-faint);">{c.text}</a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
+  </details>
+)}

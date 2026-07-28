@@ -90,18 +90,20 @@ enough to **break DKIM** too. The result is a DMARC failure for mail you did
 legitimately send.
 
 **Fix:** there's no perfect fix, but aligned DKIM survives most forwarding, and
-[ARC](/glossary/dkim/) lets participating receivers honor a prior "pass". Don't
+[ARC](/glossary/arc/) lets participating receivers honor a prior "pass". Don't
 tighten your policy based on forwarding failures alone — read the reports first.
 
 ## Cause 5 — a subdomain with no record
 
 Mail from `news.yourdomain.com` is governed by that subdomain's DMARC — or, if
-it has none, by your organizational policy's subdomain tag (`sp=`). A forgotten
-subdomain sending unauthenticated mail will fail.
+it has none, by your organizational policy's subdomain tag (`sp=`), or by `p=`
+itself when no `sp=` is published. A forgotten subdomain sending unauthenticated
+mail will fail either way.
 
-**Fix:** publish DMARC (and SPF/DKIM) on active subdomains, and set a deliberate
-`sp=` on your main [policy](/glossary/dmarc-policy/) rather than leaving it to
-chance.
+**Fix:** publish DMARC (and SPF/DKIM) on active subdomains, and treat `sp=` on your
+main [policy](/glossary/dmarc-policy/) as the exception rather than the default —
+subdomains already inherit `p=`. For names that don't resolve at all, `np=` covers
+them specifically; the [tag reference](/guides/dmarc-record-tags/) has both.
 
 ## How to diagnose which one it is
 

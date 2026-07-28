@@ -26,7 +26,7 @@ gets one of four states — only one of which is a finding:
 |---|---|
 | match | Published and observed agree |
 | **differs** | A receiver saw something else — stale DNS, a second record, or a recent edit still propagating |
-| inherited | You didn't publish the tag; RFC 7489 derives its default. Nothing to disagree with |
+| inherited | You didn't publish the tag, so the receiver used [its default](/guides/dmarc-record-tags/). Nothing to disagree with |
 | not_reported | Published, but the reporter didn't echo a value for it |
 
 The panel also inspects the SPF record — including its DNS lookup count against

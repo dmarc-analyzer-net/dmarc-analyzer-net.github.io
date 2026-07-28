@@ -29,7 +29,7 @@ heavy" and "so light it keeps no history."
 
 | Tool | Language | What you run | Dashboards | Multi-tenant | Helm chart |
 |---|---|---|---|---|---|
-| **DMARC Analyzer** | .NET + React | One container + PostgreSQL | Built in | Yes (per client) | Yes |
+| **DMARC Analyzer** | .NET + React | [One container + PostgreSQL](/docs/install/) | Built in | Yes ([per client](/docs/clients-users-and-audit/)) | [Yes](/docs/kubernetes/) |
 | parsedmarc | Python | Parser + Elasticsearch/OpenSearch + Kibana/Grafana | Via Kibana/Grafana | No | No |
 | dmarc-report-viewer | Rust | One ~10 MB container or a single binary — no database | Built in | No | No |
 | dmarc-report-converter | Go | A scheduled CLI job — no service to run | Static HTML output, no dashboard | No | No |
@@ -67,7 +67,7 @@ heavy" and "so light it keeps no history."
 - **One mailbox, and you only care about recent reports** → a lightweight viewer
   such as dmarc-report-viewer.
 - **You need SMTP TLS reporting today** → parsedmarc or dmarc-report-viewer both
-  read TLS-RPT; this project is DMARC-only for now. parsedmarc also parses
+  read [TLS-RPT](/glossary/tls-rpt/); this project is DMARC-only for now. parsedmarc also parses
   forensic (RUF) reports, which we do not.
 - **You want a scheduled artifact, not a dashboard** → dmarc-report-converter.
 - **Want turnkey dashboards, many client domains, and no search stack** →
