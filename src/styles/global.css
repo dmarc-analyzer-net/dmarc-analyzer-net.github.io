@@ -223,6 +223,28 @@ code,kbd,pre{font-family:var(--font-mono)}
 
 .docs-aside-heading { display: none; }
 
+/* Article body: pairs the reading column with the Toc rail as a two-column
+   grid. Page templates set `display:grid` and `grid-template-columns` inline,
+   conditionally on whether Toc.astro will render anything (see `hasToc()` in
+   lib/toc.ts) — a page with too few headings for a TOC gets no grid at all
+   here, so no rail column is ever declared for it to leave an empty gap in.
+   This block only owns the pieces that don't depend on that per-page choice:
+   gap/alignment, and the order flip that keeps the mobile accordion above the
+   content while the desktop rail sits to its right.
+
+   `align-items` is left at its `stretch` default (unlike `.docs-shell`, which
+   uses `start`): there, `position:sticky` sits directly on the grid item
+   (`.docs-aside`), so shrinking that item to its own content height is exactly
+   what lets it hug the top and still stick. Here the sticky element
+   (`.toc-rail`) is nested *inside* the grid item (`Toc.astro`'s `.toc`
+   wrapper, which also holds the mobile accordion) — `start` would shrink
+   `.toc` itself to its content height, leaving `.toc-rail` no taller box to
+   stick within, so it would just scroll off with the page. Stretching `.toc`
+   to the row's full height gives `.toc-rail` room to travel. */
+.article-body { gap: 44px; }
+.article-content { min-width: 0; }
+.article-body > .toc { order: 1; min-width: 0; overflow-wrap: anywhere; }
+
 /* --- Responsive ---------------------------------------------------------
    The site was drawn desktop-first with no breakpoints and rendered ~930px
    wide inside a 390px viewport. Breakpoints and rules follow the design
@@ -253,6 +275,8 @@ code,kbd,pre{font-family:var(--font-mono)}
   .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
   .split  { grid-template-columns: 1fr !important; }
   .docs-shell { grid-template-columns: minmax(0, 1fr) !important; }
+  .article-body { grid-template-columns: minmax(0, 1fr) !important; }
+  .article-body > .toc { order: -1; }
   /* The docs nav moves below the article rather than disappearing. Hiding it
      left phone readers with only prev/next, and a disclosure above the article
      would push the content they came for off the screen. Ordered last, it reads

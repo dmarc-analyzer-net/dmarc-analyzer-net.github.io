@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import { DOCS_SECTIONS } from '../../lib/docs';
+import { hasToc } from '../../lib/toc';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
@@ -23,6 +24,7 @@ export async function getStaticPaths() {
 const { entry, ordered } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/docs/${entry.id}/`;
+const showToc = hasToc(headings, { maxDepth: 3 });
 
 // Prev/next within the reading sequence (section, then order).
 
@@ -46,7 +48,7 @@ const schema = {
 ---
 <BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
   <JsonLd slot="head" schema={schema} />
-    <div class="docs-shell" style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
+    <div class="docs-shell" style={`max-width:${showToc ? 1280 : 1160}px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;`}>
       <aside class="docs-aside" style="position:sticky; top:88px;">
         <h2 class="docs-aside-heading">All documentation</h2>
         <DocsSidebar current={entry.id} />
@@ -61,28 +63,32 @@ const schema = {
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-3xl); line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
         <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
 
-        <Toc headings={headings} />
+        <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,1fr) 240px;' : undefined}>
+          <div class="article-content">
+            <div class="prose">
+              <Content />
+            </div>
 
-        <div class="prose">
-          <Content />
+            {(prev || next) && (
+              <nav aria-label="Pagination" style="margin-top:48px; border-top:1px solid var(--border-default); padding-top:20px; display:flex; gap:16px; justify-content:space-between; flex-wrap:wrap;">
+                {prev ? (
+                  <a class="lift" href={`/docs/${prev.id}/`} style="flex:1 1 220px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:14px 16px; color:var(--text-body) !important;">
+                    <span style="display:block; font-size:var(--text-xs); color:var(--text-faint);">Previous</span>
+                    <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{prev.data.title}</span>
+                  </a>
+                ) : <span style="flex:1 1 220px;"></span>}
+                {next ? (
+                  <a class="lift" href={`/docs/${next.id}/`} style="flex:1 1 220px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:14px 16px; text-align:right; color:var(--text-body) !important;">
+                    <span style="display:block; font-size:var(--text-xs); color:var(--text-faint);">Next</span>
+                    <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{next.data.title}</span>
+                  </a>
+                ) : <span style="flex:1 1 220px;"></span>}
+              </nav>
+            )}
+          </div>
+
+          {showToc && <Toc headings={headings} maxDepth={3} />}
         </div>
-
-        {(prev || next) && (
-          <nav aria-label="Pagination" style="margin-top:48px; border-top:1px solid var(--border-default); padding-top:20px; display:flex; gap:16px; justify-content:space-between; flex-wrap:wrap;">
-            {prev ? (
-              <a class="lift" href={`/docs/${prev.id}/`} style="flex:1 1 220px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:14px 16px; color:var(--text-body) !important;">
-                <span style="display:block; font-size:var(--text-xs); color:var(--text-faint);">Previous</span>
-                <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{prev.data.title}</span>
-              </a>
-            ) : <span style="flex:1 1 220px;"></span>}
-            {next ? (
-              <a class="lift" href={`/docs/${next.id}/`} style="flex:1 1 220px; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:#fff; padding:14px 16px; text-align:right; color:var(--text-body) !important;">
-                <span style="display:block; font-size:var(--text-xs); color:var(--text-faint);">Next</span>
-                <span style="display:block; margin-top:2px; font-size:14.5px; font-weight:600;">{next.data.title}</span>
-              </a>
-            ) : <span style="flex:1 1 220px;"></span>}
-          </nav>
-        )}
       </article>
     </div>
 </BaseLayout>
