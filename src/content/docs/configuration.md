@@ -108,7 +108,8 @@ All optional. Defaults below are what ships in the image.
 | Variable | Default | What it does |
 |---|---|---|
 | `Worker__ScheduleIntervalSeconds` | `3600` | Seconds between polling passes. 60 minutes, 24/7. Floor of 15s. |
-| `Worker__MaxMessagesPerSync` | `200` | Messages examined per mailbox per pass. Raise to backfill a large mailbox faster. |
+| `Worker__MaxMessagesPerSync` | `500` | Messages fetched per **batch**, not per pass — a pass keeps drawing batches until the mailbox is drained or the drain budget below runs out, checkpointing between them. |
+| `Worker__MailboxDrainBudgetMinutes` | `20` | How long one source may keep drawing batches before the pass moves on to the next source. |
 | `Worker__MaxRetryAttempts` | `3` | Attempts per mailbox before the run is recorded as failed. |
 | `Worker__RetryBaseDelaySeconds` | `2` | Base for exponential backoff between those attempts. |
 | `Worker__StaleRunTimeoutMinutes` | `90` | A sync stuck in `running` this long is auto-closed as failed. |
@@ -224,6 +225,44 @@ Retention is measured against each report's **reporting window end**, not its
 ingest date — a backfilled mailbox doesn't reset the clock on old reports. A
 non-positive `RetentionMonths` is treated as misconfiguration and falls back to
 27 rather than deleting everything.
+
+Purging the database does nothing to the mailbox: ingestion only reads, so the
+same report mail sits there indefinitely unless you turn on **mailbox
+retention deletion** per source — off by default, and the one pass in this
+application that removes data it does not own. See
+[the mailbox copy](/docs/data-protection/#the-mailbox-copy) for what it does
+and why it is opt-in.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Worker__MailboxRetentionGraceDays` | `30` | Extra days on top of the retention window before mail is deleted, so a clock skew or a paused worker cannot destroy mail the database has not re-read yet. |
+| `Worker__MailboxRetentionIntervalHours` | `24` | Gap between mailbox retention passes. |
+
+## Backup offload
+
+Ships the [configuration export](/docs/upgrading-and-backup/#the-configuration-export)
+and the append-only history tables to S3-compatible object storage on a
+schedule — MinIO, Cloudflare R2, Backblaze B2, or AWS itself.
+**`Bucket` empty disables the whole feature**, the same way an empty
+`Email__Host` above leaves alerts and digests inert.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Backup__Bucket` | *(empty)* | Destination bucket. Empty disables offload. |
+| `Backup__IntervalMinutes` | `30` | Gap between offload passes. |
+| `Backup__Endpoint` | *(empty)* | Custom S3 endpoint for MinIO, R2, B2. Empty targets AWS. |
+| `Backup__Region` | `us-east-1` | AWS region, or the signing region when `Endpoint` is set. |
+| `Backup__AccessKeyId`, `Backup__SecretAccessKey` | *(empty)* | Leave both empty to use the ambient credential chain — an instance role or IRSA beats a long-lived key in configuration. |
+| `Backup__Prefix` | `dmarc` | Key prefix, so one bucket can hold more than one install. |
+| `Backup__IncludeHistory` | `true` | Ship the audit trail, alerts, digests, sync runs and ingest ledger as immutable dated objects. |
+| `Backup__ArchiveReportMail` | `false` | Also archive raw report mail as it is ingested, so report history survives independently of the mailbox. Off by default — it is the largest thing this feature can store. |
+
+**Refuses to run with no credential encryption key configured** — in that state
+mailbox passwords are stored in plaintext, and shipping them to a bucket is
+worse than leaving them in the database. See
+[the configuration export](/docs/upgrading-and-backup/#the-configuration-export)
+and [offloading it to object storage](/docs/upgrading-and-backup/#offloading-it-to-object-storage)
+for the operational side, including why bucket versioning matters.
 
 ## Single sign-on (OIDC)
 
