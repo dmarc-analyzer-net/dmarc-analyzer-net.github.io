@@ -19,13 +19,13 @@ const terms = (await getCollection('glossary', ({ data }) => !data.draft)).sort(
       </div>
     </section>
     <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
-      <dl style="margin:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;">
+      <div style="margin:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;">
         {terms.map((t) => (
           <a class="lift" href={`/glossary/${t.id}/`} style="display:block; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:18px 20px; color:var(--text-body) !important;">
-            <dt style="font-size:16px; font-weight:600; letter-spacing:-0.01em; margin:0 0 6px;">{t.data.term}</dt>
-            <dd style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">{t.data.description}</dd>
+            <h2 style="font-size:16px; font-weight:600; letter-spacing:-0.01em; margin:0 0 6px;">{t.data.term}</h2>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">{t.data.description}</p>
           </a>
         ))}
-      </dl>
+      </div>
     </section>
 </BaseLayout>
