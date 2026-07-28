@@ -602,10 +602,38 @@ primary source; where a line number is given it was accurate in July 2026.
       what ARC does and doesn't buy, and why forwarding failures must not gate
       enforcement — the enforcement guide's exit criterion is otherwise
       unachievable.
-- [ ] (todo) **Cloudflare under `/dmarc-for`** — a *dependency* of the existing
-      three rather than a sibling: proxying a `selector1._domainkey` CNAME
-      breaks M365 DKIM outright, and Cloudflare's SPF flattening interacts with
-      the 10-lookup advice on all three pages.
+- [x] (done) **Cloudflare under `/dmarc-for`** — a *dependency* of the existing
+      three rather than a sibling, and written that way: it opens by saying your mail
+      is at Workspace, M365 or GoDaddy and Cloudflare is only where the records go,
+      so read it alongside your provider's page rather than instead of it.
+
+      Two failure modes carry the page, both silent, both invisible in your
+      provider's instructions. **Proxying**: only A, AAAA and CNAME records can be
+      proxied, and a proxied CNAME is flattened to Cloudflare's anycast IPs — so
+      M365's CNAME-based DKIM selectors return an IP where a verifier expects a key.
+      The record still looks right in the dashboard. Cloudflare warns, and sometimes
+      refuses, for records it recognises as DKIM, but that is not something to rely
+      on. Worth stating the flip side too, since it removes a worry: SPF and DMARC are
+      `TXT` records and **cannot** be proxied, so there is no cloud icon to get wrong.
+      **CNAME flattening** breaks DKIM the same way with no icon at all — default at
+      the zone apex (harmless), but paid plans can flatten every CNAME, and
+      Cloudflare's own caution is that "the CNAME record itself will not be returned
+      directly". A zone-wide setting that breaks every selector at once reads like a
+      provider outage rather than a DNS change.
+
+      **This item's own premise was partly wrong, which is worth recording.** There is
+      no such thing as Cloudflare SPF flattening — the feature is *CNAME* flattening,
+      and the two had been conflated. The real SPF interaction is Email Routing, which
+      requires Cloudflare's MX records (so it cannot run alongside an external mail
+      server), and adds `include:_spf.mx.cloudflare.net`, which must be merged into
+      the existing record rather than published as a second one, and which costs one
+      of the ten lookups. All of it verified against Cloudflare's own documentation.
+
+      Closes the last real near-orphan as a side effect: the page links to all three
+      existing provider pages, so `/dmarc-for/godaddy/` finally has an editorial
+      inbound link, and the provider cluster's internal links went from 2 page pairs
+      to 8. `/brand/` is now the only page the check flags, and footer-only is a
+      defensible place for a brand-assets page to live.
 
 ### Structure
 
