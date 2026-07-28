@@ -35,7 +35,9 @@ rollout, not a shortcut around it.
 Two details beyond the policy value itself:
 
 - The policy must apply to **all** your mail. A partial rollout via `pct=`
-  disqualifies the domain.
+  disqualifies the domain — and so does `t=y`, the tag that
+  [replaced it](/guides/dmarc-rfc-9989/), since it asks receivers not to apply the
+  policy at all.
 - Check `sp=` as well. A root at `p=reject` with `sp=none` leaves subdomains
   unenforced, and mail from those subdomains won't qualify.
 
@@ -71,7 +73,7 @@ inbox simply ignores it.
 | Cause | Check |
 |---|---|
 | Policy still `p=none` | The domain isn't at enforcement |
-| `pct=` below 100 | Partial enforcement disqualifies the domain |
+| `pct=` below 100, or `t=y` | Partial or test-only enforcement disqualifies the domain |
 | `sp=none` on the root | Subdomain mail isn't enforced |
 | No VMC | Required by Gmail and some others |
 | Logo rejected | Not valid SVG Tiny PS, or not square |

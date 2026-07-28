@@ -38,6 +38,10 @@ For anything not listed, read the `s=` value from the `DKIM-Signature` header of
 a message you've already sent. That's authoritative in a way documentation isn't
 — it's what you actually signed with.
 
+If you don't have a sent message to hand, the [DKIM record
+checker](/tools/dkim-checker/) will try a list of common selectors against live DNS
+and report which ones resolve, along with the real key length behind each.
+
 There is no way to enumerate a domain's selectors from DNS. `_domainkey` isn't a
 listable zone, so you can only look up a selector you already know. This is why
 "check if DKIM is set up" tools ask you to guess common selector names.

@@ -86,11 +86,27 @@ A record that exists but is malformed reads as absent to most checkers:
 
 ## The subdomain case
 
-DMARC lookups do **not** automatically walk up to the parent domain. If
-`news.yourdomain.com` has no `_dmarc` record, a checker aimed at that subdomain
-reports "not found" — even though the receiver *will* fall back to the
-organizational domain's `sp=` (subdomain policy) at delivery time. If a subdomain
-sends mail, give it its own record, and set a deliberate `sp=` on the root.
+"Not found" on a subdomain usually means the tool and the receiver are looking in
+different places. A receiver starts at the exact name in the `From:` address and, if
+there is no record there, **walks up the DNS tree** until it finds one. Checkers
+report on the name you typed and stop.
+
+So if `news.yourdomain.com` has no `_dmarc` record, a checker aimed at that subdomain
+says "not found", while at delivery time the receiver finds your root record and
+applies its `sp=` — or its `p=`, when no `sp=` is published. There is a policy in
+force; the tool simply isn't looking where the receiver looks.
+
+That walk is newer than most of the advice written about it. The original DMARC
+specification worked out where your organizational domain began using a public suffix
+list, without mandating which one — so two receivers could disagree about it. The
+current specification replaced that with the tree walk, which also means a record on
+an *intermediate* name is now discoverable in a way it might not have been before:
+worth knowing if you have delegated subdomains to teams or customers. See
+[what changed in the new DMARC standard](/guides/dmarc-rfc-9989/).
+
+If a subdomain sends mail, give it its own record, and set `sp=` on the root only if
+you want subdomains treated *differently* — see the
+[tag reference](/guides/dmarc-record-tags/).
 
 ## "Please try a different email" on signup forms
 
@@ -115,6 +131,8 @@ yourdomain.com._report._dmarc.agency.com   TXT   v=DMARC1
 Without it, standards-compliant receivers won't send the reports. Agencies
 centralising many clients' reports into one mailbox hit this constantly — and
 because nothing bounces, the record looks perfect while the reports never come.
+(If that's you, [DMARC for many client domains](/guides/dmarc-multiple-client-domains/)
+covers the wildcard form and the trap that comes with it.)
 The [record checker](/tools/dmarc-checker/) performs that second lookup for every
 external `rua=` address it finds, which is the fastest way to rule this out. Once
 they do arrive, something has to parse the XML and aggregate it across domains —

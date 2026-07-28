@@ -69,8 +69,9 @@ published policy and the window's compliance:
 what a live DNS lookup returns (refreshed roughly every six hours in the
 background), and what the reporting receivers echoed back inside each aggregate
 report. The [record inspection panel](/docs/domain-detail/) compares the two
-per tag and flags only genuine disagreements — a tag you didn't publish that
-RFC 7489 derives a default for is labelled *inherited*, not a problem.
+per tag and flags only genuine disagreements — a tag you didn't publish that the
+[specification gives a default for](/guides/dmarc-record-tags/) is labelled
+*inherited*, not a problem.
 
 ## Where the data comes from
 

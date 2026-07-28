@@ -2,7 +2,7 @@
 term: DMARC quarantine vs reject
 description: DMARC quarantine sends failing mail to spam; reject blocks it outright. Here's the difference, when to use each, and how to move between them safely.
 aliases: ["quarantine vs reject", "p=quarantine vs p=reject"]
-related: ["dmarc-policy", "dmarc", "dmarc-alignment"]
+related: ["dmarc-policy", "dmarc", "dmarc-alignment", "arc"]
 ---
 
 `quarantine` and `reject` are the two **enforcing** [DMARC
@@ -55,6 +55,13 @@ mail is rejected and the rest is **quarantined**, not delivered normally. So
 `pct` on `reject` is a quarantine-with-a-bit-of-reject setting, and `pct` on
 `quarantine` is the one that actually leaves most failures alone.
 
+That inconsistency is why the tag is going away. The current DMARC specification
+removes `pct=` — receivers applied values between 0 and 100 too differently for it to
+mean anything reliable — and replaces the two values that did work with `t=y` (test:
+apply one level weaker) and `t=n` (the default). Receivers still honour `pct` today,
+so a ramp works; treat it as transitional. See
+[what changed in the new standard](/guides/dmarc-rfc-9989/).
+
 ## Don't forget subdomains
 
 `p=` covers the domain and, by default, its subdomains. `sp=` overrides that for
@@ -77,6 +84,9 @@ Two legitimate patterns fail DMARC through no fault of your DNS:
   valid DKIM signature usually survives, which is why you want both.
 - **Mailing lists** often rewrite the subject or body and break DKIM too. Many
   handle this by rewriting the `From:` to their own domain.
+  [ARC](/glossary/arc/) exists to describe what the list saw before it touched the
+  message, but honouring it is the receiver's choice and adoption is thin — it is
+  not something you can publish or rely on.
 
 Neither is a reason to stay at `p=none` — but both are reasons to read your
 [aggregate reports](/glossary/dmarc-aggregate-report/) before tightening, so you

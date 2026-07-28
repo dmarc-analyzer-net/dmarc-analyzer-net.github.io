@@ -24,7 +24,12 @@ tells receiving servers what to do with mail that fails
   misleading one for `reject`: see [what `pct=` actually
   does](/glossary/dmarc-quarantine-vs-reject/#what-pct-actually-does).
 - **`sp=`** sets a separate policy for subdomains. With no `sp=`, subdomains
-  inherit `p=`.
+  inherit `p=`, so it is a tag for exceptions rather than one you need.
+
+Every tag, its default, and whether it is worth publishing:
+[DMARC record tags](/guides/dmarc-record-tags/). Note that `pct=` has been removed
+from the current specification in favour of `t=`, though receivers still honour it —
+[what changed](/guides/dmarc-rfc-9989/).
 
 Moving from `none` to `reject` safely is a process, not a flip of a switch — see
 [from monitoring to enforcement](/guides/from-monitoring-to-enforcement/).
