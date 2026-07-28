@@ -586,11 +586,28 @@ Keep claims truthful to the intended end state.
          likely to attract readers who check things. That is the correction item
          above, and it is a prerequisite, not a companion.
 
-      **Settle the volume question cheaply before committing:** add `dmarcbis`,
-      `rfc 9989`, `dmarc rfc`, `new dmarc standard` and `pct deprecated` to the seeds
-      in the `seo` repo's `pull.sh` and re-run it — the plan says to do that monthly
-      anyway and the last full pull cost $0.36. Note GSC still has zero query rows, so
-      there is no first-party signal to weigh either way.
+      **Settled, 2026-07-28: the volume isn't there for the jargon itself.** Added
+      `dmarcbis`, `rfc 9989`, `dmarc rfc`, `new dmarc standard` and `pct deprecated`
+      to the `seo` repo's `pull.sh` seeds and re-ran it. Only `dmarc rfc` returned
+      any tracked volume at all (40/mo, KD 24, informational intent) —
+      `dmarcbis`, `rfc 9989`, `new dmarc standard` and `pct deprecated` came back
+      with no data at all, meaning DataForSEO doesn't track meaningful search
+      demand for any of them yet. Worse for the "rising" framing above: `dmarc
+      rfc`'s volume predates RFC 9989 entirely — it peaked at 170/mo in Q1 2024
+      and has been declining since (yearly trend -20%), with no bump around the
+      May 2026 publication. It's a small, steady, generic query ("what RFC covers
+      DMARC"), not evidence of demand for *this* spec change specifically. GSC
+      still has zero query rows for the page.
+
+      This doesn't retract the first-mover claim — competitor coverage is still
+      zero — but it does mean the `rfc 5322` proxy above overstated things:
+      RFC-number queries don't reliably carry volume in this niche, one generic
+      query does. Practical effect: the existing single guide is very likely
+      sufficient for what demand exists. **Don't build out the jargon cluster
+      further** (no FAQ page, no comparison page, no dedicated `dmarcbis`/`pct
+      deprecated` pages) — there's nothing there to capture. Checked the guide's
+      `seoTitle` ("What changed in DMARC RFC 9989") against this: it already
+      contains "DMARC RFC" as consecutive words, so no edit needed there.
 
       One caveat worth writing down now: **this page decays.** In two years "the new
       standard" is just the standard, and the page either becomes the permanent DMARC
