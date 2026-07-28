@@ -27,6 +27,7 @@ get wrong later.
 | `ri` | Requested seconds between aggregate reports | `86400` (a day) | No — advisory |
 | `rf` | Requested failure-report format | `afrf` | No — one value is defined |
 | `t` | Testing mode: apply the policy, or don't | `n` | See `pct` below |
+| `psd` | Declares the name a public suffix domain | `u` (work it out) | No — registry operators only |
 
 Anything not in that list is ignored by receivers, which is why a typo is silent
 rather than fatal.
@@ -147,6 +148,18 @@ reason to reject subdomain-signed mail, and check your reports first — see
 practice you get daily reports whatever you ask for. `rf` names the failure-report
 format, and exactly one format is defined, so the only value it can carry is its
 default. The current revision of the specification drops both.
+
+## `psd`: not for you, unless you run a registry
+
+`psd` declares whether a name is a **public suffix domain** — the level above the
+domains people register, like `co.uk`. It exists for registry and public-suffix
+operators, who publish a policy covering names beneath them. Its default, `u`, means
+"work it out", which is what receivers do for everyone else.
+
+It is in this reference for one reason: if you find `psd=y` on an ordinary company
+domain, it was almost certainly copied from someone else's record, and it changes how
+policy is discovered for every name underneath you. Remove it. Our
+[record checker](/tools/dmarc-checker/) flags it for exactly that case.
 
 ## Tags that don't exist
 
