@@ -3,8 +3,9 @@
 
 Screaming Frog's free tier is GUI-only and its headless CLI is licence-gated, so
 this covers the same ground from a terminal: broken links, redirect chains,
-title/description/H1 problems, canonical mismatches, thin pages, images missing
-alt text or weighing more than 100 KB, orphan pages, and sitemap coverage.
+title/description/H1/H2/H3 problems, heading order, a missing custom 404 page,
+canonical mismatches, thin pages, images missing alt text or weighing more than
+100 KB, orphan pages, and sitemap coverage.
 
 It also reports something a crawler usually can't tell you: which pages nothing
 but the site's own chrome links to. Header, footer, breadcrumbs, sidebars and
@@ -38,7 +39,13 @@ MAX_EXTERNAL = 60     # cap outbound checks so a run stays quick
 
 TITLE_MAX, TITLE_MIN = 60, 15
 DESC_MAX, DESC_MIN = 160, 50
-THIN_WORDS = 150
+# 150 caught nothing — the site never once dipped under it, so it was
+# indistinguishable from no check at all. A third-party audit (Morningscore)
+# flagged 13 real pages this crawl missed, all under ~330 words by this file's
+# own counting (which excludes nav/footer/aside on purpose — see word_count
+# below); the shortest confirmed-fine page it left alone measured 334 by the
+# same method. 300 sits just under that line.
+THIN_WORDS = 300
 IMAGE_MAX_BYTES = 100 * 1024   # Screaming Frog's own "large images" threshold
 MAX_IMAGES = 100
 
@@ -59,6 +66,12 @@ class Page(HTMLParser):
         self.canonical = None
         self.robots = None
         self.h1: list[str] = []
+        # Every h1/h2/h3 tag in raw document order, unlike word_count's text
+        # (which deliberately excludes nav/footer/aside): a sidebar's heading
+        # competes with the article's h1 for "what came first" whether or not
+        # it's editorial content, so this has to see the whole document to
+        # answer that question the way a real audit tool does.
+        self.headings: list[str] = []
         self.links: list[str] = []
         # `links` stays every link on the page, because it feeds the crawl
         # frontier — gate it and the crawler stops finding the site. These two
@@ -84,6 +97,9 @@ class Page(HTMLParser):
         elif tag == "h1":
             self._in_h1 = True
             self._h1_buf = []
+            self.headings.append("h1")
+        elif tag in ("h2", "h3"):
+            self.headings.append(tag)
         elif tag == "meta":
             name = (a.get("name") or "").lower()
             prop = (a.get("property") or "").lower()
@@ -380,6 +396,17 @@ def main() -> int:
         errors.append(f"{status or 'ERR'} {url}" + (f" — {msg}" if msg else "")
                       + (f"  [linked from: {', '.join(sorted(inbound[url])[:2])}]" if inbound[url] else ""))
 
+    # A missing custom 404 means an unknown URL either soft-404s (200, so a
+    # search engine indexes it as real content) or falls through to a bare host
+    # error page with none of the site's own navigation. Neither shows up any
+    # other way here, since nothing in a real crawl ever links to a URL that
+    # doesn't exist — this has to go looking for one on purpose.
+    bogus = urljoin(root + "/", "__dmarc-analyzer-crawl-404-check__/")
+    status_404, _, _ = fetch(bogus)
+    if status_404 != 404:
+        errors.append(f"missing/broken 404 page: {bogus} returned "
+                       f"{status_404 or 'ERR'} instead of 404")
+
     # Internal links that resolve to a redirect are worth fixing: they waste a
     # hop and dilute the signal.
     for src, dst in sorted(redirects.items()):
@@ -417,6 +444,12 @@ def main() -> int:
             warnings.append(f"no <h1>: {url}")
         elif len(p.h1) > 1:
             warnings.append(f"{len(p.h1)} <h1> elements: {url}")
+
+        if not any(h in ("h2", "h3") for h in p.headings):
+            warnings.append(f"no <h2> or <h3> anywhere on the page: {url}")
+
+        if p.headings and p.headings[0] != "h1":
+            warnings.append(f"first heading is <{p.headings[0]}>, not <h1>: {url}")
 
         if not p.canonical:
             warnings.append(f"no canonical: {url}")
