@@ -41,10 +41,13 @@ means "monitor only" — no message is quarantined or rejected. `rua=` is where
 reports are sent.
 
 Need something other than the default record — a subdomain policy, strict
-alignment, a staged `pct=`? The [record generator](/tools/dmarc-generator/)
+alignment, a staged rollout? The [record generator](/tools/dmarc-generator/)
 builds it and tells you what each choice will do to your mail, and the
 [tag reference](/guides/dmarc-record-tags/) covers what every tag defaults to if
-you leave it out.
+you leave it out. For a staged rollout, note that the tag people reach for first,
+`pct=`, has been [removed from the current
+specification](/guides/dmarc-rfc-9989/) in favour of `t=` — receivers still honour
+it, but it is not a setting to leave in place.
 
 ## Step 4 — Wait for reports
 
