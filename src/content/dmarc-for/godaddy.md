@@ -30,6 +30,12 @@ the old `secureserver.net` include is probably still sitting in your record.
 
 In your GoDaddy account: **Domain Portfolio → your domain → DNS → DNS Records**.
 
+That is the right place only if GoDaddy is actually answering DNS for the domain.
+Plenty of GoDaddy-registered domains have their nameservers pointed at
+[Cloudflare](/dmarc-for/cloudflare/) or another host, in which case records added
+here do nothing at all — check which nameservers the domain uses before wondering
+why a correct record never resolves.
+
 For the root domain, GoDaddy uses **`@`** in the *Name* field. Never type your
 domain into *Name* — GoDaddy appends it automatically, so entering
 `_dmarc.yourdomain.com` creates a record at `_dmarc.yourdomain.com.yourdomain.com`

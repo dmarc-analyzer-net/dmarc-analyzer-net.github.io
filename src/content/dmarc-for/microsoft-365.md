@@ -72,6 +72,12 @@ and you can't guess it.
 don't copy values out of an old runbook. Read the real values for your domain
 from the Defender portal, or from Exchange Online PowerShell:
 
+Because these are CNAMEs rather than TXT records, they are also the records most
+easily broken by your DNS host. If Cloudflare hosts your DNS, read
+[the Cloudflare notes](/dmarc-for/cloudflare/) before adding them — proxying or
+flattening either selector stops DKIM validating while leaving the record looking
+perfectly correct in the dashboard.
+
 ```
 Get-DkimSigningConfig -Identity yourdomain.com | Format-List Name,Enabled,Status,Selector1CNAME,Selector2CNAME
 ```

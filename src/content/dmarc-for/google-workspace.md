@@ -84,6 +84,11 @@ published it can take up to **48 hours** for DKIM to start working.
 > automatically; a few require you to paste it as multiple quoted strings. If
 > your host rejects the value outright, that's the reason — not a bad key.
 
+Workspace publishes DKIM as a `TXT` record, which spares you the trap that catches
+Microsoft 365 users on [Cloudflare](/dmarc-for/cloudflare/) — `TXT` records cannot be
+proxied, so there is no cloud icon to get wrong here. Cloudflare's Email Routing and
+SPF interactions still apply if it hosts your DNS.
+
 ## 3. DMARC
 
 Once SPF and DKIM are live, publish a [DMARC](/glossary/dmarc/) record in
