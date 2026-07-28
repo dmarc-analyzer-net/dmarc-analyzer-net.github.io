@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { DOCS_SECTIONS } from './lib/docs';
 
 /**
  * Guards the *rendered* <title> length. Templates append a suffix (" — DMARC
@@ -93,7 +94,7 @@ const docs = defineCollection({
     seoTitle: z.string().optional(),
     title: z.string().max(65),
     description: z.string().min(50).max(160),
-    section: z.enum(['Getting started', 'Using the console', 'Configuration', 'Operations']),
+    section: z.enum(DOCS_SECTIONS),
     order: z.number(),
     draft: z.boolean().default(false),
   }).refine(titleBudget(38), { message: budgetMessage(38) }),

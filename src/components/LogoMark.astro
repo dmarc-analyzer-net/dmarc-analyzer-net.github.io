@@ -25,8 +25,20 @@ interface Props {
   class?: string;
 }
 const { size = 30, class: className } = Astro.props;
-// Each instance needs its own gradient id, or the first one on the page wins.
-const gid = `dmg-${Math.random().toString(36).slice(2, 9)}`;
+/*
+ * Each instance needs its own gradient id, or the first one on the page wins — but
+ * it must be *derived*, not random. A `Math.random()` id made the build
+ * non-reproducible: every page's HTML changed on every build even with no source
+ * change, which quietly destroys the cheapest verification there is ("did this
+ * refactor alter any output?"). It cost exactly that during the MDX work.
+ *
+ * `size` is the only prop that changes what is drawn, and no page currently renders
+ * two marks at the same size — the header is 30, the footer 26, and the pages that
+ * use more (brand: 72, 44, 20; home: 22) all differ. Two at the same size on one
+ * page would share an id, which is invalid HTML but renders correctly, since every
+ * instance defines an identical gradient.
+ */
+const gid = `dmg-${size}`;
 ---
 <svg
   class={className}

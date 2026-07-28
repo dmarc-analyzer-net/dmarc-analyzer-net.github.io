@@ -1,15 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
+import { DOCS_SECTIONS } from '../../lib/docs';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import Icon from '../../components/Icon.astro';
 import Cta from '../../components/Cta.astro';
 
 const GH = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
-const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 const entries = await getCollection('docs', ({ data }) => !data.draft);
-const sections = SECTION_ORDER.map((section) => ({
+const sections = DOCS_SECTIONS.map((section) => ({
   section,
   items: entries
     .filter((e) => e.data.section === section)
