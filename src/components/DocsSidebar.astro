@@ -1,10 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
+import { DOCS_SECTIONS } from '../lib/docs';
 
 // Persistent docs navigation, grouped by `section` and ordered by `order`.
 // Section order is fixed here rather than alphabetical so the docs read as a
 // sequence (install -> configure -> operate).
-const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 interface Props {
   /** Slug of the page being viewed, so it can be marked current. */
@@ -13,7 +13,7 @@ interface Props {
 const { current } = Astro.props;
 
 const entries = await getCollection('docs', ({ data }) => !data.draft);
-const sections = SECTION_ORDER.map((section) => ({
+const sections = DOCS_SECTIONS.map((section) => ({
   section,
   items: entries
     .filter((e) => e.data.section === section)

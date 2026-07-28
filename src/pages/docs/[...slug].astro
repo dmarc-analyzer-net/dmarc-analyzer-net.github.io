@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { DOCS_SECTIONS } from '../../lib/docs';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
@@ -24,9 +25,9 @@ const { Content, headings } = await render(entry);
 const path = `/docs/${entry.id}/`;
 
 // Prev/next within the reading sequence (section, then order).
-const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'];
+
 const sequence = [...ordered].sort((a, b) => {
-  const s = SECTION_ORDER.indexOf(a.data.section) - SECTION_ORDER.indexOf(b.data.section);
+  const s = DOCS_SECTIONS.indexOf(a.data.section) - DOCS_SECTIONS.indexOf(b.data.section);
   return s !== 0 ? s : a.data.order - b.data.order;
 });
 const index = sequence.findIndex((e) => e.id === entry.id);

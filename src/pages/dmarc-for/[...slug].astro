@@ -19,9 +19,12 @@ const { entry, all } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/dmarc-for/${entry.id}/`;
 
-// Link to the other provider guides for internal linking.
+// Link to the other provider guides for internal linking, alphabetically as on the
+// index. Sorting is what makes the build reproducible: unsorted, this slice took
+// whatever order the filesystem gave getCollection.
 const related = all
   .filter((e) => e.id !== entry.id)
+  .sort((a, b) => a.data.provider.localeCompare(b.data.provider))
   .slice(0, 3)
   .map((e) => ({ label: e.data.title, href: `/dmarc-for/${e.id}/` }));
 

@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { DOCS_SECTIONS } from './docs';
 
 /**
  * Shared source for /llms.txt and /llms-full.txt (https://llmstxt.org/).
@@ -10,9 +11,6 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const SITE = 'https://dmarc-analyzer.net';
 export const REPO = 'https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp';
-
-/** Matches the docs sidebar ordering — docs read in sequence, unlike the rest. */
-const SECTION_ORDER = ['Getting started', 'Using the console', 'Configuration', 'Operations'] as const;
 
 export type Item = {
   title: string;
@@ -73,7 +71,7 @@ export async function buildSections(): Promise<Section[]> {
   ]);
 
   // Docs keep their sidebar order; everything else sorts by title.
-  const docItems = SECTION_ORDER.flatMap((section) =>
+  const docItems = DOCS_SECTIONS.flatMap((section) =>
     docs
       .filter((e) => e.data.section === section)
       .sort((a, b) => a.data.order - b.data.order)

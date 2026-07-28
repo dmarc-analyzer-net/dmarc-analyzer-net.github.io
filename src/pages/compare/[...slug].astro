@@ -18,8 +18,11 @@ const { entry, all } = Astro.props;
 const { Content } = await render(entry);
 const path = `/compare/${entry.id}/`;
 
+// Alphabetically by competitor, as on the index. An unsorted slice took whatever
+// order the filesystem handed getCollection, which made the build non-reproducible.
 const related = all
   .filter((e) => e.id !== entry.id)
+  .sort((a, b) => a.data.competitor.localeCompare(b.data.competitor))
   .slice(0, 3)
   .map((e) => ({ label: e.data.title, href: `/compare/${e.id}/` }));
 

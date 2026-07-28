@@ -148,12 +148,24 @@ Keep claims truthful to the intended end state.
       so this is worth doing per-file as those files are edited for other reasons rather
       than as one sweep. `note` was built to match the existing blockquote exactly, so a
       converted file looks identical until the variant is changed deliberately.
-- [ ] (todo) **The build is not reproducible.** `LogoMark.astro` generates a random
-      gradient id per instance, so every build emits different HTML for all 64 pages
-      even with no source change. It cost a verification gate during the MDX work —
-      "did this change any output?" is unanswerable without normalising the ids away
-      first. Deriving the id from something stable (the page path, or a counter) would
-      make byte-comparison between builds a usable check.
+- [x] (done) **The build was not reproducible**, and there were *two* causes, not
+      the one recorded here. Three consecutive builds are now byte-identical across
+      every page, so "did this change any output?" is answerable with `sha256sum`.
+
+      **`LogoMark.astro`** generated a random gradient id per instance, so every page
+      changed on every build. The id is now derived from `size`, which is the only
+      prop that changes what is drawn, and no page renders two marks at the same size
+      (header 30, footer 26, brand 72/44/20, home 22). Two at one size would share an
+      id — invalid HTML, but it renders correctly, since every instance defines an
+      identical gradient.
+
+      **The second cause was `all.slice(0, 3)`** in the related-links blocks, found
+      while verifying the first. `getCollection()` returns glob order, so an unsorted
+      slice took whatever order the filesystem gave it: `/dmarc-for/microsoft-365/`
+      swapped Google Workspace and GoDaddy between two builds of identical source.
+      Each template now sorts the way its own index page does — guides newest-first,
+      providers and compare alphabetically — which is a real improvement on filesystem
+      order even though it is still not topical relatedness. See the Structure item.
 - [x] (done) **Make the decorative copy icons copy.** Both are real buttons now,
       wired through `src/lib/clipboard.ts`. `Terminal.astro` copies its `cmd`
       lines only, without the `$` this component adds.
@@ -658,9 +670,17 @@ primary source; where a line number is given it was accurate in July 2026.
       **nothing outside `/compare/` links into it.** Those 8 compare-to-compare pairs
       are the whole of its inbound prose graph, and no guide, glossary entry or doc
       page sends anyone there. Also still 0: `dmarc-for → docs`.
-- [ ] (todo) **"Related links" on guides and compare are `all.slice(0, 3)`** —
-      collection order, not topical relatedness. Only the glossary uses curated
+- [~] (in-progress) **"Related links" on guides, providers and compare are
+      `all.slice(0, 3)`** — not topical relatedness. Only the glossary uses curated
       `related` frontmatter.
+
+      Half-fixed: each template now **sorts** before slicing, the way its own index
+      page does. That was not cosmetic — an unsorted slice of `getCollection()` took
+      filesystem order and made the build non-reproducible, with related links
+      swapping places between builds of identical source. What remains is the
+      editorial half: newest-three and alphabetical-three are both arbitrary next to
+      a curated list, and with 11 guides the three newest are rarely the three most
+      relevant. Wants a `related` field on those collections, as the glossary has.
 - [~] (in-progress) **Near-orphans with no editorial inbound links — two left, from
       six.** The crawler flags exactly these and nothing else: `/dmarc-for/godaddy/`
       and `/brand/` (footer-linked on all 69 pages, and arguably fine that way — a
@@ -691,10 +711,18 @@ primary source; where a line number is given it was accurate in July 2026.
 - [ ] (todo) **Docs have no version marker.** A reader on `0.2.0` and one on
       `edge` see identical pages, and `README.md` explicitly tells people `edge`
       is unreleased. Consider an "applies to" field or a docs-version selector.
-- [ ] (todo) **`SECTION_ORDER` is duplicated in four files**
+- [x] (done) **`SECTION_ORDER` was duplicated in four files**
       (`DocsSidebar.astro`, `docs/index.astro`, `docs/[...slug].astro`,
-      `lib/llms.ts`) — it taxes every structural change; adding the "Using the
-      console" section meant editing all four.
+      `lib/llms.ts`) — it taxed every structural change; adding the "Using the
+      console" section meant editing all four. It was actually **five**: the
+      `z.enum` in `content.config.ts` is the same list, and missing that one is the
+      loudest failure of the set, because every page in a new section fails the build.
+
+      Now one `DOCS_SECTIONS` in `src/lib/docs.ts`, imported by all five. It lives
+      there rather than being exported from `content.config.ts` so that nothing has
+      to import the config to render a sidebar. Verified output-inert by normalising
+      the random gradient ids away and diffing all 69 pages — which is exactly the
+      awkward dance the reproducibility item below existed to remove.
 
 ## Low Priority
 

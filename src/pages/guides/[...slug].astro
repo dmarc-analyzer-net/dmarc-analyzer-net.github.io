@@ -19,9 +19,14 @@ const { entry, all } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/guides/${entry.id}/`;
 
-// Link to the other guides (up to 3) for internal linking.
+// Link to the other guides (up to 3) for internal linking. Newest first, which is
+// the order the guides index uses — and, more importantly, an order at all:
+// getCollection returns glob order, so slicing it unsorted made the build
+// non-reproducible, with related links swapping places between builds. Still not
+// topical relatedness; see the backlog.
 const related = all
   .filter((e) => e.id !== entry.id)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
   .slice(0, 3)
   .map((e) => ({ label: e.data.title, href: `/guides/${e.id}/` }));
 
