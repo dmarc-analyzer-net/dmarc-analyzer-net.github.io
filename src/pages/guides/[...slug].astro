@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { hasToc } from '../../lib/toc';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
@@ -18,6 +19,7 @@ export async function getStaticPaths() {
 const { entry, all } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/guides/${entry.id}/`;
+const showToc = hasToc(headings, { maxDepth: 3 });
 
 // Link to the other guides (up to 3) for internal linking. Newest first, which is
 // the order the guides index uses — and, more importantly, an order at all:
@@ -46,7 +48,7 @@ const articleSchema = {
 ---
 <BaseLayout current="guides" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} ogType="article" publishedTime={published} modifiedTime={modified}>
   <JsonLd slot="head" schema={articleSchema} />
-    <article style="max-width:760px; margin:0 auto; padding:40px 32px 72px;">
+    <article style={`max-width:${showToc ? 1044 : 760}px; margin:0 auto; padding:40px 32px 72px;`}>
       <Breadcrumbs items={[
         { label: 'Home', href: '/' },
         { label: 'Guides', href: '/guides/' },
@@ -54,10 +56,17 @@ const articleSchema = {
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
       <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 32px;">{entry.data.description}</p>
-      <Toc headings={headings} />
-      <div class="prose">
-        <Content />
+
+      <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,760px) 240px;' : undefined}>
+        <div class="article-content">
+          <div class="prose">
+            <Content />
+          </div>
+        </div>
+
+        {showToc && <Toc headings={headings} maxDepth={3} />}
       </div>
+
       <RelatedLinks title="More guides" links={related} />
       <Cta />
     </article>

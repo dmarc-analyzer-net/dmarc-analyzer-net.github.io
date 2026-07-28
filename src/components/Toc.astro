@@ -1,22 +1,30 @@
 ---
 import type { MarkdownHeading } from 'astro';
+import { buildTocSections, tocLinkCount } from '../lib/toc';
 
 /**
- * On-page table of contents, as a collapsed disclosure.
+ * On-page table of contents. Renders two variants of the same links in one
+ * wrapping element and lets CSS alone pick which is visible:
+ *  - `.toc-accordion`: a collapsed `<details>`, shown below 1024px.
+ *  - `.toc-rail`: a persistent sticky rail with scroll-spy highlighting,
+ *    shown at 1024px and up. It is a plain `<div role="region">`, not a
+ *    `<nav>` or `<aside>` — `scripts/crawl.py` excludes the text of *all
+ *    three* of `<nav>`, `<aside>` and `<footer>` from its word count (see
+ *    `_skip`/`_chrome` in `PageParser`), so either literal tag would silently
+ *    undercount every page's word total. `role="region"` plus
+ *    `aria-labelledby` gives assistive tech a named landmark without using a
+ *    tag the crawler treats as chrome (DPub-ARIA's `doc-toc` would be the more
+ *    precise role, but it isn't in Astro/TS's `AriaRole` type).
  *
  * Astro slugs markdown headings with github-slugger by default, so
  * `headings[].slug` already matches the `id` in the rendered HTML — no rehype
- * plugin needed. `.prose h1..h4` carries `scroll-margin-top` so an anchor jump
- * clears the sticky header.
+ * plugin needed. `.prose h1..h4` carries `scroll-margin-top:88px` so an anchor
+ * jump clears the sticky header; the rail's `top` and the scroll-spy's
+ * rootMargin reuse the same 88px.
  *
- * Deliberately not wrapped in <nav>: `scripts/crawl.py` excludes nav text from
- * its word count, so a TOC in a landmark would silently subtract 10-20 words
- * from every page it appears on and push short ones under the thin-content
- * threshold.
- *
- * `maxDepth` defaults to 2 — a flat list of h2s, which is what the docs pages
- * shipped and what most pages want (only one guide has any h3 at all). Set it to
- * 3 on a long reference page to nest h3s under their h2.
+ * The page template decides the *layout* (whether a rail column exists at
+ * all) via `hasToc()` from `../lib/toc` before this component ever runs —
+ * this component only decides whether it renders its own contents.
  */
 interface Props {
   /** From `const { Content, headings } = await render(entry)`. */
@@ -30,39 +38,127 @@ interface Props {
 
 const { headings, minHeadings = 3, maxDepth = 2, title = 'On this page' } = Astro.props;
 
-type Section = MarkdownHeading & { children: MarkdownHeading[] };
-
-const sections: Section[] = [];
-for (const h of headings) {
-  if (h.depth === 2) {
-    sections.push({ ...h, children: [] });
-  } else if (h.depth === 3 && maxDepth >= 3 && sections.length) {
-    sections[sections.length - 1].children.push(h);
-  }
-}
+const sections = buildTocSections(headings, maxDepth);
 
 // Counts rendered links, not headings: at maxDepth 3 a page with two h2s and
 // four h3s has six entries and is worth showing.
-const count = sections.reduce((n, s) => n + 1 + s.children.length, 0);
+const count = tocLinkCount(sections);
 ---
 {count >= minHeadings && (
-  <details style="margin:0 0 28px; border:1px solid var(--border-default); border-radius:var(--radius-md); background:var(--surface-page); padding:12px 16px;">
-    <summary style="font-size:var(--text-sm); font-weight:600; color:var(--gray-800);">{title}</summary>
-    <ul style="list-style:none; margin:10px 0 2px; padding:0;">
-      {sections.map((s) => (
-        <li style="margin:4px 0;">
-          <a href={`#${s.slug}`} style="font-size:13.5px; color:var(--brand);">{s.text}</a>
-          {s.children.length > 0 && (
-            <ul style="list-style:none; margin:4px 0 0; padding:0 0 0 14px;">
-              {s.children.map((c) => (
-                <li style="margin:4px 0;">
-                  <a href={`#${c.slug}`} style="font-size:13px; color:var(--text-faint);">{c.text}</a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
-    </ul>
-  </details>
+  <div class="toc">
+    <details class="toc-accordion">
+      <summary class="toc-summary">{title}</summary>
+      <ul class="toc-list">
+        {sections.map((s) => (
+          <li>
+            <a href={`#${s.slug}`}>{s.text}</a>
+            {s.children.length > 0 && (
+              <ul class="toc-sublist">
+                {s.children.map((c) => (
+                  <li><a href={`#${c.slug}`}>{c.text}</a></li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </details>
+
+    <div class="toc-rail" role="region" aria-labelledby="toc-rail-heading">
+      <p id="toc-rail-heading" class="toc-rail-heading">{title}</p>
+      <ul class="toc-list">
+        {sections.map((s) => (
+          <li>
+            <a href={`#${s.slug}`} data-toc-link>{s.text}</a>
+            {s.children.length > 0 && (
+              <ul class="toc-sublist">
+                {s.children.map((c) => (
+                  <li><a href={`#${c.slug}`} data-toc-link>{c.text}</a></li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
 )}
+
+<script>
+  // Placed unconditionally (not inside the count-gated block above) so it
+  // works regardless of Astro's script-hoisting semantics; wireTocSpy() itself
+  // no-ops instantly via its own `.toc-rail` lookup on short pages that render
+  // nothing, so this costs nothing there beyond the tiny bundled module.
+  import { wireTocSpy } from '../lib/tocSpy';
+  wireTocSpy();
+</script>
+
+<style>
+  .toc { margin: 0 0 28px; }
+
+  .toc-list, .toc-sublist { list-style: none; margin: 0; padding: 0; }
+  .toc-list > li, .toc-sublist > li { margin: 4px 0; }
+  .toc-sublist { margin: 4px 0 0; padding: 0 0 0 14px; }
+
+  /* Accordion — collapsed disclosure, shown below 1024px. */
+  .toc-accordion {
+    display: none;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    background: var(--surface-page);
+    padding: 12px 16px;
+  }
+  .toc-summary { font-size: var(--text-sm); font-weight: 600; color: var(--gray-800); cursor: pointer; }
+  .toc-accordion .toc-list { margin: 10px 0 2px; }
+  .toc-accordion .toc-list > li > a { font-size: 13.5px; color: var(--brand); }
+  .toc-accordion .toc-sublist > li > a { font-size: 13px; color: var(--text-faint); }
+
+  /* Rail — persistent sticky column, desktop default (1024px+). Page templates
+     make this a grid child; this component only styles it, never positions it
+     in a grid — see `.article-body > .toc` in global.css for the order flip. */
+  .toc-rail {
+    position: sticky;
+    top: 88px;
+    max-height: calc(100vh - 88px - 32px);
+    overflow-y: auto;
+    padding-left: 18px;
+    border-left: 1px solid var(--border-default);
+  }
+  .toc-rail-heading {
+    margin: 0 0 12px;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--text-faint);
+  }
+  .toc-rail .toc-list > li > a {
+    display: block;
+    padding: 5px 0 5px 13px;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: var(--text-secondary) !important;
+    transition: color 120ms, border-color 120ms;
+  }
+  .toc-rail .toc-sublist > li > a {
+    padding-left: 27px;
+    font-size: 13px;
+    color: var(--text-faint) !important;
+  }
+  .toc-rail a:hover { color: var(--brand) !important; }
+  /* Mirrors DocsSidebar's active-item language: border-left + font-weight:600
+     + color:var(--brand), so the rail's highlight reads as the same "you are
+     here" convention as the docs nav next to it. */
+  .toc-rail a.is-active {
+    border-left-color: var(--teal-600);
+    font-weight: 600;
+    color: var(--brand) !important;
+  }
+
+  @media (max-width: 1023px) {
+    .toc-accordion { display: block; }
+    .toc-rail { display: none; }
+  }
+</style>
