@@ -339,26 +339,21 @@ Keep claims truthful to the intended end state.
       links, both `<summary>` kinds, the primary button, footer links and the mint CTA
       button; the `prefers-reduced-motion` block read back out of the shipped
       stylesheet through the CSSOM; the media query confirmed in the tools' JS bundle.
-- [ ] (todo) **`crawl.py` counts `<aside>` text toward `word_count`.** `Cta.astro`
+- [x] (done) **`crawl.py` counted `<aside>` text toward `word_count`.** `Cta.astro`
       and `RelatedLinks.astro` are asides whose boilerplate is identical on every
-      guide, provider and compare page, so it inflates each of them by 5–8 words.
-      Excluding it is the right call on the merits but recalibrates the
-      thin-content threshold for the whole site, so it wants to be its own change
-      with its own before/after — not folded into a content PR. Measured effect
-      today: `/glossary/dkim/` 134 → 126, `/glossary/spf/` 148 → 142,
-      `/glossary/dmarc-alignment/` 143 → 138. No page changes verdict.
+      guide, provider and compare page, so it inflated all of them equally — which
+      is the opposite of what a thin-content check is for. Excluded now, so the
+      number means "how much did this page actually say".
 
-## Content accuracy (from the July 2026 docs review)
-
-A full review of every content page against the RFCs and the shipped code. The
-[deployment-docs errors](#deployment-docs), the `pct=` fallback rule, the
-competitor claims, and the missing console/monitoring/data-protection pages were
-fixed at the time (PRs #37, #38, #40–43). What follows is what was found and
-*not* fixed, ordered by how much harm it does. Every item was verified against a
-primary source; where a line number is given it was accurate in July 2026.
-
-### Corrections — statements that are wrong
-
+      Done as its own change with its own before/after, as this item asked, because
+      it moves the threshold for the whole site at once. **No page changes verdict:**
+      still zero under 150. What it did was make the numbers honest, and one of them
+      newly interesting — `/glossary/dmarc/` reads 168 → 155, which is five words
+      clear of thin. It is the shortest page on the site and worth a look on its own
+      merits, not because the check now says so. Other movers:
+      `/tools/dmarc-report-analyzer/` 228 → 197, `/glossary/dkim/` 287 → 275,
+      `/glossary/dmarc-policy/` 247 → 235. Index pages carry no aside and did not
+      move.
 - [x] (done) **DMARC has a new specification and the site cited the old one.**
       Found while verifying the tag reference against RFC 7489, which turns out to be
       obsolete: **DMARCbis published in May 2026 as RFC 9989** (core, Proposed
@@ -609,11 +604,29 @@ primary source; where a line number is given it was accurate in July 2026.
 - [x] (done) **Glossary entries for ARC and TLS-RPT.** Both are named as
       backlog items already; ARC is the mislinked term above, and
       `mta-sts.md:69` devotes a section to TLS-RPT with nothing to link to.
-- [ ] (todo) **A forwarding / mailing-lists / ARC guide.** Currently one
-      paragraph with a broken link. Covers why lists break DKIM, From-rewriting,
-      what ARC does and doesn't buy, and why forwarding failures must not gate
-      enforcement — the enforcement guide's exit criterion is otherwise
-      unachievable.
+- [x] (done — as coverage, not as a page) **A forwarding / mailing-lists / ARC
+      guide.** The premise no longer holds: this was filed when the subject was "one
+      paragraph with a broken link", and every part of it is now written, in the place
+      a reader meets it.
+
+      `glossary/arc.md` carries the mechanism, the header set, and a deliberately long
+      "what ARC does not buy you" — nothing to publish, not a DMARC pass, entirely the
+      receiver's choice, and not widely adopted, which the current DMARC standard says
+      outright. `guides/fix-dmarc-failure.md` Cause 4 carries the forwarding mechanism,
+      corrected: plain forwarding breaks SPF *because the envelope doesn't change*, and
+      SRS rewriting makes SPF pass for the forwarder and then fail alignment.
+      `from-monitoring-to-enforcement.md` carries the exit criterion this item was
+      most worried about — forwarding failures never reach zero, so "wait until nothing
+      fails" was never achievable. From-rewriting, mailing lists and the
+      forwarder-row-in-reports case are covered across seven pages in total.
+
+      **Deliberately not writing the page**, and this is a judgement rather than an
+      omission: a standalone guide would restate three pages that already own their
+      queries, and `/guides/fix-dmarc-failure/` *is* the page a reader lands on when
+      forwarded mail fails. The content plan's own rule — check whether an existing
+      page already owns the term, one page per query — argues against it, and no
+      keyword data was ever pulled for forwarding terms. Reopen it if the reports ever
+      show people searching for forwarding specifically.
 - [x] (done) **Cloudflare under `/dmarc-for`** — a *dependency* of the existing
       three rather than a sibling, and written that way: it opens by saying your mail
       is at Workspace, M365 or GoDaddy and Cloudflare is only where the records go,
