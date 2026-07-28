@@ -116,19 +116,13 @@ class Page(HTMLParser):
                 self.images_without_alt += 1
             if not (a.get("width") and a.get("height")):
                 self.images_without_dimensions += 1
-        elif tag in ("script", "style", "nav", "footer"):
+        elif tag in ("script", "style", "nav", "footer", "aside"):
             self._skip += 1
             if tag == "nav":
                 self._nav += 1
                 self._chrome += 1
-            elif tag == "footer":
+            elif tag in ("footer", "aside"):
                 self._chrome += 1
-        elif tag == "aside":
-            # Deliberately not in _skip: excluding <aside> *text* would move the
-            # thin-content threshold by several words on every templated page at
-            # once. It only zones links, where Cta and RelatedLinks are
-            # boilerplate rather than an editorial recommendation.
-            self._chrome += 1
 
     def handle_endtag(self, tag):
         if tag == "title":
@@ -136,15 +130,13 @@ class Page(HTMLParser):
         elif tag == "h1":
             self._in_h1 = False
             self.h1.append(" ".join("".join(self._h1_buf).split()))
-        elif tag in ("script", "style", "nav", "footer"):
+        elif tag in ("script", "style", "nav", "footer", "aside"):
             self._skip = max(self._skip - 1, 0)
             if tag == "nav":
                 self._nav = max(self._nav - 1, 0)
                 self._chrome = max(self._chrome - 1, 0)
-            elif tag == "footer":
+            elif tag in ("footer", "aside"):
                 self._chrome = max(self._chrome - 1, 0)
-        elif tag == "aside":
-            self._chrome = max(self._chrome - 1, 0)
 
     def handle_data(self, data):
         if self._in_title:
