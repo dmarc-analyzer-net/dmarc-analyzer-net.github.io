@@ -24,12 +24,7 @@ const first = sections[0]?.items[0];
   path="/docs/"
 >
     <div class="docs-shell" style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
-      <aside class="docs-aside" style="position:sticky; top:88px;">
-        <h2 class="docs-aside-heading">All documentation</h2>
-        <DocsSidebar />
-      </aside>
-
-      <div style="min-width:0;">
+      <div style="min-width:0; order:2;">
         <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">Documentation</div>
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:0 0 14px;">Run DMARC Analyzer yourself.</h1>
         <p style="font-size:17.5px; line-height:1.55; color:var(--gray-700); margin:0 0 28px; max-width:620px;">
@@ -72,5 +67,10 @@ const first = sections[0]?.items[0];
 
         <Cta />
       </div>
+
+      <aside class="docs-aside" style="position:sticky; top:88px; order:1;">
+        <h2 class="docs-aside-heading">All documentation</h2>
+        <DocsSidebar />
+      </aside>
     </div>
 </BaseLayout>
