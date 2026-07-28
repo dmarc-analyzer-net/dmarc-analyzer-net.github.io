@@ -145,6 +145,7 @@ const schema = {
 
   /** The subset of the DNS-over-HTTPS JSON response this tool reads. */
   import { errorText, lookupTxt, LOOKS_LIKE_DOMAIN, normalizeDomain } from '../../lib/doh';
+  import { revealResults } from '../../lib/motion';
 
   type Tag = { name: string; value: string };
 
@@ -690,7 +691,7 @@ const schema = {
       const url = new URL(window.location.href);
       url.searchParams.set('domain', domain);
       window.history.replaceState(null, '', url);
-      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      revealResults(results);
     } catch (e) {
       showError(errorText(e, 'Something went wrong looking that up.'));
     } finally {

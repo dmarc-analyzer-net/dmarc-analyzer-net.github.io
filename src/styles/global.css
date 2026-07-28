@@ -113,6 +113,47 @@ code,kbd,pre{font-family:var(--font-mono)}
   .row-hover { transition: background 120ms; }
   .row-hover:hover { background: var(--gray-50); }
 
+  /* --- Keyboard focus.
+     `--focus-ring` was defined with the other tokens and referenced nowhere, so
+     every interactive element fell back to the browser's default outline — and
+     `details > summary { list-style: none }` above strips the marker that made a
+     focused disclosure obvious, which the header dropdown and every TOC rely on.
+
+     `:focus-visible` rather than `:focus`, so a mouse click doesn't leave a ring
+     behind. An `outline` rather than the token's box-shadow for the base rule:
+     outline follows the element's shape, isn't clipped by `overflow`, and works on
+     an inline link that wraps across two lines — all three of which a box-shadow
+     gets wrong. The token still earns its keep on the raised surfaces below, where
+     the softer glow is what the design system drew. --- */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+  .btn-primary:focus-visible,
+  .btn-ghost:focus-visible,
+  .lift:focus-visible { box-shadow: var(--focus-ring); }
+  /* Teal on a dark panel is nearly invisible; ink surfaces use mint as their
+     accent, so focus follows the same rule the buttons do. */
+  .ink-panel :focus-visible,
+  .btn-mint:focus-visible { outline-color: var(--mint-400); }
+
+  /* --- Reduced motion. Everything above that moves is decoration: a card lifting,
+     a button dipping on press, a chevron spinning. Honour the request to stop it,
+     but keep *state* legible — the chevron still ends up rotated when its
+     disclosure is open, because that rotation is information, not animation. --- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+    }
+    .lift:hover { transform: none; }
+    .btn-primary:active,
+    .btn-mint:active { transform: none; }
+  }
+
 /* --- Prose: typographic styling for Markdown article bodies (guides, glossary).
    Bare markdown tags (<h2>, <p>, <ul>, <pre>, <table>…) styled with the brand
    tokens/palette so authored content matches the hand-built pages. Wrap article

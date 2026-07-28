@@ -86,6 +86,8 @@ const schema = {
 </BaseLayout>
 
 <script>
+  import { revealResults } from '../../lib/motion';
+
   /** One record row as read out of the report. */
   type ReportRecord = {
     ip: string;
@@ -309,7 +311,7 @@ const schema = {
     wrap.appendChild(table);
     results.appendChild(wrap);
     results.style.display = 'block';
-    results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    revealResults(results);
   }
 
   async function analyze(xml: string) {

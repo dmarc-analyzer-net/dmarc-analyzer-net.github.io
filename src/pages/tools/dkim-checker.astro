@@ -136,6 +136,7 @@ const schema = {
 
 <script>
   import { errorText, lookupTxt, LOOKS_LIKE_DOMAIN, normalizeDomain } from '../../lib/doh';
+  import { revealResults } from '../../lib/motion';
 
   type Finding = {
     level: 'good' | 'warn' | 'bad';
@@ -538,7 +539,7 @@ const schema = {
       url.searchParams.set('selector', selector);
       window.history.replaceState(null, '', url);
       results.style.display = 'block';
-      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      revealResults(results);
     } catch (e) {
       showError(errorText(e, 'Something went wrong looking that up.'));
     } finally {
@@ -606,7 +607,7 @@ const schema = {
       url.searchParams.delete('selector');
       window.history.replaceState(null, '', url);
       results.style.display = 'block';
-      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      revealResults(results);
     } catch (e) {
       showError(errorText(e, 'Something went wrong searching for selectors.'));
     } finally {
