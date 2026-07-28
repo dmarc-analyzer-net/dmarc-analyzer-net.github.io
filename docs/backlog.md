@@ -298,15 +298,35 @@ Keep claims truthful to the intended end state.
       carrying none of Guides, Glossary, Setup, Tools or Compare; and `current`
       accepts `'home'`, which `index.astro` passes, but no nav item carries that key,
       so it highlights nothing.
-- [ ] (todo) **No `:focus-visible` styling anywhere.** `grep -rE
-      "focus-visible|:focus|prefers-reduced-motion" src/` returns nothing, so
-      `--focus-ring` at `global.css:45` is defined and referenced nowhere and every
-      interactive element falls back to the browser default outline — including the
-      two `<summary>` triggers, whose default marker `global.css:110` has already
-      removed site-wide. Lighthouse reports accessibility 100 because it does not
-      test this. While in there: `.lift:hover` translates, `.btn-primary:active`
-      scales and the header chevron rotates, none of it behind
-      `prefers-reduced-motion`.
+- [x] (done) **No `:focus-visible` styling anywhere.** `--focus-ring` was defined
+      with the other tokens and referenced nowhere, so every interactive element fell
+      back to the browser default outline — including the two `<summary>` triggers,
+      whose marker `global.css` strips site-wide, which is the header's Resources menu
+      and all 30 table-of-contents disclosures. Lighthouse reported accessibility 100
+      throughout, because it does not test this.
+
+      An `outline` for the base rule rather than the token's box-shadow: outline
+      follows the element's shape, isn't clipped by `overflow`, and works on an inline
+      link wrapping across two lines — a box-shadow gets all three wrong. The token
+      is still used on the raised surfaces where its softer glow was drawn for, and
+      ink panels get a **mint** ring, matching the rule `.btn-mint` already exists to
+      follow: teal on the dark CTA gradient is nearly invisible.
+
+      Reduced motion covers transitions, animations and `scroll-behavior`, while
+      leaving *state* legible — the FAQ chevron still ends up rotated when open,
+      because that rotation is information rather than decoration.
+
+      The CSS alone would have been a half-fix, and this is the part worth
+      remembering: **`scroll-behavior: auto` in a stylesheet does not override a
+      `behavior: 'smooth'` passed to `scrollIntoView()` in script.** All five tool
+      pages animated their jump to the results regardless of the preference. They now
+      call `revealResults()` from `src/lib/motion.ts`, so the media query is written
+      once rather than five times.
+
+      Verified in headless Chrome, not assumed: rings measured on the brand link, nav
+      links, both `<summary>` kinds, the primary button, footer links and the mint CTA
+      button; the `prefers-reduced-motion` block read back out of the shipped
+      stylesheet through the CSSOM; the media query confirmed in the tools' JS bundle.
 - [ ] (todo) **`crawl.py` counts `<aside>` text toward `word_count`.** `Cta.astro`
       and `RelatedLinks.astro` are asides whose boilerplate is identical on every
       guide, provider and compare page, so it inflates each of them by 5–8 words.
