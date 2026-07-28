@@ -42,9 +42,16 @@ rollout.
 | `a` | The domain's own A record | `a` or `a:mail.example.com` |
 | `mx` | The domain's MX hosts | `mx` |
 | `include` | Another domain's SPF (e.g. a provider) | `include:_spf.google.com` |
+| `exists` | Whether a name resolves at all, after macro expansion | `exists:%{ir}.spf.example.net` |
 | `all` | Everything — always last | `-all` |
 
 Avoid `ptr` — it's slow, unreliable, and deprecated.
+
+`exists` is the one most people never meet, and it is worth recognising rather than
+writing: it substitutes values from the connection into a hostname and matches if
+that name resolves, which is how allow-list and reputation services plug into SPF.
+If you find one in a record you inherited, it is deliberate — and it **costs a
+lookup**, which is the part that matters below.
 
 ## Qualifiers
 
@@ -82,9 +89,15 @@ one level down.
 
 - **One record only.** A domain must have exactly one SPF `TXT` record. Two
   produces a `permerror` — and a [DMARC failure](/guides/fix-dmarc-failure/).
-- **Ten DNS-lookup limit.** Every `include`, `a`, `mx`, `ptr`, and `redirect`
-  costs a lookup; the total must stay **≤ 10**. Chained providers blow past this
-  fast.
+- **Ten DNS-lookup limit.** Six terms cost a lookup — `include`, `a`, `mx`,
+  `ptr`, `exists` and `redirect` — and the total must stay **≤ 10**. Ten is
+  allowed; eleven `permerror`s. Chained providers blow past this fast.
+- **`mx` and `ptr` have their own sub-limits**, which is how a record with a term
+  count of 1 still fails. Evaluating `mx` must not require more than **10 address
+  lookups**, so a domain with a dozen MX hosts `permerror`s on a single `mx` term.
+  The same cap applies to `ptr`, except there the extra records are ignored rather
+  than fatal — the difference being that you control your MX records and not the
+  reverse DNS of whoever is connecting.
 - **Two void lookups.** Separately from the limit above, no more than two
   lookups may return an empty answer. A stale `include:` for a service you
   cancelled can `permerror` a record that's otherwise fine.

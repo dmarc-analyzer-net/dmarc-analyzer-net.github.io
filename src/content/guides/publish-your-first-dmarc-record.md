@@ -8,6 +8,12 @@ Publishing DMARC sounds risky — you are, after all, telling the world's mail
 servers how to treat your email. It isn't, as long as you start in **monitoring
 mode**. This guide gets you collecting data today without affecting delivery.
 
+If you send more than 5,000 messages a day to Gmail accounts, a DMARC record is not
+optional any more — Gmail and Yahoo have required one since February 2024, and a
+monitoring record satisfies it. [What the bulk-sender rules
+ask for](/guides/spf-dkim-dmarc/#the-reason-this-stopped-being-optional) is the
+short version.
+
 ## Step 1 — Make sure SPF and DKIM exist first
 
 DMARC is built on [SPF](/glossary/spf/) and [DKIM](/glossary/dkim/). Before

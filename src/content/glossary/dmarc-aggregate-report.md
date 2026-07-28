@@ -16,6 +16,24 @@ You request them with the `rua=` tag in your [DMARC](/glossary/dmarc/) record:
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
+Three practical details that the tag alone doesn't tell you:
+
+- **They arrive gzipped.** The XML should be GZIP-compressed and attached as
+  `application/gzip`, with a filename built from the reporting receiver, your
+  domain, and the start and end timestamps — `receiver!yourdomain.com!1013662812!1013749130.xml.gz`.
+  Uncompressed reports are allowed but discouraged, because a large one can exceed
+  the receiving server's size limit and simply never be delivered.
+- **Daily is what you get**, not what you asked for. There used to be a tag for
+  requesting an interval, `ri=`; providers sent daily reports regardless, and the
+  current specification has [removed it](/guides/dmarc-rfc-9989/).
+- **If the mailbox is on another domain**, that domain has to authorise it with a
+  `_report._dmarc` record, or conforming receivers discard the request silently —
+  no bounce, no error, no reports. This is the single most common reason a
+  perfect-looking record produces nothing; see
+  [reports won't arrive if `rua=` is wrong](/guides/no-dmarc-record-found/), or
+  the [agency treatment](/guides/dmarc-multiple-client-domains/) if you collect
+  for domains you don't own.
+
 Each `<record>` in the XML groups messages by source and reports the
 [alignment](/glossary/dmarc-alignment/) outcome:
 

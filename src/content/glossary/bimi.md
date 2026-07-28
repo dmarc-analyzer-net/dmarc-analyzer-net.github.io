@@ -64,9 +64,26 @@ A related **Common Mark Certificate (CMC)** covers marks without trademark
 registration, but provider support differs from VMC support, so check what your
 target inboxes accept before buying either.
 
-Support varies by provider: some display a BIMI logo without a certificate,
-while Gmail requires one. The record is harmless either way — an unsupported
-inbox simply ignores it.
+Support varies, and not in the way "Gmail wants a certificate" suggests. **Gmail
+and Apple Mail both require one** — the two inboxes most likely to make the
+investment worth it — while some others, Yahoo among them, will display a
+self-asserted record. So a VMC is closer to the price of entry than an optional
+extra.
+
+## Microsoft doesn't support BIMI at all
+
+Worth knowing before you budget for a certificate, because it is the fact that
+decides the whole question for a lot of senders. Outlook, Outlook.com and
+Microsoft 365 do **not** display BIMI logos — Microsoft is listed among the
+providers that do not support it, not among those considering it.
+
+The providers that do are Apple, Google, Yahoo, Fastmail, Zoho, Comcast, GMX,
+Web.de, Zone, Zoner, LaPoste, OnetPoczta, KDDI, NTT docomo and Cloudmark. Read
+that list against your own recipients: if you mail consumers, it covers most of
+them; if you mail businesses, a large share of your audience is on Microsoft and
+will never see the logo you paid to certify. The record is harmless either way —
+an unsupported inbox ignores it — but the certificate is not free, and this is
+what it does and doesn't buy.
 
 ## Why the logo isn't showing
 
@@ -75,7 +92,8 @@ inbox simply ignores it.
 | Policy still `p=none` | The domain isn't at enforcement |
 | `pct=` below 100, or `t=y` | Partial or test-only enforcement disqualifies the domain |
 | `sp=none` on the root | Subdomain mail isn't enforced |
-| No VMC | Required by Gmail and some others |
+| No VMC | Required by Gmail and Apple; some others accept self-asserted |
+| Reader is on Outlook | Microsoft doesn't support BIMI, so there is nothing to show |
 | Logo rejected | Not valid SVG Tiny PS, or not square |
 | Message failed DMARC | BIMI applies only to mail that passes |
 

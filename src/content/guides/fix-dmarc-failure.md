@@ -64,7 +64,7 @@ Even when SPF *should* align, the record itself can fail:
   record. Two records is also a `permerror`.
 - **A missing sender.** The sending IP simply isn't covered by any mechanism.
 
-**Fix:** keep a single record, flatten or prune `include:`s to stay under 10
+**Fix:** keep a single record, flatten or prune `include:`s to stay at or under 10
 lookups, and make sure every real sender is represented. Example of a clean one:
 
 ```

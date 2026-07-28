@@ -466,7 +466,7 @@ primary source; where a line number is given it was accurate in July 2026.
       which was the thinnest page on the site and is no longer. **The three provider
       pages themselves still don't mention it**, which is what remains here: one
       cross-link each rather than a repeat of the explanation.
-- [ ] (todo) **`guides/spf-record-syntax.md` omits `exists` from both the
+- [x] (done) **`guides/spf-record-syntax.md` omitted `exists` from both the
       mechanism table and the lookup-counting list** (RFC 7208 §4.6.4 names
       `include`, `a`, `mx`, `ptr`, `exists` and `redirect`). It also omits the
       separate 10-name sub-limits on `mx`/`ptr` — a domain with 12 MX hosts
@@ -482,14 +482,14 @@ primary source; where a line number is given it was accurate in July 2026.
       default** — absent `sp=`, subdomains inherit `p=`
       (`dmarc-policy-not-enabled.md:82`, `no-dmarc-record-found.md:88`,
       `fix-dmarc-failure.md:96`). `np=` (RFC 9091) appears nowhere on the site.
-- [ ] (todo) **No page mentions the Gmail/Yahoo/Outlook bulk-sender
+- [x] (done) **No page mentioned the Gmail/Yahoo/Outlook bulk-sender
       requirements** (Feb 2024 onward) — the strongest present-day reason a
       reader needs any of this, absent from all eight guides.
-- [ ] (todo) **`glossary/bimi.md` frames the VMC as a Gmail quirk** (line ~65)
+- [x] (done) **`glossary/bimi.md` framed the VMC as a Gmail quirk** (line ~65)
       when every major provider that displays BIMI requires one, and never
       mentions that **Outlook does not support BIMI at all** — which for a B2B
       sender changes the whole cost/benefit.
-- [ ] (todo) **`glossary/dmarc-aggregate-report.md` omits the `_report._dmarc`
+- [x] (done) **`glossary/dmarc-aggregate-report.md` omitted the `_report._dmarc`
       requirement, gzip delivery, and `ri=` being advisory.**
 
 ### New pages worth writing
