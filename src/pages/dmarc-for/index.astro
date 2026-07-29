@@ -6,11 +6,16 @@ import Icon from '../../components/Icon.astro';
 const providers = (await getCollection('providers', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.provider.localeCompare(b.data.provider),
 );
+
+export const title = 'Set up DMARC for your email provider — DMARC Analyzer';
+export const description =
+  'Step-by-step SPF, DKIM, and DMARC setup guides for Google Workspace, Microsoft 365, GoDaddy, and more — with the provider-specific gotchas that trip people up.';
 ---
 <BaseLayout current="setup"
-  title="Set up DMARC for your email provider — DMARC Analyzer"
-  description="Step-by-step SPF, DKIM, and DMARC setup guides for Google Workspace, Microsoft 365, GoDaddy, and more — with the provider-specific gotchas that trip people up."
+  title={title}
+  description={description}
   path="/dmarc-for/"
+  image="/open-graph/dmarc-for.png"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">

@@ -17,11 +17,16 @@ const sections = DOCS_SECTIONS.map((section) => ({
 })).filter((s) => s.items.length > 0);
 
 const first = sections[0]?.items[0];
+
+export const title = 'Documentation — DMARC Analyzer';
+export const description =
+  'Install, configure, and operate your own DMARC Analyzer: Docker quick start, full configuration reference, mailbox setup, upgrades, and troubleshooting.';
 ---
 <BaseLayout current="docs"
-  title="Documentation — DMARC Analyzer"
-  description="Install, configure, and operate your own DMARC Analyzer: Docker quick start, full configuration reference, mailbox setup, upgrades, and troubleshooting."
+  title={title}
+  description={description}
   path="/docs/"
+  image="/open-graph/docs.png"
 >
     <div class="docs-shell" style="max-width:1160px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;">
       <div style="min-width:0; order:2;">

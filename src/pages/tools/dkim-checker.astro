@@ -5,10 +5,11 @@ import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 
-const title = 'DKIM record checker';
-const description =
+export const title = 'DKIM record checker';
+export const description =
   'Free DKIM checker: look up a selector’s public key, decode it to report the real key length, and catch revoked keys and testing mode left switched on.';
 const path = '/tools/dkim-checker/';
+const image = '/open-graph/tools/dkim-checker.png';
 
 const schema = {
   '@context': 'https://schema.org',
@@ -17,11 +18,12 @@ const schema = {
   applicationCategory: 'SecurityApplication',
   operatingSystem: 'Any (web browser)',
   description,
+  image: new URL(image, Astro.site).href,
   url: new URL(path, Astro.site).href,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
 ---
-<BaseLayout current="tools" title={`${title} — DMARC Analyzer`} description={description} path={path}>
+<BaseLayout current="tools" title={`${title} — DMARC Analyzer`} description={description} path={path} image={image}>
   <JsonLd slot="head" schema={schema} />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:900px; margin:0 auto; padding:56px 32px 20px;">

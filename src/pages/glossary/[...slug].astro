@@ -17,6 +17,7 @@ export async function getStaticPaths() {
 const { entry, byId } = Astro.props;
 const { Content } = await render(entry);
 const path = `/glossary/${entry.id}/`;
+const image = `/open-graph/glossary/${entry.id}.png`;
 
 // Resolve related slugs to real entries so labels stay accurate.
 const related = entry.data.related
@@ -30,11 +31,12 @@ const definedTermSchema = {
   name: entry.data.term,
   description: entry.data.description,
   ...(entry.data.aliases.length > 0 && { alternateName: entry.data.aliases }),
+  image: new URL(image, Astro.site).href,
   inDefinedTermSet: new URL('/glossary', Astro.site).href,
   url: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="glossary" title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path} ogType="article">
+<BaseLayout current="glossary" title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path} image={image} ogType="article">
   <JsonLd slot="head" schema={definedTermSchema} />
     <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[
