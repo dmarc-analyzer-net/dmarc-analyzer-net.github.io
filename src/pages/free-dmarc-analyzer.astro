@@ -4,20 +4,22 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Cta from '../components/Cta.astro';
 import JsonLd from '../components/JsonLd.astro';
 
-const title = 'Free DMARC analyzer, self-hosted';
-const description =
+export const title = 'Free DMARC analyzer, self-hosted';
+export const description =
   'A genuinely free DMARC analyzer: open source and self-hosted, with unlimited domains and no report data leaving your servers — not a capped free tier.';
 const path = '/free-dmarc-analyzer/';
+const image = '/open-graph/free-dmarc-analyzer.png';
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: title,
   description,
+  image: new URL(image, Astro.site).href,
   url: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path} image={image}>
   <JsonLd slot="head" schema={schema} />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">

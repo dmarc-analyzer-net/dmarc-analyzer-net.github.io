@@ -5,20 +5,22 @@ import Cta from '../components/Cta.astro';
 import JsonLd from '../components/JsonLd.astro';
 import RelatedLinks from '../components/RelatedLinks.astro';
 
-const title = 'Self-hosted DMARC monitoring';
-const description =
+export const title = 'Self-hosted DMARC monitoring';
+export const description =
   'Self-hosted DMARC monitoring on your own infrastructure: what your aggregate reports reveal, what running it yourself costs, and whether that trade is worth it.';
 const path = '/self-hosted-dmarc-monitoring/';
+const image = '/open-graph/self-hosted-dmarc-monitoring.png';
 
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
   name: title,
   description,
+  image: new URL(image, Astro.site).href,
   url: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path}>
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path} image={image}>
   <JsonLd slot="head" schema={schema} />
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">

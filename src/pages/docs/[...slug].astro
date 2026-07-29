@@ -24,6 +24,7 @@ export async function getStaticPaths() {
 const { entry, ordered } = Astro.props;
 const { Content, headings } = await render(entry);
 const path = `/docs/${entry.id}/`;
+const image = `/open-graph/docs/${entry.id}.png`;
 const showToc = hasToc(headings, { maxDepth: 3 });
 
 // Prev/next within the reading sequence (section, then order).
@@ -41,12 +42,13 @@ const schema = {
   '@type': 'TechArticle',
   headline: entry.data.title,
   description: entry.data.description,
+  image: new URL(image, Astro.site).href,
   author: { '@type': 'Organization', name: 'DMARC Analyzer' },
   publisher: { '@type': 'Organization', name: 'DMARC Analyzer' },
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path}>
+<BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path} image={image}>
   <JsonLd slot="head" schema={schema} />
     <div class="docs-shell" style={`max-width:${showToc ? 1280 : 1160}px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;`}>
       <article style="min-width:0; order:2;">

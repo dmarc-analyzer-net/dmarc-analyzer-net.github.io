@@ -7,11 +7,16 @@ import Cta from '../../components/Cta.astro';
 const entries = (await getCollection('compare', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.competitor.localeCompare(b.data.competitor),
 );
+
+export const title = 'Compare DMARC Analyzer to the alternatives';
+export const description =
+  'How an open-source, self-hosted DMARC analyzer compares to dmarcian, EasyDMARC, PowerDMARC, Valimail, and parsedmarc — on hosting, pricing, and data ownership.';
 ---
 <BaseLayout current="compare"
-  title="Compare DMARC Analyzer to the alternatives"
-  description="How an open-source, self-hosted DMARC analyzer compares to dmarcian, EasyDMARC, PowerDMARC, Valimail, and parsedmarc — on hosting, pricing, and data ownership."
+  title={title}
+  description={description}
   path="/compare/"
+  image="/open-graph/compare.png"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">

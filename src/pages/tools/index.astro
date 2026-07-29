@@ -30,11 +30,16 @@ const tools = [
     note: 'Paste or upload an aggregate (RUA) report and get a readable, per-source breakdown. Runs entirely in your browser.',
   },
 ];
+
+export const title = 'Free DMARC tools — DMARC Analyzer';
+export const description =
+  'Free, in-browser DMARC, SPF and DKIM tools: record checkers, a DMARC generator, an SPF lookup counter and a report analyzer. Open source, no account.';
 ---
 <BaseLayout current="tools"
-  title="Free DMARC tools — DMARC Analyzer"
-  description="Free, in-browser DMARC, SPF and DKIM tools: record checkers, a DMARC generator, an SPF lookup counter and a report analyzer. Open source, no account."
+  title={title}
+  description={description}
   path="/tools/"
+  image="/open-graph/tools.png"
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
