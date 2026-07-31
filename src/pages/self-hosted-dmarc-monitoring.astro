@@ -35,6 +35,47 @@ const schema = {
 
     <section style="max-width:760px; margin:0 auto; padding:36px 32px 8px;">
       <div class="prose">
+        <h2>What it is, concretely</h2>
+        <p>
+          One image. The web console and the mailbox polling run in a single
+          container, next to PostgreSQL — two containers, and nothing else to
+          install. No search cluster to keep alive, no separate dashboard
+          service to import and maintain. Around 1&nbsp;GB of RAM.
+        </p>
+        <pre><code>mkdir dmarc-analyzer &amp;&amp; cd dmarc-analyzer
+curl -fsSL -o compose.yml https://raw.githubusercontent.com/dmarc-analyzer-net/DmarcAnalyzerApp/main/deploy/compose.yml
+# generates the key that encrypts stored mailbox passwords — back this up
+echo "DMARC_ENCRYPTION_KEY=$(openssl rand -base64 32)" &gt; .env
+docker compose up -d</code></pre>
+        <p>
+          Then open <code>http://localhost:8080</code>, create the first
+          administrator, and point it at the mailbox your aggregate reports
+          already arrive in. The image is on
+          <code>ghcr.io/dmarc-analyzer-net/dmarc-analyzer</code> for amd64 and
+          arm64, so a Raspberry Pi or an Apple Silicon machine works too. The
+          full walkthrough is <a href="/docs/install/">install with Docker</a>.
+        </p>
+        <p>
+          <strong>You can run it alongside whatever you already have.</strong>
+          Ingestion is read-only — it never deletes, moves or flags anything in
+          the mailbox, and re-reading a report it has already seen changes
+          nothing. So you can point this at the mailbox another tool is reading
+          today, without touching that tool, and compare the two on the same
+          data for as long as you like before committing.
+        </p>
+        <p>
+          It is a finished application rather than parts to assemble: the
+          console, ingestion, alerting and multi-tenancy in one image, with
+          unlimited domains and no paid tier —
+          <a href="/free-dmarc-analyzer/">free and open source</a> under
+          Apache-2.0. Nothing here can be capped, shortened or moved behind an
+          upgrade later, because it is your install and your database.
+        </p>
+        <p>
+          The rest of this page is the honest case for and against running it
+          yourself.
+        </p>
+
         <h2>What you are actually handing over</h2>
         <p>
           "DMARC reports don't contain message content" is true, and it is the
@@ -93,34 +134,31 @@ const schema = {
 
         <h2>What running it looks like</h2>
         <p>
-          One container plus PostgreSQL, started with
-          <code>docker compose up</code>. It connects to a mailbox over IMAP,
-          reads the reports providers send there, and builds the dashboards from
-          them. There is a
+          Day to day it connects to a mailbox over IMAP, reads the reports
+          providers send there, and builds the dashboards from them. The first
+          sync reads the whole mailbox, not just new mail, so however far back
+          your reports go, that becomes your history on day one.
+        </p>
+        <p>
+          The default two-container shape is not the only one. There is a
           <a href="/docs/kubernetes/">maintained Helm chart</a> if you would
           rather run it on Kubernetes, and
           <a href="/docs/choose-your-deployment/">choosing a deployment</a> walks
-          through bundled versus external PostgreSQL and one container versus
+          through bundled versus external PostgreSQL, and one container versus
           two.
         </p>
-        <p>
-          Ingestion is read-only: it never deletes, moves or flags anything in
-          the mailbox. That matters more than it sounds — it means you can point
-          it at a mailbox something else is already reading and compare the two
-          for as long as you like before committing.
-        </p>
 
-        <h2>Self-hosted does not have to mean assembled</h2>
+        <h2>Where it sits among the self-hostable options</h2>
         <p>
-          The usual objection to self-hosting DMARC is the stack: a parser here,
-          a search cluster there, dashboards to import and maintain.
-          <a href="/">DMARC Analyzer</a> is a finished application instead — the
-          console, the ingestion, the alerting and the multi-tenancy in one
-          image, <a href="/free-dmarc-analyzer/">free and open source</a> under
-          Apache-2.0. If you want to see how it sits against the other
-          self-hostable options, including the lighter ones, that is the
-          <a href="/compare/open-source-dmarc-analyzer/">open-source
-          roundup</a>.
+          The usual objection to self-hosting DMARC is the stack, and the
+          options really do sit at two extremes. The lightest hold no state at
+          all — history is only ever what is still in the mailbox. The most
+          capable are parsers you wire to a search cluster and a dashboard
+          yourself, then keep alive. <a href="/">DMARC Analyzer</a> is
+          deliberately in between: a finished multi-tenant application with its
+          own database, which is why the install above is two containers and no
+          assembly. The <a href="/compare/open-source-dmarc-analyzer/">open-source
+          roundup</a> puts them side by side.
         </p>
       </div>
 
