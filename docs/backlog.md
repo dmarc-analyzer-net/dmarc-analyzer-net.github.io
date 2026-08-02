@@ -80,6 +80,108 @@ Keep claims truthful to the intended end state.
       IceWhaleTech/CasaOS-AppStore#988. Full state in
       `DmarcAnalyzerApp/docs/ops/directory-listings.md`.
 
+## Docs gaps (from the July 2026 API pass)
+
+Every `curl` example in `src/content/docs/` was run against a stack built from
+`DmarcAnalyzerApp@main`, and the auth model was read out of the code rather than
+inferred. What follows is what that found and what it left.
+
+- [x] (done) **`/docs/using-the-api/`** — the docs had 24 references to
+      `/api/v1/…` spread over six pages and **no page explaining how to
+      authenticate**, so a reader following any of them got
+      `401 {"error":"not authenticated"}`. The new page covers the one credential
+      that exists (a session cookie; there are no API tokens, no bearer auth, no
+      OpenAPI document and no rate limiting), the three role tiers, the response
+      and error shapes, and a scripted client onboarding. Every claim was executed
+      against a live instance, and the interesting ones are now guarded by
+      `scripts/verify-docs-snippets.sh`.
+
+      **The find worth keeping:** an unmatched `/api/v1/…` path falls through
+      `MapFallbackToFile` to the console's SPA, so a typo, a renamed endpoint or a
+      malformed `{id}` returns **`200 text/html`, not `404`** — while the *same*
+      path unauthenticated returns a normal `401`, because the session middleware
+      matches on the path prefix before routing. `curl -f` does not catch it and
+      `if (response.ok)` actively misleads.
+
+- [x] (done) **Nine `curl` examples corrected** across `configuration.md`,
+      `upgrading-and-backup.md` and `data-protection.md` — all of them admin-only
+      endpoints written without a cookie. They now use the `-b /tmp/cj`
+      convention `monitoring.md` already used, and point at the new page for where
+      the jar comes from.
+
+- [x] (done) **`monitoring.md` recommended a monitoring identity that cannot
+      work.** It said `GET /api/v1/mailbox-health` needs "any signed-in role" and
+      that "a dedicated `client_viewer` account with no grants makes a fine
+      monitoring identity". That endpoint carries no role annotation, and the
+      middleware default is agency staff — so a `client_viewer` gets a flat `403`.
+      A monitoring check built on that advice can never succeed, and a check that
+      never succeeds is worse than none. Corrected to `agency_analyst`, which is
+      genuinely the least privilege that works, and pinned with a test.
+
+- [x] (done) **The docs sidebar was above the article on mobile, not below it.**
+      The Medium-priority item claiming otherwise was written against CSS that
+      never took effect: `.docs-aside` carries an inline `order:1` for the desktop
+      grid, and the `@media (max-width: 1023px)` block set `order: 2` **without**
+      `!important` while marking `position: static !important` right beneath it.
+      Inline styles win, so every docs page opened on a phone led with ~890px of
+      navigation before its `h1` — the exact outcome that item's own comment says
+      it was avoiding. One word fixed it. Worth remembering as a class: this block
+      *partly* applied, so it looked implemented at a glance and the surrounding
+      prose read as verified.
+
+- [x] (done) **`scripts/verify-docs-snippets.sh` had been silently broken since
+      2026-07-27.** Its rollback step derived the migration to undo with
+      `max("MigrationId")` but hard-coded the *inverse* as
+      `alter table audit_event drop column "ClientName"`. That pairing held only
+      while `AddAuditEventClientName` was the newest migration; three migrations
+      later it deleted the history row for `AddMailboxRetentionDeletion` and
+      dropped a column belonging to an older one, so `migrate` mode re-ran the
+      wrong migration and died on `column "DeleteAfterRetention" of relation
+      "mailbox_source" already exists`. The dropped column then broke the running
+      app, and **twelve** subsequent checks failed with connection errors — a
+      failure that reads like a broken product rather than a broken test.
+
+      The pair is now pinned to one migration id with its inverse written beside
+      it, and the script asserts that migration is actually applied before
+      touching anything, so the next person gets one clear failure instead of
+      twelve confusing ones. All 25 checks pass. The general lesson: this script
+      is deliberately not in CI, so *nothing* was telling anyone it had rotted —
+      run it when touching the pages named in its header.
+
+- [ ] (todo) **An encryption-key rotation runbook.**
+      [`/docs/security/`](/docs/security/#the-encryption-key) documents what losing
+      `Security__CredentialEncryptionKey` costs but says nothing about changing it,
+      and the honest reason is that nobody has done it. The code stores a versioned
+      `enc:v1:` envelope and passes legacy plaintext through, which is what would
+      make a staged rotation possible — but "possible" is not a procedure. This
+      needs designing and running against a throwaway instance *before* it is
+      written down, not the other way round. Tracked app-side too.
+
+- [ ] (todo) **A restore drill, as distinct from a restore procedure.**
+      `upgrading-and-backup.md` explains how to restore; nothing tells an operator
+      how to find out whether their backups actually work. The end-to-end check is
+      export → import into a throwaway instance → compare manifest counts → sync
+      one mailbox source, because that last step is the only thing that proves the
+      credential encryption key round-tripped. Scriptable, and it belongs next to
+      the backup page rather than inside it.
+
+- [ ] (todo) **Ingestion throughput and backlog guidance.**
+      [Sizing](/docs/choose-your-deployment/#sizing) covers RAM and disk and stops
+      there. What an operator actually asks on day one of a backfill is "how long
+      until this mailbox is drained?", and nothing answers it. The inputs are
+      known — 500 messages per batch, a 20-minute drain budget per source, hourly
+      passes, batches repeating until the source is drained — but turning those
+      into a defensible number means **measuring a real backfill**, not doing
+      arithmetic on the defaults and publishing it as fact.
+
+- [ ] (todo) **Revisit the route list if an OpenAPI document ever ships.** The new
+      page deliberately does not enumerate all 57 `/api/v1` routes: a second copy
+      of a route list is a second thing to go stale, and the app repo's own
+      `api-contract.md` is the standing proof of that. It points at
+      `http/api.http` instead, which the July 2026 review found agrees with the
+      code exactly. If the app ever exposes a generated OpenAPI document, replace
+      the pointer with generated reference rather than hand-maintaining one here.
+
 ## Medium Priority
 
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
