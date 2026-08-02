@@ -116,8 +116,11 @@ An admin can see exactly what the next pass would do, per source, without deleti
 anything:
 
 ```bash
-curl https://dmarc.example.com/api/v1/admin/mailbox-retention/preview
+curl -s -b /tmp/cj https://dmarc.example.com/api/v1/admin/mailbox-retention/preview
 ```
+
+(`-b /tmp/cj` is the admin session cookie from [signing
+in](/docs/using-the-api/#signing-in); without it the endpoint answers `401`.)
 
 It reports every source, including the ones that will do nothing — a preview that
 hid the suspended sources could not answer "why is that mailbox still growing?"

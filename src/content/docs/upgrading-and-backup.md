@@ -200,13 +200,14 @@ Two admin endpoints, so you can prove the destination works without waiting out
 an interval:
 
 ```bash
-curl https://dmarc.example.com/api/v1/admin/backup/status
-curl -X POST https://dmarc.example.com/api/v1/admin/backup/offload
+curl -s -b /tmp/cj https://dmarc.example.com/api/v1/admin/backup/status
+curl -s -b /tmp/cj -X POST https://dmarc.example.com/api/v1/admin/backup/offload
 ```
 
 `status` reports the destination, whether credentials are protected, the bucket's
 versioning state, the last successful pass and the per-stream watermarks. Both
-require an `agency_admin` session.
+require an `agency_admin` session — `-b /tmp/cj` sends the cookie from
+[signing in](/docs/using-the-api/#signing-in), and without it you get a `401`.
 
 Two things to decide rather than inherit. First, **the bucket must be private** —
 it holds credential material: mailbox passwords that are one leaked key away from
@@ -330,7 +331,7 @@ Change the window per client (Clients → edit → retention), or set
 investigation where data must be preserved regardless of the window:
 
 ```bash
-curl -X PATCH https://dmarc.example.com/api/v1/clients/<id> \
+curl -s -b /tmp/cj -X PATCH https://dmarc.example.com/api/v1/clients/<id> \
   -H 'Content-Type: application/json' -d '{"legalHold": true}'
 ```
 
@@ -340,7 +341,7 @@ An admin can see exactly what the next pass would remove, without removing
 anything:
 
 ```bash
-curl https://dmarc.example.com/api/v1/admin/retention/preview
+curl -s -b /tmp/cj https://dmarc.example.com/api/v1/admin/retention/preview
 ```
 
 It reports per client: the retention window, the cutoff date, how many reports
@@ -348,11 +349,12 @@ and ledger rows would go, and whether the client is on legal hold. To run the
 purge immediately rather than waiting for the daily pass:
 
 ```bash
-curl -X POST https://dmarc.example.com/api/v1/admin/retention/purge
+curl -s -b /tmp/cj -X POST https://dmarc.example.com/api/v1/admin/retention/purge
 ```
 
-Both require an `agency_admin` session. Tuning knobs — including switching the
-pass off entirely — are in the [configuration
+Both require an `agency_admin` session — see [using the
+API](/docs/using-the-api/#signing-in) for where `/tmp/cj` comes from. Tuning
+knobs — including switching the pass off entirely — are in the [configuration
 reference](/docs/configuration/#retention).
 
 ## Moving to another host
