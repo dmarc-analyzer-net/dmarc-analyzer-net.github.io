@@ -61,6 +61,7 @@ const appSchema = {
   operatingSystem: 'Docker, Linux',
   description,
   url: GH,
+  codeRepository: GH,
   license: 'https://www.apache.org/licenses/LICENSE-2.0',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 };
@@ -267,6 +268,11 @@ const FAQS: FaqItem[] = [
             <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
             <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Runs as a single container with PostgreSQL, on Docker Compose or Kubernetes. Client report data never leaves your infrastructure — a real answer for data-residency clauses.</p>
           </div>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
+            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="key-round" style="font-size:19px; color:var(--tint-indigo-fg);" /></span>
+            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">OIDC single sign-on &amp; RBAC</h3>
+            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Operators sign in through Entra ID, Okta, Keycloak, Zitadel, Authentik, or Google — with roles and per-client access still enforced by DMARC Analyzer itself. <a href="/docs/single-sign-on/" style="color:var(--brand) !important; font-weight:600;">See how it works &rarr;</a></p>
+          </div>
         </div>
         <div style="margin-top:28px;">
           <a href="/features/" style="display:inline-flex; align-items:center; gap:7px; font-size:var(--text-base); font-weight:600; color:var(--brand) !important;">See the full feature breakdown <Icon name="arrow-right" style="font-size:var(--text-md);" /></a>
@@ -313,7 +319,10 @@ const FAQS: FaqItem[] = [
               <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Split them, or bring your own PostgreSQL, when you need to</li>
               <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Helm chart for Kubernetes, the same settings either way</li>
             </ul>
-            <a class="btn-ghost" href="/docs/install/" style="display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 18px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="book-open" style="font-size:16px;" /> Read the setup guide</a>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+              <a class="btn-ghost" href="/docs/install/" style="display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 18px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="book-open" style="font-size:16px;" /> Read the setup guide</a>
+              <a class="btn-ghost" href="/docs/single-sign-on/" style="display:inline-flex; align-items:center; gap:8px; height:42px; padding:0 18px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:var(--surface-card); color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="key-round" style="font-size:16px;" /> Set up SSO</a>
+            </div>
           </div>
           <Terminal
             lines={[
