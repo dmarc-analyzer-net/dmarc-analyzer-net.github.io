@@ -141,8 +141,13 @@ in the API, they just aren't emailed. Nothing errors.
 Check it works without waiting for something to break:
 
 ```bash
-curl -X POST 'https://dmarc.example.com/api/v1/admin/notifications/test?to=you@example.com'
+curl -s -b /tmp/cj -X POST \
+  'https://dmarc.example.com/api/v1/admin/notifications/test?to=you@example.com'
 ```
+
+Every `curl` on this page needs an admin session cookie — `-b /tmp/cj` sends the
+one [signing in](/docs/using-the-api/#signing-in) saved. Without it the answer is
+`401`, not a test email.
 
 ## Alerts
 
@@ -175,7 +180,7 @@ Add recipients with `POST /api/v1/notification-recipients`. Omit `clientId` to
 have an address receive alerts for **every** client:
 
 ```bash
-curl -X POST https://dmarc.example.com/api/v1/notification-recipients \
+curl -s -b /tmp/cj -X POST https://dmarc.example.com/api/v1/notification-recipients \
   -H 'Content-Type: application/json' \
   -d '{"clientId":"<id>","email":"ops@client.example","kind":"alert"}'
 ```
@@ -202,7 +207,7 @@ restarts — so the check interval is safe to lower.
 Preview exactly what a client would receive, without sending it:
 
 ```bash
-curl 'https://dmarc.example.com/api/v1/admin/digest/preview?clientId=<id>'
+curl -s -b /tmp/cj 'https://dmarc.example.com/api/v1/admin/digest/preview?clientId=<id>'
 ```
 
 `POST /api/v1/admin/digest/send` sends anything due immediately. Recipients need

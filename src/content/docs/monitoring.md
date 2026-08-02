@@ -44,8 +44,8 @@ hour, so:
 
 That single rule catches a dead worker, a lost advisory lock, a broken mailbox
 password, a full disk, and an expired app password — everything that stops
-reports arriving, whatever the cause. The endpoint needs a `dmarc_session`
-cookie (any signed-in role), so a scripted check logs in first:
+reports arriving, whatever the cause. The endpoint needs a `dmarc_session` cookie
+from an **agency staff** account, so a scripted check logs in first:
 
 ```bash
 curl -s -c /tmp/cj -X POST https://dmarc.example.com/api/v1/auth/login \
@@ -55,8 +55,13 @@ curl -s -b /tmp/cj https://dmarc.example.com/api/v1/mailbox-health \
   | jq -r '.[] | select(.isActive) | "\(.name) \(.lastSuccessSyncAtUtc) \(.lastRunStatus)"'
 ```
 
-A dedicated `client_viewer` account with no grants makes a fine monitoring
-identity — it can read health and nothing else.
+Use a **dedicated `agency_analyst` account** as the monitoring identity. An
+analyst can read mailbox health and triage alerts but cannot reach any `/admin/*`
+route, which is the least privilege this check can run with — a `client_viewer`
+is *not* enough and gets a flat `403`, so a check built on one never succeeds and
+never tells you anything. [Using the API](/docs/using-the-api/) covers the sign-in
+mechanics, the role tiers, and the response shapes a scripted check should assert
+on — including why a mistyped path returns `200`.
 
 Two secondary signals from the same endpoint and
 `GET /api/v1/mailbox-sync-runs`: `lastRunStatus: "failed"` with its
