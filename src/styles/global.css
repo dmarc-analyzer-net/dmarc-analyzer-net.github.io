@@ -282,7 +282,12 @@ code,kbd,pre{font-family:var(--font-mono)}
      would push the content they came for off the screen. Ordered last, it reads
      as "where to go next", which is what a doc page ends with anyway. */
   .docs-aside {
-    order: 2;
+    /* `!important` because the element carries an inline `order:1` for the
+       desktop grid, and an inline style beats a stylesheet rule. Without it
+       this whole block still applied *except* the ordering, so the nav stayed
+       above the article — ~890px of links before the h1, the exact outcome the
+       comment above says it was avoiding. */
+    order: 2 !important;
     position: static !important;
     margin-top: 40px;
     padding-top: 24px;
