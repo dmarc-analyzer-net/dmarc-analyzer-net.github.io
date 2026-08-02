@@ -237,41 +237,46 @@ const FAQS: FaqItem[] = [
           <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">Everything you need to run DMARC for a portfolio of clients.</h2>
           <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0;">One workspace, unlimited domains, no per-domain licensing. Purpose-built for the way agencies actually work.</p>
         </div>
-        <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--teal-100); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="globe" style="font-size:19px; color:var(--brand);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Unlimited domains &amp; clients</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Group domains by client, tag them, and give each account its own view. Add the 43rd domain at the same price as the first — zero.</p>
+        <div class="grid-4" style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px;">
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--teal-100); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="globe" style="font-size:18px; color:var(--brand);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Unlimited domains &amp; clients</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Group domains by client, tag them, and give each account its own view. Add the 43rd domain at the same price as the first — zero.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="inbox" style="font-size:19px; color:var(--tint-indigo-fg);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Automatic report ingestion</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Point a mailbox at the tool. Aggregate and forensic XML reports are fetched, parsed, and de-duplicated on a schedule — no manual uploads.</p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="inbox" style="font-size:18px; color:var(--tint-indigo-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Automatic report ingestion</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Point a mailbox at the tool. Reports are fetched, parsed, and de-duplicated on a schedule — no manual uploads.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-red-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="triangle-alert" style="font-size:19px; color:var(--tint-red-fg);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Spoofing &amp; threat detection</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Unauthenticated sources are surfaced the moment they appear, with the sending IP, volume, and geography so you can act before a client does.</p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-red-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="triangle-alert" style="font-size:18px; color:var(--tint-red-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Spoofing &amp; threat detection</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Unauthenticated sources surface the moment they appear, with sending IP, volume, and geography.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--status-warn-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="chart-column" style="font-size:19px; color:var(--amber-600);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Guided path to enforcement</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Each domain shows exactly what stands between p=none and p=reject, with source-by-source alignment for SPF and DKIM.</p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--status-warn-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="chart-column" style="font-size:18px; color:var(--amber-600);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Guided path to enforcement</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Each domain shows what stands between p=none and p=reject, with source-by-source SPF/DKIM alignment.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-purple-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="download" style="font-size:19px; color:var(--tint-purple-fg);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">White-label client reports</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Export a clean monthly summary per domain — your logo, your colours — that a non-technical client can actually read.</p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-purple-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="download" style="font-size:18px; color:var(--tint-purple-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">White-label client reports</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">A clean monthly summary per domain — your logo, your colours — a non-technical client can actually read.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-olive-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="database" style="font-size:19px; color:var(--tint-olive-fg);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Runs as a single container with PostgreSQL, on Docker Compose or Kubernetes. Client report data never leaves your infrastructure — a real answer for data-residency clauses.</p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-olive-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="database" style="font-size:18px; color:var(--tint-olive-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">One container with PostgreSQL, on Docker Compose or Kubernetes. Client data never leaves your infrastructure.</p>
           </div>
-          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px;">
-            <span style="display:inline-flex; width:38px; height:38px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:16px;"><Icon name="key-round" style="font-size:19px; color:var(--tint-indigo-fg);" /></span>
-            <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">OIDC single sign-on &amp; RBAC</h3>
-            <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Operators sign in through Entra ID, Okta, Keycloak, Zitadel, Authentik, or Google — with roles and per-client access still enforced by DMARC Analyzer itself. <a href="/docs/single-sign-on/" style="color:var(--brand) !important; font-weight:600;">See how it works &rarr;</a></p>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="key-round" style="font-size:18px; color:var(--tint-indigo-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">OIDC single sign-on &amp; RBAC</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Sign in through Entra ID, Okta, Keycloak, Zitadel, Authentik, or Google — roles stay enforced in-app. <a href="/docs/single-sign-on/" style="color:var(--brand) !important; font-weight:600;">See how &rarr;</a></p>
+          </div>
+          <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
+            <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-teal-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="file-text" style="font-size:18px; color:var(--tint-teal-fg);" /></span>
+            <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Full audit trail</h3>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Every sign-in, grant change, and admin action recorded with actor, IP, and timestamp — for two years by default.</p>
           </div>
         </div>
         <div style="margin-top:28px;">
