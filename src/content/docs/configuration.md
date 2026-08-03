@@ -67,6 +67,13 @@ local development — set it explicitly:
 ConnectionStrings__Default=Host=postgres;Port=5432;Database=dmarc_analyzer;Username=postgres;Password=…
 ```
 
+### `DATABASE_URL`
+A `postgres://user:pass@host:port/database` URI, accepted as an alternative to
+`ConnectionStrings__Default` and converted internally — for platforms (Render,
+Heroku, Railway, …) that hand you a managed database as a URI rather than an
+ADO.NET string. Takes priority when both are set. A `sslmode` query parameter is
+honored (`disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`).
+
 ### `Database__MigrateOnStartup`
 `true` in the shipped compose files. When true, the API applies pending EF Core
 migrations as it boots.
