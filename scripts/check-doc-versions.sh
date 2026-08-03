@@ -40,7 +40,7 @@ older_than() {
 # Deliberately historical references are not staleness. "On 0.2.1 and earlier this
 # was a bug" must keep naming 0.2.1 — bumping it would make the sentence false. The
 # app repo's VersionReferenceTests carves out the same cases for the same reason.
-HISTORICAL='(and|or) earlier|was a bug|releases/tag/v|previous release|superseded|upgrading fixes'
+HISTORICAL='(and|or) earlier|was a bug|releases/tag/v|previous release|superseded|upgrading fixes|since [0-9]'
 
 fail=0
 while IFS=: read -r file line text; do
