@@ -19,8 +19,10 @@ The important design point: **authentication is pluggable, authorisation never i
 3. Roles and client access come from DMARC Analyzer's own records, not from the
    token.
 
-So local passwords and SSO are interchangeable front doors, and you can enable SSO
-without migrating existing accounts. Your provider never controls who is an admin.
+So local passwords and SSO are interchangeable front doors by default, and you can
+enable SSO without migrating existing accounts. Your provider never controls who
+is an admin. Local login can be turned off entirely once SSO is working — see
+[Requiring SSO for everyone](#requiring-sso-for-everyone) below.
 
 ## Register the application
 
@@ -87,10 +89,28 @@ Enforcement is deny-by-default, and a request for another tenant's data returns
 **404** rather than 403 — deliberately, so the API never reveals that a resource
 exists.
 
+## Requiring SSO for everyone
+
+```yaml
+environment:
+  Auth__Oidc__DisableLocalLogin: "true"
+```
+
+Turns off password sign-in (`/api/v1/auth/login` refuses with 403) and has the
+login page skip straight to your provider instead of showing a form with nothing
+usable on it.
+
+Registration is unaffected — it already refuses itself once the first account
+exists, so bootstrapping a fresh instance still works locally. The intended order
+is: bootstrap the first admin locally (or via `AutoProvision`), confirm SSO works,
+*then* turn this on. Setting it without `Auth__Oidc__Enabled` is refused at
+startup, since that combination would leave no way to sign in at all.
+
 ## Keep a local admin
 
-Leave at least one local password account with `agency_admin`. If your provider or
-its configuration breaks, that's how you get back in.
+Leave at least one local password account with `agency_admin`, unless you've
+deliberately turned on `DisableLocalLogin` above. If your provider or its
+configuration breaks, that local account is how you get back in.
 
 ## Testing locally
 
