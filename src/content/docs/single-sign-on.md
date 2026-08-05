@@ -1,8 +1,8 @@
 ---
 title: Single sign-on (OIDC)
 description: Let operators sign in with your existing identity provider over OIDC, alongside or instead of local passwords, with roles still enforced in-app.
-section: Configuration
-order: 3
+section: Single sign-on
+order: 1
 ---
 
 DMARC Analyzer can authenticate operators against any OpenID Connect provider —
@@ -24,11 +24,26 @@ enable SSO without migrating existing accounts. Your provider never controls who
 is an admin. Local login can be turned off entirely once SSO is working — see
 [Requiring SSO for everyone](#requiring-sso-for-everyone) below.
 
+## Per-provider guides
+
+The steps below are generic and enough for any OpenID Connect provider. For one
+walked through screen by screen:
+
+- [Microsoft Entra ID](/docs/entra-id/)
+
+More to follow.
+
 ## Register the application
 
 In your identity provider, create a web client — confidential with a secret, or a
 public client using PKCE. The app always uses PKCE and only sends a client secret
-if you configure one, so either works.
+if you configure one, so either usually works.
+
+**Some providers insist on a secret** and refuse the token exchange without one,
+however PKCE is configured. Microsoft Entra ID is one: a redirect URI registered
+under its *Web* platform is a confidential client by definition. A callback
+failing with `AADSTS7000218`, or any "client_secret required" error, is the
+provider telling you so.
 
 - **Redirect URI**: `https://dmarc.example.com/api/v1/auth/oidc/callback`
 - **Scopes**: `openid`, `profile`, `email`
