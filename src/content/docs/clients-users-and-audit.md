@@ -36,10 +36,17 @@ clients.
 | `agency_analyst` | The working screens — analytics, clients, mailboxes, notifications, alert triage — but no user admin |
 | `client_viewer` | Dashboard, Domains, Threats and Alerts, read-only, **only for granted clients** |
 
-Creating a user takes a display name, email, role and a password of at least
-ten characters. For a `client_viewer`, the edit dialog has the checkbox list of
+Creating a user takes a display name, email, role and, optionally, a password
+of at least ten characters. Leave the password out and the account has no
+password door at all — only [SSO](/docs/single-sign-on/) reaches it, which is
+how you pick a passwordless user's role up front instead of everyone landing
+on `DefaultRole` through auto-provisioning. The Users list has a Sign-in
+column — `Password`, `<provider> only`, or a warning badge if a passwordless
+account exists with no SSO provider configured, since it would then have no
+way in at all. For a `client_viewer`, the edit dialog has the checkbox list of
 client grants — no grants means they sign in and see nothing, so grant first,
-share credentials second. Admins reset passwords from the same dialog.
+share credentials second. Admins reset passwords from the same dialog,
+including adding one to a previously passwordless account.
 
 Deactivating an account (same dialog) is usually the better call over deleting
 it — audit history stays attributable to a name rather than a row that no
