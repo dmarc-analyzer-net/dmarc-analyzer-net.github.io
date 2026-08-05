@@ -291,10 +291,11 @@ Off by default; see [single sign-on](/docs/single-sign-on/) for a worked example
 | `Auth__Oidc__AutoProvision` | `false` | Create a local user on first successful SSO login. |
 | `Auth__Oidc__DefaultRole` | `client_viewer` | Role given to auto-provisioned users. Deliberately the least privileged. |
 | `Auth__Oidc__RequireHttpsMetadata` | `true` | Only set `false` against a local test IdP over HTTP. |
+| `Auth__Oidc__DisableLocalLogin` | `false` | Turn off password sign-in and redirect the login page straight to this provider. Requires `Enabled=true`. See [requiring SSO for everyone](/docs/single-sign-on/#requiring-sso-for-everyone). |
 
-Local passwords and OIDC are interchangeable front doors — both mint the same
-application session, and **authorisation is always evaluated in-app**, never
-delegated to the identity provider.
+Local passwords and OIDC are interchangeable front doors by default — both mint
+the same application session, and **authorisation is always evaluated in-app**,
+never delegated to the identity provider.
 
 ## Logging
 
