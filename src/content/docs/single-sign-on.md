@@ -29,7 +29,8 @@ is an admin. Local login can be turned off entirely once SSO is working — see
 The steps below are generic and enough for any OpenID Connect provider. For one
 walked through screen by screen:
 
-- [Microsoft Entra ID](/docs/entra-id/)
+- [Microsoft Entra ID](/docs/single-sign-on/entra-id/) — needs a client secret
+- [Zitadel](/docs/single-sign-on/zitadel/) — PKCE, with no secret to store
 
 More to follow.
 
@@ -80,21 +81,33 @@ reference](/docs/configuration/#single-sign-on-oidc).
 > the one place where that setting is required rather than merely advisable — see
 > [running behind a reverse proxy](/docs/reverse-proxy/).
 
-## Linking and provisioning
+## The first sign-in
 
-- An SSO identity is linked to a local user by **verified email**. If someone
-  already has a local account with that address, their first SSO login attaches to
-  it rather than creating a duplicate.
-- With `AutoProvision=false` (the default), someone with no matching account is
-  refused — you invite operators explicitly. This is the safer setting for an
-  agency install. Create their account ahead of time in
-  [Users](/docs/clients-users-and-audit/#users-and-roles) with no password set,
-  picking their role yourself rather than leaving everyone on `DefaultRole` —
-  their first SSO login links to it by verified email, same as any other
-  pre-existing account.
-- With `AutoProvision=true`, a new user is created with `DefaultRole`, which
-  defaults to `client_viewer` — the least privileged role, with no client access
-  until an admin grants it. Promote deliberately.
+What happens the first time someone arrives from your provider depends on one
+setting, and the two paths suit different situations.
+
+**`AutoProvision=false`** (the default) refuses anyone with no existing account,
+rather than letting them in at some default role. So create the accounts first,
+in [Users](/docs/clients-users-and-audit/#users-and-roles), leaving the password
+empty — that stores no password at all, so the account opens only by SSO. Their
+first login attaches to it by verified email. This is the safer setting for an
+agency install, and it is how you pick each person's role up front instead of
+promoting them afterwards.
+
+**`AutoProvision=true`** creates an account on the spot at
+`Auth__Oidc__DefaultRole`, which defaults to `client_viewer` — the least
+privileged role, with no client access until an admin grants it. Convenient for a
+first test; worth turning off once you are done.
+
+Either way:
+
+- An SSO identity links to a local user by **verified email**. Someone who
+  already has a local account at that address gets it attached rather than
+  duplicated, and an *unverified* address is refused, so it cannot be used to
+  take over an account.
+- Returning users are matched on issuer and subject, not email, so a later email
+  change at the provider does not strand the account or create a second one.
+- Keep one local `agency_admin` password as the way back in — see [below](#keep-a-local-admin).
 
 ## Roles
 

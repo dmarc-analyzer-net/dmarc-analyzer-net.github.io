@@ -278,7 +278,10 @@ for the operational side, including why bucket versioning matters.
 
 ## Single sign-on (OIDC)
 
-Off by default; see [single sign-on](/docs/single-sign-on/) for a worked example.
+Off by default; see [single sign-on](/docs/single-sign-on/) for how it fits
+together, or a provider walked through screen by screen:
+[Microsoft Entra ID](/docs/single-sign-on/entra-id/), which requires
+`ClientSecret`, and [Zitadel](/docs/single-sign-on/zitadel/), which issues none.
 
 | Variable | Default | What it does |
 |---|---|---|
