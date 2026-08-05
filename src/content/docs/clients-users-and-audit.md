@@ -39,8 +39,15 @@ clients.
 Creating a user takes a display name, email, role and a password of at least
 ten characters. For a `client_viewer`, the edit dialog has the checkbox list of
 client grants — no grants means they sign in and see nothing, so grant first,
-share credentials second. Admins reset passwords from the same dialog, and
-deactivate accounts rather than deleting them (audit history stays attributable).
+share credentials second. Admins reset passwords from the same dialog.
+
+Deactivating an account (same dialog) is usually the better call over deleting
+it — audit history stays attributable to a name rather than a row that no
+longer exists. Delete is there for when you actually want the account gone:
+it refuses to remove your own account or the last active `agency_admin`, and
+their sessions, SSO identity links, and client grants are removed with them —
+audit entries are not, they keep the email on record independently of whether
+the account still exists.
 
 Two habits worth keeping: give clients `client_viewer` and promote deliberately
 — cross-tenant requests 404 by design, so a viewer cannot enumerate other
