@@ -68,7 +68,7 @@ Tracking `latest` means you get changes whenever you pull. To control that, pin 
 version tag in `compose.yml`:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.4.0
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.5.0
 ```
 
 Then upgrading is an explicit edit. Available tags: `latest`, `sha-<commit>`, and
@@ -117,7 +117,10 @@ migration the schema was on, how many report rows were left out, which clients
 are on legal hold, and a fingerprint of the encryption key that protected the
 mailbox credentials inside. The fingerprint is the one that earns its place in a
 recovery: it answers "do I hold the right key for this file?" *before* you import
-it, rather than at the first failed mailbox sync afterwards.
+it, rather than at the first failed mailbox sync afterwards. A mismatch is a
+warning you acknowledge, not a dead end — the rest of the artifact still
+imports, and the console tells you afterward which mailbox sources need their
+password re-entered by hand.
 
 > **This is a credential file, not a config file.** It carries encrypted mailbox
 > passwords and password hashes, so handle it as you would a database dump. With
