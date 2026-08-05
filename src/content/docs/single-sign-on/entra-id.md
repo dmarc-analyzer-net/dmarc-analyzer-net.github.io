@@ -29,7 +29,7 @@ Throughout, `dmarc-analyzer.agency.tld` stands in for your own hostname.
 In the [Entra admin center](https://entra.microsoft.com), go to **Entra ID → App
 registrations → New registration**.
 
-<img src="/docs/entra-id/01-register-an-application.webp" alt="Entra's Register an application form, with the name dmarc-analyzer, single-tenant selected, and a Web platform redirect URI ending in /api/v1/auth/oidc/callback" width="760" height="364" loading="lazy" />
+<img src="/docs/single-sign-on/entra-id/01-register-an-application.webp" alt="Entra's Register an application form, with the name dmarc-analyzer, single-tenant selected, and a Web platform redirect URI ending in /api/v1/auth/oidc/callback" width="841" height="431" loading="lazy" />
 
 - **Name** — `dmarc-analyzer`, or whatever your operators should see on the
   consent screen.
@@ -49,11 +49,16 @@ The path ends in `/callback`. You may also see `/api/v1/auth/oidc/complete` in
 logs or the address bar — that is an internal hop *after* Entra has returned, and
 registering it here produces a `redirect_uri` mismatch.
 
+Afterwards the **Authentication** blade lists what you registered. One Web entry
+is all this needs:
+
+<img src="/docs/single-sign-on/entra-id/03-redirect-uri.webp" alt="The Authentication blade's Redirect URI configuration tab, listing a single Web platform entry ending in /api/v1/auth/oidc/callback" width="761" height="321" loading="lazy" />
+
 ## Copy the client and tenant IDs
 
 The **Overview** blade has both values the app needs.
 
-<img src="/docs/entra-id/02-overview-ids.webp" alt="The Overview Essentials panel showing Application (client) ID and Directory (tenant) ID, with placeholder GUIDs" width="650" height="220" loading="lazy" />
+<img src="/docs/single-sign-on/entra-id/02-overview-ids.webp" alt="The Overview Essentials panel showing Application (client) ID and Directory (tenant) ID, with placeholder GUIDs" width="751" height="255" loading="lazy" />
 
 - **Application (client) ID** → `Auth__Oidc__ClientId`
 - **Directory (tenant) ID** → goes into the authority URL:
@@ -75,11 +80,15 @@ the token exchange no matter what else is configured — PKCE, which the app
 always uses, does not remove the requirement. Without a secret the login fails
 with `AADSTS7000218`.
 
+This is where Entra differs from a provider like
+[Zitadel](/docs/single-sign-on/zitadel/), which will tell you outright that no
+secret exists for a PKCE client.
+
 Go to **Certificates & secrets → Client secrets → New client secret**.
 
-<img src="/docs/entra-id/04-add-client-secret.webp" alt="The Add a client secret panel, with a description and an expiry dropdown set to the recommended 180 days" width="490" height="120" loading="lazy" />
+<img src="/docs/single-sign-on/entra-id/05-add-client-secret.webp" alt="The Add a client secret panel, with a description and an expiry dropdown set to the recommended 180 days" width="560" height="145" loading="lazy" />
 
-<img src="/docs/entra-id/05-client-secret-created.webp" alt="The client secrets list showing one secret with its value and secret ID, both redacted" width="655" height="175" loading="lazy" />
+<img src="/docs/single-sign-on/entra-id/06-client-secret-created.webp" alt="The client secrets list showing one secret with its value masked, alongside its expiry date and secret ID" width="761" height="201" loading="lazy" />
 
 **Copy the value immediately.** Entra shows it once; navigate away and it is
 gone and you must create another. Put it straight into wherever your deployment
@@ -94,7 +103,7 @@ and prefer a certificate over a secret if you have the tooling for it.
 Under **Authentication → Settings**, leave **Allow public client flows**
 disabled.
 
-<img src="/docs/entra-id/03-authentication-settings.webp" alt="Authentication Settings tab with implicit grant checkboxes cleared and Allow public client flows disabled" width="660" height="290" loading="lazy" />
+<img src="/docs/single-sign-on/entra-id/04-auth-settings.webp" alt="Authentication Settings tab with implicit grant checkboxes cleared and Allow public client flows disabled" width="761" height="376" loading="lazy" />
 
 It is tempting when you would rather not manage a secret, but it enables
 device-code and other native-app flows; it does not make a Web-platform
@@ -117,27 +126,13 @@ environment:
 it. Full option list in the [configuration
 reference](/docs/configuration/#single-sign-on-oidc).
 
-Restart, and the login page gains the button.
+Restart and the login page gains the button. What happens on the [first
+sign-in](/docs/single-sign-on/#the-first-sign-in) is the same for every provider.
 
 > **Behind a reverse proxy, set `Network__UseForwardedHeaders`.** The app builds
 > its redirect URI from the incoming request, and without a trust list it does
 > not believe `X-Forwarded-Proto` — so it sends `http://` to Entra, which
 > refuses it. See [running behind a reverse proxy](/docs/reverse-proxy/).
-
-## The first sign-in
-
-With `AutoProvision=false` above, someone with no existing account is refused
-rather than let in at a default role. So create the accounts first, in
-[Users](/docs/clients-users-and-audit/#users-and-roles), leaving the password
-empty — that stores no password at all, so the account opens only by SSO. Their
-first Entra login attaches to it by verified email.
-
-Turn `AutoProvision` on instead and the first person through the door gets an
-account at `Auth__Oidc__DefaultRole`, which defaults to the least-privileged
-`client_viewer`. Convenient for a first test, worth turning off afterwards.
-
-Either way, keep one local `agency_admin` password as the way back in if the
-provider or its secret ever breaks.
 
 ## Troubleshooting
 

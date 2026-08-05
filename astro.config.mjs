@@ -25,6 +25,14 @@ export default defineConfig({
   site: 'https://dmarc-analyzer.net',
   trailingSlash: 'always',
   integrations: [sitemap(), mdx()],
+  // The Entra guide shipped at /docs/entra-id/ before the per-provider pages were
+  // nested under the SSO hub. On a static build Astro emits this as a
+  // meta-refresh page whose canonical points at the new URL — enough for a path
+  // that was live for an afternoon, and cheaper than leaving it 404ing. Every
+  // internal link already uses the new URL, so none of them spends a hop here.
+  redirects: {
+    '/docs/entra-id/': '/docs/single-sign-on/entra-id/',
+  },
   // Dev-server only: Vite blocks Host headers not in its allowlist. When
   // previewing over SSH via a hostname (see AGENTS.md), pass the host(s) in
   // DEV_ALLOWED_HOSTS (comma-separated) so no internal hostname is committed.
