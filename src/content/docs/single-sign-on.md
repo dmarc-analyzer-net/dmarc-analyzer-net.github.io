@@ -72,7 +72,11 @@ reference](/docs/configuration/#single-sign-on-oidc).
   it rather than creating a duplicate.
 - With `AutoProvision=false` (the default), someone with no matching account is
   refused — you invite operators explicitly. This is the safer setting for an
-  agency install.
+  agency install. Create their account ahead of time in
+  [Users](/docs/clients-users-and-audit/#users-and-roles) with no password set,
+  picking their role yourself rather than leaving everyone on `DefaultRole` —
+  their first SSO login links to it by verified email, same as any other
+  pre-existing account.
 - With `AutoProvision=true`, a new user is created with `DefaultRole`, which
   defaults to `client_viewer` — the least privileged role, with no client access
   until an admin grants it. Promote deliberately.
