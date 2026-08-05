@@ -15,6 +15,9 @@ export const DOCS_SECTIONS = [
   'Getting started',
   'Using the console',
   'Configuration',
+  // One page per identity provider, after the general Configuration pages and
+  // before Operations: you configure SSO while setting up, not while running.
+  'Single sign-on',
   'Operations',
 ] as const;
 
