@@ -908,4 +908,6 @@ inferred. What follows is what that found and what it left.
       as `.mdx` so far; the rest stay plain Markdown until a page needs a component.
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
 - [ ] (todo) **Add a blog/changelog collection** to announce releases and roadmap progress.
+- [ ] (todo) **Cross-post blog posts to dev.to** for backlink/distribution reach once the blog collection exists. dev.to supports canonical URLs, so posts there should point back at the site's version to avoid duplicate-content dilution.
+- [ ] (todo) **Get links from https://hn.svelte.dev/ to our site.**
 - [ ] (todo) **Add RFC overview and per-RFC pages** under `/rfc` — email RFCs (7489, 7208, 6376, etc.) with what each covers and how they relate to DMARC setup. `rfc` queries carry real volume (e.g. `rfc 5322` at 590/mo, KD 20) and we have authority to write this content.
