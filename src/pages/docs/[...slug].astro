@@ -27,6 +27,25 @@ const path = `/docs/${entry.id}/`;
 const image = `/open-graph/docs/${entry.id}.png`;
 const showToc = hasToc(headings, { maxDepth: 3 });
 
+// Walk `parent` up to Home > Docs > ... so a nested page's breadcrumb (and its
+// BreadcrumbList JSON-LD) matches the depth DocsSidebar already nests it at,
+// instead of the two silently drifting the way they did before this existed.
+const byId = new Map(ordered.map((e) => [e.id, e]));
+const ancestors = [];
+const seenIds = new Set();
+let ancestor = entry.data.parent ? byId.get(entry.data.parent) : undefined;
+while (ancestor && !seenIds.has(ancestor.id)) {
+  ancestors.unshift(ancestor);
+  seenIds.add(ancestor.id);
+  ancestor = ancestor.data.parent ? byId.get(ancestor.data.parent) : undefined;
+}
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Docs', href: '/docs/' },
+  ...ancestors.map((a) => ({ label: a.data.title, href: `/docs/${a.id}/` })),
+  { label: entry.data.title, href: path },
+];
+
 // Prev/next within the reading sequence (section, then order).
 
 const sequence = [...ordered].sort((a, b) => {
@@ -52,11 +71,7 @@ const schema = {
   <JsonLd slot="head" schema={schema} />
     <div class="docs-shell" style={`max-width:${showToc ? 1280 : 1160}px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;`}>
       <article style="min-width:0; order:2;">
-        <Breadcrumbs items={[
-          { label: 'Home', href: '/' },
-          { label: 'Docs', href: '/docs/' },
-          { label: entry.data.title, href: path },
-        ]} />
+        <Breadcrumbs items={breadcrumbItems} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-3xl); line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
         <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
 
