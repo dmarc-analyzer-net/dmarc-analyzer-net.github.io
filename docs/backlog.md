@@ -907,4 +907,5 @@ inferred. What follows is what that found and what it left.
       pinned to 4.x because the `latest` tag peers on Astro 7. One guide is authored
       as `.mdx` so far; the rest stay plain Markdown until a page needs a component.
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
-- [ ] (todo) Add a blog/changelog collection to announce releases and roadmap progress.
+- [ ] (todo) **Add a blog/changelog collection** to announce releases and roadmap progress.
+- [ ] (todo) **Add RFC overview and per-RFC pages** under `/rfc` — email RFCs (7489, 7208, 6376, etc.) with what each covers and how they relate to DMARC setup. `rfc` queries carry real volume (e.g. `rfc 5322` at 590/mo, KD 20) and we have authority to write this content.
