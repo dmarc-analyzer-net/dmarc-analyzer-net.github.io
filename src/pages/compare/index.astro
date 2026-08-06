@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Icon from '../../components/Icon.astro';
 import Cta from '../../components/Cta.astro';
 
@@ -20,7 +21,11 @@ export const description =
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
-        <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:14px;">Compare</div>
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Compare', href: '/compare/' },
+        ]} />
+        <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">Compare</div>
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:740px;">Honest comparisons — hosting, pricing, and who owns your data.</h1>
         <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Most commercial DMARC platforms are vendor-hosted and priced per domain. Here's how a self-hosted, open-source analyzer stacks up against each — and where each alternative genuinely fits.</p>
       </div>
