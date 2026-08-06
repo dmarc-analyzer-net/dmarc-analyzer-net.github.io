@@ -280,9 +280,10 @@ for the operational side, including why bucket versioning matters.
 
 Off by default; see [single sign-on](/docs/single-sign-on/) for how it fits
 together, or a provider walked through screen by screen:
-[Microsoft Entra ID](/docs/single-sign-on/entra-id/), which requires
-`ClientSecret`; [Zitadel](/docs/single-sign-on/zitadel/); and
-[Keycloak](/docs/single-sign-on/keycloak/) — the latter two issue none.
+[Microsoft Entra ID](/docs/single-sign-on/entra-id/) and
+[Authentik](/docs/single-sign-on/authentik/), which need a `ClientSecret`; and
+[Zitadel](/docs/single-sign-on/zitadel/) and
+[Keycloak](/docs/single-sign-on/keycloak/), which issue none.
 
 | Variable | Default | What it does |
 |---|---|---|
