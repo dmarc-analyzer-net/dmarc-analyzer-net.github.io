@@ -31,6 +31,7 @@ walked through screen by screen:
 
 - [Microsoft Entra ID](/docs/single-sign-on/entra-id/) — needs a client secret
 - [Zitadel](/docs/single-sign-on/zitadel/) — PKCE, with no secret to store
+- [Keycloak](/docs/single-sign-on/keycloak/) — PKCE, with one default worth overriding
 
 More to follow.
 
