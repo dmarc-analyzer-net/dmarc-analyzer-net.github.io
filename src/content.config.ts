@@ -96,6 +96,13 @@ const docs = defineCollection({
     description: z.string().min(50).max(160),
     section: z.enum(DOCS_SECTIONS),
     order: z.number(),
+    /**
+     * Slug of another docs entry this one nests under in the sidebar only —
+     * reading order (`section`/`order`), the URL, and every other listing are
+     * unaffected. For a family of otherwise-flat pages, e.g. one per identity
+     * provider under a shared "Single sign-on" page.
+     */
+    parent: z.string().optional(),
     draft: z.boolean().default(false),
   }).refine(titleBudget(38), { message: budgetMessage(38) }),
 });

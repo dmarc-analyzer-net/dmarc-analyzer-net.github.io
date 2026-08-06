@@ -1,8 +1,9 @@
 ---
 title: Microsoft Entra ID
 description: Set up SSO with Microsoft Entra ID — register the app, add the client secret Entra requires, and get the redirect URI right first time.
-section: Single sign-on
-order: 2
+section: Configuration
+order: 5
+parent: single-sign-on
 ---
 
 Sign operators in with their Microsoft work accounts, while DMARC Analyzer keeps
