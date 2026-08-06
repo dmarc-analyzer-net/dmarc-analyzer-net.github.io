@@ -1,8 +1,9 @@
 ---
 title: Zitadel
 description: Set up SSO with Zitadel — a PKCE app with no client secret to store, rotate or leak, walked through the v4 console screen by screen.
-section: Single sign-on
-order: 3
+section: Configuration
+order: 6
+parent: single-sign-on
 ---
 
 Zitadel is open source and self-hostable, which makes it a natural fit if you are

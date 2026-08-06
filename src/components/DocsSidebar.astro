@@ -5,6 +5,11 @@ import { DOCS_SECTIONS } from '../lib/docs';
 // Persistent docs navigation, grouped by `section` and ordered by `order`.
 // Section order is fixed here rather than alphabetical so the docs read as a
 // sequence (install -> configure -> operate).
+//
+// Within a section, a page can nest under another via `parent` (its slug) —
+// e.g. one page per identity provider under a shared "Single sign-on" page.
+// That only changes this tree; reading order and every other listing still
+// come from plain `section`/`order`, unaware nesting exists.
 
 interface Props {
   /** Slug of the page being viewed, so it can be marked current. */
@@ -13,12 +18,26 @@ interface Props {
 const { current } = Astro.props;
 
 const entries = await getCollection('docs', ({ data }) => !data.draft);
-const sections = DOCS_SECTIONS.map((section) => ({
-  section,
-  items: entries
+const sections = DOCS_SECTIONS.map((section) => {
+  const items = entries
     .filter((e) => e.data.section === section)
-    .sort((a, b) => a.data.order - b.data.order),
-})).filter((s) => s.items.length > 0);
+    .sort((a, b) => a.data.order - b.data.order);
+  // A `parent` only nests visually if it resolves to a sibling in this same
+  // section — an unresolved or cross-section value is a mistake, and the
+  // page still belongs somewhere, so it falls back to top-level.
+  const ids = new Set(items.map((i) => i.id));
+  return {
+    section,
+    items: items.filter((i) => !i.data.parent || !ids.has(i.data.parent)),
+    childrenOf: (id: string) => items.filter((i) => i.data.parent === id),
+  };
+}).filter((s) => s.items.length > 0);
+
+// Astro's JSX-like syntax is only valid in the template below, not in this
+// frontmatter script, so the shared `<a>` markup can't be a helper function
+// that returns it — only the style string is shared.
+const linkStyle = (active: boolean, nested: boolean) =>
+  `display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? 'var(--teal-600)' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? 'var(--brand)' : 'var(--text-secondary)'} !important; line-height:1.45; ${nested ? 'font-size:13.5px;' : ''}`;
 ---
 <nav aria-label="Documentation" style="font-size:var(--text-base);">
   <a
@@ -35,15 +54,26 @@ const sections = DOCS_SECTIONS.map((section) => ({
       <ul style="list-style:none; margin:0; padding:0; border-left:1px solid var(--border-default);">
         {group.items.map((item) => {
           const active = item.id === current;
+          const children = group.childrenOf(item.id);
           return (
             <li>
-              <a
-                href={`/docs/${item.id}/`}
-                aria-current={active ? 'page' : undefined}
-                style={`display:block; padding:5px 0 5px 14px; margin-left:-1px; border-left:2px solid ${active ? 'var(--teal-600)' : 'transparent'}; font-weight:${active ? 600 : 400}; color:${active ? 'var(--brand)' : 'var(--text-secondary)'} !important; line-height:1.45;`}
-              >
+              <a href={`/docs/${item.id}/`} aria-current={active ? 'page' : undefined} style={linkStyle(active, false)}>
                 {item.data.title}
               </a>
+              {children.length > 0 && (
+                <ul style="list-style:none; margin:0 0 4px 14px; padding:0; border-left:1px solid var(--border-default);">
+                  {children.map((child) => {
+                    const childActive = child.id === current;
+                    return (
+                      <li>
+                        <a href={`/docs/${child.id}/`} aria-current={childActive ? 'page' : undefined} style={linkStyle(childActive, true)}>
+                          {child.data.title}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </li>
           );
         })}
