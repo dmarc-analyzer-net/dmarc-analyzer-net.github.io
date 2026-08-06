@@ -21,7 +21,7 @@ Keycloak's own default leaves one gap worth closing yourself, covered below.
 In the [Keycloak admin console](https://www.keycloak.org/getting-started/getting-started-docker),
 **Manage realms → Create realm**.
 
-<img src="/docs/single-sign-on/keycloak/01-create-realm.webp" alt="Keycloak's Create realm dialog, with the realm name dmarc-analyzer entered" width="673" height="466" loading="lazy" />
+<img src="/docs/single-sign-on/keycloak/01-create-realm.webp" alt="Keycloak's Create realm dialog, with the realm name dmarc-analyzer entered" width="840" height="573" loading="lazy" />
 
 A realm is a fully isolated set of users, clients and roles. Give the app its
 own — `dmarc-analyzer` here — rather than adding its client to `master`,
@@ -34,13 +34,13 @@ steps that matter.
 
 **General settings** — a Client ID and, optionally, a display name:
 
-<img src="/docs/single-sign-on/keycloak/02-create-client-general.webp" alt="Create client wizard, General settings step, with Client ID dmarc-analyzer and Name DMARC Analyzer entered" width="550" height="246" loading="lazy" />
+<img src="/docs/single-sign-on/keycloak/02-create-client-general.webp" alt="Create client wizard, General settings step, with Client type OpenID Connect, Client ID dmarc-analyzer and Name DMARC Analyzer entered" width="745" height="298" loading="lazy" />
 
 **Capability config** — leave **Client authentication** off and **Standard
 flow** checked (that's a public client using the authorization code flow),
 then turn **Require PKCE** on:
 
-<img src="/docs/single-sign-on/keycloak/03-capability-config-pkce.webp" alt="Capability config step with Client authentication off, Standard flow checked, and Require PKCE turned on with PKCE Method set to S256" width="550" height="431" loading="lazy" />
+<img src="/docs/single-sign-on/keycloak/03-capability-config-pkce.webp" alt="Capability config step with Client authentication off, Standard flow checked, and Require PKCE turned on with PKCE Method set to S256" width="745" height="475" loading="lazy" />
 
 **This one default is worth overriding.** Keycloak ships new clients with
 Require PKCE **off**, flagged with its own warning icon, even when Client
@@ -54,7 +54,7 @@ PKCE as its recommended default. Leave **PKCE Method** at `S256`.
 https://dmarc-analyzer.agency.tld/api/v1/auth/oidc/callback
 ```
 
-<img src="/docs/single-sign-on/keycloak/04-redirect-uri.webp" alt="Login settings step with the Valid redirect URIs field containing the callback URL" width="550" height="246" loading="lazy" />
+<img src="/docs/single-sign-on/keycloak/04-redirect-uri.webp" alt="Login settings step with the Valid redirect URIs field containing the callback URL, and Root URL, Home URL, post logout URIs and Web origins all left empty" width="745" height="395" loading="lazy" />
 
 Unlike Zitadel, there is no development-mode flag to enable first — Keycloak
 validates a redirect URI by matching the string you register, `http://`
@@ -65,7 +65,7 @@ included, so nothing extra is needed even for a local test.
 Once created, the client's Settings page shows the ID — and, because it's a
 public client, there is no Credentials tab to check for a secret:
 
-<img src="/docs/single-sign-on/keycloak/05-client-details-no-secret.webp" alt="Client details Settings page, showing tabs Settings, Roles, Client scopes, Sessions, Advanced and Events — no Credentials tab, since this is a public client" width="620" height="355" loading="lazy" />
+<img src="/docs/single-sign-on/keycloak/05-client-details-no-secret.webp" alt="Client details Settings page, showing tabs Settings, Roles, Client scopes, Sessions, Advanced and Events — no Credentials tab, since this is a public client" width="672" height="310" loading="lazy" />
 
 The client ID is not a secret — it travels in every sign-in redirect.
 
