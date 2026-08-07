@@ -30,10 +30,10 @@ The steps below are generic and enough for any OpenID Connect provider. For one
 walked through screen by screen:
 
 - [Microsoft Entra ID](/docs/single-sign-on/entra-id/) — needs a client secret
-- [Zitadel](/docs/single-sign-on/zitadel/) — PKCE, with no secret to store
+- [Google](/docs/single-sign-on/google/) — a secret shown exactly once
 - [Keycloak](/docs/single-sign-on/keycloak/) — PKCE, with one default worth overriding
+- [Zitadel](/docs/single-sign-on/zitadel/) — PKCE, with no secret to store
 - [Authentik](/docs/single-sign-on/authentik/) — two objects to create, and a secret by default
-- [Google](/docs/single-sign-on/google/) — no self-hosted option, and a secret shown exactly once
 
 More to follow.
 

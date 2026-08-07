@@ -2,7 +2,7 @@
 title: Zitadel
 description: Set up SSO with Zitadel — a PKCE app with no client secret to store, rotate or leak, walked through the v4 console screen by screen.
 section: Configuration
-order: 6
+order: 8
 parent: single-sign-on
 ---
 
@@ -14,9 +14,7 @@ Zitadel-specific half.
 The pleasant part: **there is no client secret.** Zitadel's recommended flow for
 a web application is PKCE, which authenticates the request with a one-time hash
 instead of a stored credential. Nothing to keep in a secrets manager, nothing to
-rotate, nothing to leak. Compare
-[Entra ID](/docs/single-sign-on/entra-id/), which refuses the token exchange
-without one.
+rotate, nothing to leak.
 
 Screens below are from the **v4** console. Throughout,
 `dmarc-analyzer.agency.tld` stands in for your own hostname.
