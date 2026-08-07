@@ -68,8 +68,9 @@ The **Overview** blade has both values the app needs.
   https://login.microsoftonline.com/<tenant-id>/v2.0
   ```
 
-Use the `/v2.0` endpoint. The v1.0 issuer advertises different claims and will
-not give you the verified email the app links accounts by.
+Use the `/v2.0` endpoint. The v1.0 issuer advertises different claims, and the
+`xms_edov` claim the [next section](#add-the-optional-claims) turns on is v2.0
+only.
 
 Neither ID is a secret — both travel in every sign-in redirect.
 
@@ -98,6 +99,49 @@ keeps secrets — a Kubernetes Secret, or a file that is not your values file.
 Note the expiry date. A secret has a maximum life of two years and the default
 is six months; when it lapses, every SSO login stops at once. Set a reminder,
 and prefer a certificate over a secret if you have the tooling for it.
+
+## Add the optional claims
+
+**Do not skip this.** Without it, anyone who already has a DMARC Analyzer
+account is refused at their first SSO login, with a message saying their email
+could not be verified — and nothing is wrong with their email.
+
+DMARC Analyzer attaches an SSO login to an existing local account by email, and
+only when the provider vouches for the address. Otherwise a provider that lets
+people type any address into their profile could be used to walk into an
+administrator's account. Most providers answer that with the standard
+`email_verified` claim. **Entra never sends it**, for any account type: the
+attributes behind its `email` claim are editable and not uniformly verified, so
+Microsoft declines to assert what it cannot back.
+
+What Entra offers instead is **`xms_edov`** — "email domain owner verified" —
+which says the address sits in a domain your tenant has proven it owns. DMARC
+Analyzer treats it exactly like `email_verified`.
+
+Go to **Token configuration → Add optional claim**, choose token type **ID**,
+and add both **`email`** and **`xms_edov`**. If `xms_edov` is not in the list,
+add it under **Manage → Manifest**:
+
+```json
+"optionalClaims": {
+  "idToken": [
+    { "name": "email", "essential": false },
+    { "name": "xms_edov", "essential": false }
+  ]
+}
+```
+
+Add `email` even if sign-ins already carry one — without it the app has nothing
+to match an account against and refuses with `no_account`.
+
+> **On 0.8.1 or earlier**, `xms_edov` is ignored and every Entra user with an
+> existing account is refused. Upgrade to **0.9.0**, which is the release that
+> reads it. If you cannot add the optional claim at all — no access to the
+> registration, or a policy against manifest edits — 0.9.0 also has
+> `Auth__Oidc__TrustUnverifiedEmail`, which accepts a provider that says nothing.
+> It still refuses one that says "not verified", and it is only safe on a
+> single-tenant authority like the one above: on `/common`, any tenant anywhere
+> could then assert any address.
 
 ## Leave public client flows off
 
@@ -151,9 +195,23 @@ differ. They must match exactly, including scheme and any trailing path. If the
 app is sending `http://` for an HTTPS site, that is the forwarded-headers
 setting, not Entra.
 
+**"Your identity provider did not say whether this email address is verified"**
+— Entra sent no `email_verified` and no `xms_edov`, so the app would not open an
+existing account on an address nobody vouched for. Add the [optional
+claims](#add-the-optional-claims). The server log names both claims it looked
+for. On 0.8.1 or earlier this appears as *"your email address is not verified"*
+instead, which sends you looking at the mailbox; nothing is wrong with the
+mailbox.
+
+**"Your identity provider reports this email address as unverified"** — a real
+denial, not silence: `xms_edov` came back `false`, meaning the address is in a
+domain your tenant has not proven it owns. Verify the domain in Entra.
+`Auth__Oidc__TrustUnverifiedEmail` deliberately does not override this.
+
 **`no_account`** — authentication succeeded but no local user matched, with
 `AutoProvision=false`. Create the account first, using the same address Entra
-holds.
+holds. If Entra is sending no `email` claim at all, every login lands here — add
+it as an [optional claim](#add-the-optional-claims).
 
 **The button never appears** — `Auth__Oidc__Enabled` is not `true`, or the app
 did not restart. Check `GET /api/v1/auth/providers`.

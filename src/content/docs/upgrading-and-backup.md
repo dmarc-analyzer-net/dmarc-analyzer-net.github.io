@@ -68,7 +68,7 @@ Tracking `latest` means you get changes whenever you pull. To control that, pin 
 version tag in `compose.yml`:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.8.1
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.9.0
 ```
 
 Then upgrading is an explicit edit. Available tags: `latest`, `sha-<commit>`, and
