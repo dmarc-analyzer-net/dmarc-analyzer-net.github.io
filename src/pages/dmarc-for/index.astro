@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Icon from '../../components/Icon.astro';
 
 const providers = (await getCollection('providers', ({ data }) => !data.draft)).sort(
@@ -19,7 +20,11 @@ export const description =
 >
     <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
       <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
-        <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:14px;">DMARC setup</div>
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'DMARC setup', href: '/dmarc-for/' },
+        ]} />
+        <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">DMARC setup</div>
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">Set up SPF, DKIM & DMARC for your provider.</h1>
         <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:620px;">Exact records and steps for each email platform — including where each one sends reports from and the gotchas that quietly break authentication.</p>
       </div>
