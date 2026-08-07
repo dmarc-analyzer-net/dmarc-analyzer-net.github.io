@@ -33,6 +33,7 @@ walked through screen by screen:
 - [Zitadel](/docs/single-sign-on/zitadel/) — PKCE, with no secret to store
 - [Keycloak](/docs/single-sign-on/keycloak/) — PKCE, with one default worth overriding
 - [Authentik](/docs/single-sign-on/authentik/) — two objects to create, and a secret by default
+- [Google](/docs/single-sign-on/google/) — no self-hosted option, and a secret shown exactly once
 
 More to follow.
 
