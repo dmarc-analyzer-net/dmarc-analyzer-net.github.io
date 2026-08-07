@@ -296,6 +296,7 @@ together, or a provider walked through screen by screen:
 | `Auth__Oidc__Scopes` | `openid profile email` | Requested scopes. |
 | `Auth__Oidc__DisplayName` | `SSO` | Label on the login button. |
 | `Auth__Oidc__AutoProvision` | `false` | Create a local user on first successful SSO login. |
+| `Auth__Oidc__TrustUnverifiedEmail` | `false` | Link a login to an existing account when the provider asserts *nothing* about the address. For [Entra ID](/docs/single-sign-on/entra-id/#add-the-optional-claims), which sends no `email_verified` claim. Does not override a provider that answers "not verified". Leave off unless the provider's addresses are administered. *(0.9.0 or newer.)* |
 | `Auth__Oidc__DefaultRole` | `client_viewer` | Role given to auto-provisioned users. Deliberately the least privileged. |
 | `Auth__Oidc__RequireHttpsMetadata` | `true` | Only set `false` against a local test IdP over HTTP. |
 | `Auth__Oidc__DisableLocalLogin` | `false` | Turn off password sign-in and redirect the login page straight to this provider. Requires `Enabled=true`. See [requiring SSO for everyone](/docs/single-sign-on/#requiring-sso-for-everyone). |
