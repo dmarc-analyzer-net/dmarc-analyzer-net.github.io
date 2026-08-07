@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import PageDates from '../../components/PageDates.astro';
 import Toc from '../../components/Toc.astro';
 
 export async function getStaticPaths() {
@@ -78,7 +79,8 @@ const schema = {
       <article style="min-width:0; order:2;">
         <Breadcrumbs items={breadcrumbItems} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-3xl); line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
-        <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
+        <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 12px;">{entry.data.description}</p>
+        <PageDates publishDate={entry.data.publishDate} updatedDate={entry.data.updatedDate} />
 
         <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,1fr) 240px;' : undefined}>
           <div class="article-content">

@@ -6,6 +6,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import PageDates from '../../components/PageDates.astro';
 import Toc from '../../components/Toc.astro';
 
 export async function getStaticPaths() {
@@ -55,7 +56,8 @@ const articleSchema = {
         { label: entry.data.provider, href: path },
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
-      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 32px;">{entry.data.description}</p>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 12px;">{entry.data.description}</p>
+      <PageDates publishDate={entry.data.publishDate} updatedDate={entry.data.updatedDate} />
 
       <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,760px) 240px;' : undefined}>
         <div class="article-content">
