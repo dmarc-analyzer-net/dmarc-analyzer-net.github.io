@@ -3,6 +3,8 @@ title: First steps
 description: After installing, set up a client, a domain, and a mailbox source, publish a DMARC record, and learn what to expect as the first reports arrive.
 section: Getting started
 order: 2
+publishDate: 2026-07-25
+updatedDate: 2026-07-27
 ---
 
 You have the console open and an administrator account. This page takes you from

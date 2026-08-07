@@ -3,6 +3,7 @@ title: Investigating threats
 description: What the Threats page counts as a failing source, why not every entry is an attacker, and how to work through the list without breaking legitimate mail.
 section: Using the console
 order: 4
+publishDate: 2026-07-27
 ---
 
 The Threats page lists **every sending source whose mail failed both DKIM and

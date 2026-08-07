@@ -3,6 +3,7 @@ title: Dashboard and domain list
 description: What the four dashboard cards actually count, what "Needs attention" means, and how to read the domain list — including what an em dash is telling you.
 section: Using the console
 order: 2
+publishDate: 2026-07-27
 ---
 
 ## The dashboard

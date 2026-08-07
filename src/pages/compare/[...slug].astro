@@ -5,6 +5,7 @@ import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import Cta from '../../components/Cta.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import PageDates from '../../components/PageDates.astro';
 
 export async function getStaticPaths() {
   const entries = await getCollection('compare', ({ data }) => !data.draft);
@@ -51,7 +52,8 @@ const articleSchema = {
         { label: entry.data.competitor, href: path },
       ]} />
       <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 10px;">{entry.data.title}</h1>
-      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 32px;">{entry.data.description}</p>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 12px;">{entry.data.description}</p>
+      <PageDates publishDate={entry.data.publishDate} updatedDate={entry.data.updatedDate} />
       <div class="prose">
         <Content />
       </div>

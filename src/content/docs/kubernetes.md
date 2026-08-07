@@ -3,6 +3,8 @@ title: Kubernetes
 description: Install DMARC Analyzer with the Helm chart — the same two deployment choices as Compose, a migration Job, secret handling, backup and restore.
 section: Getting started
 order: 4
+publishDate: 2026-07-26
+updatedDate: 2026-08-05
 ---
 
 There is a Helm chart, published as an OCI artifact on every release. It exposes

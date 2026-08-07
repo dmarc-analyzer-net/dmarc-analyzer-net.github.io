@@ -3,6 +3,8 @@ title: Running behind a reverse proxy
 description: Terminate TLS in front of DMARC Analyzer with Caddy, nginx or Traefik — and set the one thing that keeps your audit trail recording real callers.
 section: Configuration
 order: 3
+publishDate: 2026-07-26
+updatedDate: 2026-08-05
 ---
 
 The container speaks plain HTTP on port 8080 and does not terminate TLS. For

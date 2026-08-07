@@ -3,6 +3,8 @@ title: Clients, users and audit
 description: Managing tenants and accounts — retention and legal hold per client, the three roles and per-client grants, the audit trail, and onboarding a client end to end.
 section: Using the console
 order: 6
+publishDate: 2026-07-27
+updatedDate: 2026-08-05
 ---
 
 ## Clients

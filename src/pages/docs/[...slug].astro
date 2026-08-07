@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import DocsSidebar from '../../components/DocsSidebar.astro';
 import JsonLd from '../../components/JsonLd.astro';
+import PageDates from '../../components/PageDates.astro';
 import Toc from '../../components/Toc.astro';
 
 export async function getStaticPaths() {
@@ -56,24 +57,30 @@ const index = sequence.findIndex((e) => e.id === entry.id);
 const prev = index > 0 ? sequence[index - 1] : null;
 const next = index >= 0 && index < sequence.length - 1 ? sequence[index + 1] : null;
 
+const published = entry.data.publishDate.toISOString();
+const modified = (entry.data.updatedDate ?? entry.data.publishDate).toISOString();
+
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
   headline: entry.data.title,
   description: entry.data.description,
   image: new URL(image, Astro.site).href,
+  datePublished: published,
+  dateModified: modified,
   author: { '@type': 'Organization', name: 'DMARC Analyzer' },
   publisher: { '@type': 'Organization', name: 'DMARC Analyzer' },
   mainEntityOfPage: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path} image={image}>
+<BaseLayout current="docs" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer docs`} description={entry.data.description} path={path} image={image} ogType="article" publishedTime={published} modifiedTime={modified}>
   <JsonLd slot="head" schema={schema} />
     <div class="docs-shell" style={`max-width:${showToc ? 1280 : 1160}px; margin:0 auto; padding:32px 32px 72px; display:grid; grid-template-columns:230px minmax(0,1fr); gap:44px; align-items:start;`}>
       <article style="min-width:0; order:2;">
         <Breadcrumbs items={breadcrumbItems} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-3xl); line-height:1.12; letter-spacing:-0.03em; font-weight:600; margin:18px 0 10px;">{entry.data.title}</h1>
-        <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 28px;">{entry.data.description}</p>
+        <p style="font-size:var(--text-lead); line-height:1.5; color:var(--text-faint); margin:0 0 12px;">{entry.data.description}</p>
+        <PageDates publishDate={entry.data.publishDate} updatedDate={entry.data.updatedDate} />
 
         <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,1fr) 240px;' : undefined}>
           <div class="article-content">
