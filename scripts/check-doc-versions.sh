@@ -40,7 +40,12 @@ older_than() {
 # Deliberately historical references are not staleness. "On 0.2.1 and earlier this
 # was a bug" must keep naming 0.2.1 — bumping it would make the sentence false. The
 # app repo's VersionReferenceTests carves out the same cases for the same reason.
-HISTORICAL='(and|or) earlier|was a bug|releases/tag/v|previous release|superseded|upgrading fixes|since [0-9]'
+#
+# "0.7.1 or newer" is the same case pointing the other way: a floor, naming the
+# release a fix landed in. Bumping it would tell someone already running the fix
+# that they need to upgrade. Note this is why a version pin is written bare
+# (`--version 0.8.0`) — that form is an install instruction and must stay current.
+HISTORICAL='(and|or) (earlier|newer)|was a bug|releases/tag/v|previous release|superseded|upgrading fixes|since [0-9]'
 
 fail=0
 while IFS=: read -r file line text; do

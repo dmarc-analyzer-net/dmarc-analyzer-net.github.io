@@ -142,7 +142,7 @@ cookie.** You are on 0.7.0 or earlier. Those versions let the OIDC handler ask
 Entra for a form-post response, which arrives as a cross-site POST that carries
 no `SameSite=Lax` cookie, so the correlation cookie the app set moments earlier
 was never sent back. It reads like a cookie or proxy problem and is neither.
-Upgrade to 0.7.1.
+Upgrade to 0.7.1 or newer.
 
 **`AADSTS7000218`** — no client secret. See [above](#add-a-client-secret).
 
