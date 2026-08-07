@@ -3,6 +3,8 @@ title: Configuration reference
 description: Every environment variable DMARC Analyzer reads — runtime mode, database, encryption key, worker tuning, and OIDC single sign-on — with defaults.
 section: Configuration
 order: 1
+publishDate: 2026-07-25
+updatedDate: 2026-08-07
 ---
 
 Configuration comes from environment variables, and **the same variable means the

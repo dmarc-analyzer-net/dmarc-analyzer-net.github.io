@@ -3,6 +3,7 @@ title: Alerts and notifications
 description: The two alert rules and their thresholds, how triage works, why an alert wasn't emailed, and how recipients and the monthly digest are configured.
 section: Using the console
 order: 5
+publishDate: 2026-07-27
 ---
 
 ## The two rules

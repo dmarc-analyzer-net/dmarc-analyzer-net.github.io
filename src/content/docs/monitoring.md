@@ -3,6 +3,8 @@ title: Monitoring and alerting
 description: What to probe, what to alert on, and the one fact that matters most — the worker has no HTTP surface, so watch the data move, not just the endpoints.
 section: Operations
 order: 4
+publishDate: 2026-07-27
+updatedDate: 2026-08-02
 ---
 
 The app exposes no `/metrics` endpoint and ships no OpenTelemetry today. The

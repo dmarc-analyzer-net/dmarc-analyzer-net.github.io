@@ -3,6 +3,8 @@ title: Domain detail and enforcement
 description: The per-domain drill-down — record inspection, the path-to-enforcement recommendation, and how to diagnose a failing source from its raw authentication results.
 section: Using the console
 order: 3
+publishDate: 2026-07-27
+updatedDate: 2026-07-28
 ---
 
 Open any domain from the list or the dashboard and you get the drill-down —

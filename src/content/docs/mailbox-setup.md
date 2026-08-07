@@ -3,6 +3,7 @@ title: Connecting a mailbox
 description: Point DMARC Analyzer at the inbox your rua= reports arrive in — IMAP settings, app passwords, how domains are auto-created, and how backfill works.
 section: Configuration
 order: 2
+publishDate: 2026-07-25
 ---
 
 DMARC aggregate reports arrive as email attachments. DMARC Analyzer reads them

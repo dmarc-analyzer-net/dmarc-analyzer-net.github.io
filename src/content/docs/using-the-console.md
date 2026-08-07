@@ -3,6 +3,8 @@ title: Using the console
 description: A tour of the DMARC Analyzer console — every screen, who can see it, how the analytics windows pick their dates, and what the status labels actually mean.
 section: Using the console
 order: 1
+publishDate: 2026-07-27
+updatedDate: 2026-07-28
 ---
 
 The console is what you get after [installing](/docs/install/) and signing in.

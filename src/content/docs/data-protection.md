@@ -3,6 +3,8 @@ title: Data protection and GDPR
 description: What personal data DMARC reports actually contain, where it lives in a self-hosted install, and how retention, legal hold and erasure work in practice.
 section: Operations
 order: 5
+publishDate: 2026-07-27
+updatedDate: 2026-08-02
 ---
 
 DMARC monitoring processes personal data — less than most people fear, more

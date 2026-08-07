@@ -3,6 +3,7 @@ title: Using the API
 description: Script against the same API the console uses — signing in with curl, what each role may call, the response shapes, and the mistyped path that returns 200.
 section: Operations
 order: 6
+publishDate: 2026-08-02
 ---
 
 The console is a client of this API. Every screen it draws comes from an endpoint

@@ -3,6 +3,8 @@ title: Authentik
 description: Set up SSO with Authentik — two objects rather than one, a confidential client by default, and grant types worth trimming before you finish.
 section: Configuration
 order: 8
+publishDate: 2026-08-06
+updatedDate: 2026-08-07
 parent: single-sign-on
 ---
 
