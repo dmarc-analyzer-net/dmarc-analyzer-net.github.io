@@ -67,3 +67,12 @@ Hostnames next to IPs come from reverse DNS (PTR) lookups the server makes on
 demand, batched for the sources on screen — an unresolved name usually means the
 IP has no PTR record, which is itself a signal. Reading the same evidence in the raw XML is covered in [how to read an
 aggregate report](/guides/how-to-read-a-dmarc-aggregate-report/).
+
+## Transport security
+
+Below the sources, the **Transport security** card covers the other half of the
+story — whether mail to this domain travels encrypted. It holds the
+[MTA-STS](/glossary/mta-sts/) monitoring checks, the hosted policy if this
+instance serves one, [TLS-RPT](/glossary/tls-rpt/) failure reporting, and the
+gate that says when enforcement is safe. See [transport
+security](/docs/transport-security/).

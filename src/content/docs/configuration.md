@@ -28,7 +28,7 @@ credential encryption key.
 ## Runtime
 
 ### `APP_MODE`
-What the container is for. The same image serves all four.
+What the container is for. The same image serves all five.
 
 | Value | Runs |
 |---|---|
@@ -36,6 +36,7 @@ What the container is for. The same image serves all four.
 | `api` | HTTP API plus the web console. No polling. |
 | `worker` | Mailbox polling only, no HTTP listener. |
 | `migrate` | Applies pending database migrations and exits. Serves nothing. |
+| `mta-sts` | Serves hosted MTA-STS policy files and health probes only — no console, no API, no auth stack, no worker. For an internet-facing policy host; see [hosting MTA-STS policies](/docs/mta-sts-hosting/). |
 
 Anything else **fails at startup** rather than falling back to `api`. That is
 deliberate: a typo like `APP_MODE=woker` would otherwise give you a container that
@@ -302,6 +303,23 @@ together, or a provider walked through screen by screen:
 Local passwords and OIDC are interchangeable front doors by default — both mint
 the same application session, and **authorisation is always evaluated in-app**,
 never delegated to the identity provider.
+
+## MTA-STS (`MtaSts`)
+
+A background pass checks every domain's [MTA-STS](/glossary/mta-sts/) record and
+policy from the outside in. It needs no configuration to run. The last two keys
+matter only if you also *host* policy files here — see [hosting MTA-STS
+policies](/docs/mta-sts-hosting/).
+
+| Key | Default | What it does |
+|---|---|---|
+| `MtaSts__Enabled` | `true` | Run the check pass and keep per-domain state fresh. |
+| `MtaSts__CheckIntervalHours` | `6` | Gap between passes. |
+| `MtaSts__FetchTimeoutSeconds` | `10` | Total budget for one policy-file fetch, connect included. |
+| `MtaSts__MaxConcurrentChecks` | `4` | Domains checked concurrently during a pass. |
+| `MtaSts__AllowPrivateNetworks` | `false` | Let the policy fetch reach loopback, private and link-local addresses. Off because `mta-sts.<domain>` hostnames derive from operator-entered domains; turn it on only for an instance monitoring intranet mail domains. |
+| `MtaSts__PolicyHost` | *(empty)* | The hostname client CNAMEs point at, shown as the CNAME target in the console's publish instructions. Empty shows a configure-me hint. |
+| `MtaSts__ServeCacheSeconds` | `60` | In-memory TTL and `Cache-Control: max-age` for served policy bodies — also how long a dedicated `mta-sts` container may serve a superseded body after a console edit. |
 
 ## Logging
 
