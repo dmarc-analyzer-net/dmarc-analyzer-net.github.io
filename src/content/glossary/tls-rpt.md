@@ -63,14 +63,15 @@ was never required.
 ## Use a different mailbox from your DMARC reports
 
 TLS reports arrive as mail with an attachment, exactly like aggregate reports, so
-the obvious move is to point both at one inbox. Don't. A TLS-RPT report is not a
-DMARC aggregate report, so anything that reads that mailbox for DMARC data —
-[DMARC Analyzer](/) included — counts it as a
-[parse failure](/docs/troubleshooting/). The count stops meaning "something is
-wrong" and starts meaning "TLS reports arrived again", which is how a real problem
-hides. One mailbox per report type keeps both signals readable.
+the obvious move is to point both at one inbox. Whether that works depends on your
+tooling: a reader that only understands DMARC counts every TLS report as a
+[parse failure](/docs/troubleshooting/), and the count stops meaning "something is
+wrong". [DMARC Analyzer](/) recognises both types in one mailbox and counts them
+separately, so a shared inbox stays readable.
 
 TLS-RPT and MTA-STS are the transport-security story you start *after* DMARC
 reaches enforcement — the two solve different problems, and DMARC is the one that
 stops people sending as you. If you are not there yet, start with
-[monitoring to enforcement](/guides/from-monitoring-to-enforcement/).
+[monitoring to enforcement](/guides/from-monitoring-to-enforcement/). If you are,
+the next step is [MTA-STS: from testing to
+enforce](/guides/mta-sts-testing-to-enforce/).

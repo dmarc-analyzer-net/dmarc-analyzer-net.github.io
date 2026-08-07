@@ -26,7 +26,8 @@ current terms.*
 | History retained | As long as you keep it | 3 months to 3 years, by plan |
 | Your report data | [Stays on your infrastructure](/docs/data-protection/) | Processed in the vendor's cloud |
 | Agencies / many clients | Yes, [self-hosted multi-tenant](/docs/clients-users-and-audit/) | Yes, on paid plans |
-| Wider tool suite (BIMI, MTA-STS, TLS-RPT) | — | Yes |
+| [MTA-STS](/glossary/mta-sts/) and [TLS-RPT](/glossary/tls-rpt/) | Yes | Yes |
+| Wider tool suite (BIMI and more) | — | Yes |
 
 ## Where EasyDMARC fits
 

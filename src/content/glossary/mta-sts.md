@@ -90,4 +90,5 @@ coexist, and large providers support one, the other, or both.
 
 MTA-STS and TLS-RPT are the natural next step after your domain reaches DMARC
 enforcement — the authentication story is finished, so you move on to the
-transport one.
+transport one. [MTA-STS: from testing to
+enforce](/guides/mta-sts-testing-to-enforce/) walks through the rollout.
