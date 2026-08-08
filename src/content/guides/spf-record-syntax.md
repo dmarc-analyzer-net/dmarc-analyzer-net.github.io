@@ -35,55 +35,203 @@ rollout.
 
 ## Mechanisms
 
-| Mechanism | Matches | Example |
-|---|---|---|
-| `ip4` | An IPv4 address or range | `ip4:198.51.100.0/24` |
-| `ip6` | An IPv6 address or range | `ip6:2001:db8::/32` |
-| `a` | The domain's own A record | `a` or `a:mail.example.com` |
-| `mx` | The domain's MX hosts | `mx` |
-| `include` | Another domain's SPF (e.g. a provider) | `include:_spf.google.com` |
-| `exists` | Whether a name resolves at all, after macro expansion | `exists:%{ir}.spf.example.net` |
-| `all` | Everything — always last | `-all` |
+Eight mechanisms exist. In practice you will write four of them.
 
-Avoid `ptr` — it's slow, unreliable, and deprecated.
+| Mechanism | Matches | DNS lookups | Example |
+|---|---|---|---|
+| [`all`](#the-all-mechanism) | Everything — always last | 0 | `-all` |
+| [`ip4`](#the-ip4-mechanism) | An IPv4 address or range | 0 | `ip4:198.51.100.0/24` |
+| [`ip6`](#the-ip6-mechanism) | An IPv6 address or range | 0 | `ip6:2001:db8::/32` |
+| [`a`](#the-a-mechanism) | The domain's own A/AAAA records | 1 | `a` or `a:mail.yourdomain.com` |
+| [`mx`](#the-mx-mechanism) | The domain's MX hosts | 1 | `mx` |
+| [`include`](#the-include-mechanism) | Another domain's SPF (e.g. a provider) | 1 | `include:_spf.google.com` |
+| [`exists`](#the-exists-mechanism) | Whether a name resolves, after macro expansion | 1 | `exists:%{ir}.spf.yourdomain.com` |
+| [`ptr`](#the-ptr-mechanism) | Reverse DNS of the connecting IP | 1 | `ptr` — **deprecated, don't** |
 
-`exists` is the one most people never meet, and it is worth recognising rather than
-writing: it substitutes values from the connection into a hostname and matches if
-that name resolves, which is how allow-list and reputation services plug into SPF.
-If you find one in a record you inherited, it is deliberate — and it **costs a
-lookup**, which is the part that matters below.
+The lookup column is the one to watch: only `ip4` and `ip6` are free, and the
+total across a record must stay at or below ten. That budget is what
+[counting your lookups](#counting-your-lookups) is about.
+
+### The `all` mechanism
+
+`all` always matches, so it must be the last term in the record — anything after
+it is never evaluated. Its qualifier is what decides the outcome for every sender
+you did not list:
+
+```
+v=spf1 include:_spf.google.com -all
+```
+
+A record without `all` produces a `neutral` result for unlisted senders, which is
+the same as having no opinion. Always end with one.
+
+### The `ip4` mechanism
+
+Authorizes a single IPv4 address or a CIDR range. A bare address is treated as
+`/32`:
+
+```
+v=spf1 ip4:198.51.100.10 ip4:203.0.113.0/24 -all
+```
+
+Costs no DNS lookup, which is why replacing an `include:` with the ranges behind
+it ("flattening") relieves the ten-lookup limit — and why it becomes your problem
+when the provider renumbers.
+
+### The `ip6` mechanism
+
+The same, for IPv6. A bare address is treated as `/128`:
+
+```
+v=spf1 ip6:2001:db8::1 ip6:2001:db8:1000::/36 -all
+```
+
+If your sending hosts have AAAA records, list them. An `ip4:` term can never
+match a host that connected over IPv6 — so a record that lists only IPv4 ranges
+fails for that connection, even though the same host would pass over IPv4.
+`a`, `mx` and `include` are unaffected: they resolve whichever address family
+the connection used.
+
+### The `a` mechanism
+
+Matches if the connecting IP appears in the A (or AAAA) records of the domain.
+Bare `a` means "this domain"; `a:host.yourdomain.com` names another:
+
+```
+v=spf1 a a:mail.yourdomain.com -all
+```
+
+A CIDR suffix widens the match to a network around each resolved address —
+`a:mail.yourdomain.com/24`. Costs one lookup either way. Most records carry `a`
+out of habit; if your web server does not send mail, drop it.
+
+### The `mx` mechanism
+
+Matches if the connecting IP is one of the domain's MX hosts. Convenient when
+your inbound and outbound mail share hosts, and pointless when they don't:
+
+```
+v=spf1 mx -all
+```
+
+`mx` costs one lookup, but it carries a **second, separate limit**: resolving it
+must not require more than ten address lookups. A domain with a dozen MX hosts
+therefore `permerror`s on a single `mx` term, with a term count of one. This is
+the most confusing way an SPF record can fail.
+
+### The `include` mechanism
+
+The workhorse. It evaluates another domain's SPF record and matches if *that*
+record returns a `pass`:
+
+```
+v=spf1 include:_spf.google.com include:sendgrid.net -all
+```
+
+Two details cause most `include` confusion:
+
+- **Only `pass` matches.** If the included record returns fail, softfail or
+  neutral, the `include` simply does not match and evaluation continues to the
+  next term. It does not fail the whole record.
+- **A missing record is fatal.** If the included domain has no SPF record at all,
+  the result is `permerror` — the entire record fails, not just that term. This
+  is how cancelling a service silently breaks a domain months later.
+
+Each `include` costs one lookup, plus every lookup inside the record it fetches.
+
+### The `exists` mechanism
+
+Matches if a hostname resolves to any A record after
+[macro](https://www.rfc-editor.org/rfc/rfc7208#section-7) expansion — `%{i}` is
+the connecting IP, `%{ir}` its reversed form, `%{d}` the domain:
+
+```
+v=spf1 exists:%{ir}.spf.yourdomain.com -all
+```
+
+You are unlikely to write this, and likely to meet it: it is how allow-list and
+reputation services plug into SPF, and how per-sender rules get expressed. If you
+inherit one, it is deliberate. It costs one lookup.
+
+### The `ptr` mechanism
+
+Matches on the reverse DNS of the connecting IP.
+[RFC 7208](https://www.rfc-editor.org/rfc/rfc7208#section-5.5) deprecates it in
+as many words: it is slow, it loads the receiver, and the result depends on
+reverse DNS you do not control. Some receivers skip it entirely.
+
+Do not add it. If you find it in a record you inherited, removing it is usually
+safe and always frees a lookup.
 
 ## Qualifiers
 
-A prefix on a mechanism sets the result when it matches:
+A prefix on a mechanism sets the result when that mechanism matches. `+` is the
+default, so a mechanism with no prefix means pass:
 
-| Qualifier | Meaning | On `all` |
+| Qualifier | Result | On `all` |
 |---|---|---|
 | `+` | Pass (default if omitted) | `+all` — **never do this**, authorizes the world |
 | `-` | Fail (hard) | `-all` — reject everything else (recommended) |
 | `~` | SoftFail | `~all` — mark suspicious but accept (use while testing) |
 | `?` | Neutral | `?all` — no opinion |
 
-Most domains want `-all` once they're confident every real sender is listed;
-`~all` is a safe stepping stone.
+### `-all` vs `~all`
 
-Under DMARC the practical gap between `-all` and `~all` is smaller than it
-looks: both produce an SPF result that fails alignment, and your DMARC policy
-decides what happens next. Get to `-all` anyway — but don't delay a DMARC
-rollout over it.
+This is the decision people agonise over, and under DMARC it matters less than it
+looks. Both produce an SPF result that fails alignment, and your DMARC policy —
+not the SPF qualifier — decides what happens to the message:
+
+```
+v=spf1 include:_spf.google.com ~all    # while you are still finding senders
+v=spf1 include:_spf.google.com -all    # once the list is complete
+```
+
+Use `~all` while you are still discovering senders in your aggregate reports, and
+move to `-all` once nothing legitimate is missing. Get there — but don't hold up a
+DMARC rollout over it.
+
+`+all` deserves its own warning: it authorizes every server on the internet to
+send as your domain. It appears in records where someone was debugging and never
+reverted.
 
 ## Modifiers
 
-Two modifiers are easy to miss because they use `=` rather than `:`:
+Two modifiers are easy to miss because they use `=` rather than `:`, and because
+order does not matter for them — a modifier applies to the whole record wherever
+it sits.
 
 | Modifier | Meaning |
 |---|---|
-| `redirect=` | Replace this record with another domain's entirely. Ignored if an `all` mechanism is present |
-| `exp=` | Names a TXT record with a human-readable explanation for failures |
+| `redirect=` | Replace this record with another domain's entirely |
+| `exp=` | Names a TXT record explaining failures |
 
-`redirect=` is genuinely useful for keeping one SPF record shared across many
-domains — an agency pattern — but it costs a lookup and hides the real record
-one level down.
+### The `redirect=` modifier
+
+Hands evaluation entirely to another domain's SPF record, and returns whatever
+that record returns:
+
+```
+v=spf1 redirect=_spf.yourdomain.com
+```
+
+Genuinely useful for keeping one shared record across many domains — an agency
+pattern, where a single authoritative record covers a client portfolio. Two
+catches: it costs a lookup, and it is **ignored if an `all` mechanism is present**,
+because `all` always matches first. A record ending `-all redirect=…` silently
+does nothing with the redirect.
+
+### The `exp=` modifier
+
+Names a TXT record whose contents are returned to the sender when the record
+produces a `fail`:
+
+```
+v=spf1 include:_spf.google.com exp=why.yourdomain.com -all
+```
+
+The explanation string is macro-expanded, and only used for `fail` — never for
+softfail or neutral. It is a diagnostic nicety, not a control, and most operators
+never set one.
 
 ## The rules that trip people up
 
@@ -92,12 +240,11 @@ one level down.
 - **Ten DNS-lookup limit.** Six terms cost a lookup — `include`, `a`, `mx`,
   `ptr`, `exists` and `redirect` — and the total must stay **≤ 10**. Ten is
   allowed; eleven `permerror`s. Chained providers blow past this fast.
-- **`mx` and `ptr` have their own sub-limits**, which is how a record with a term
-  count of 1 still fails. Evaluating `mx` must not require more than **10 address
-  lookups**, so a domain with a dozen MX hosts `permerror`s on a single `mx` term.
-  The same cap applies to `ptr`, except there the extra records are ignored rather
-  than fatal — the difference being that you control your MX records and not the
-  reverse DNS of whoever is connecting.
+- **[`mx`](#the-mx-mechanism) and [`ptr`](#the-ptr-mechanism) have their own
+  sub-limits**, which is how a record with a term count of 1 still fails: each is
+  capped at **10 address lookups** of its own. Over the cap, `mx` is fatal while
+  `ptr` merely ignores the extras — the difference being that you control your MX
+  records and not the reverse DNS of whoever is connecting.
 - **Two void lookups.** Separately from the limit above, no more than two
   lookups may return an empty answer. A stale `include:` for a service you
   cancelled can `permerror` a record that's otherwise fine.
