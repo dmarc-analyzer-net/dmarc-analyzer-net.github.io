@@ -5,7 +5,8 @@ aliases: ["DomainKeys Identified Mail"]
 related: ["spf", "dmarc", "dmarc-alignment", "dkim-selector", "arc"]
 ---
 
-**DKIM** (DomainKeys Identified Mail) attaches a cryptographic signature to each
+**DKIM** (DomainKeys Identified Mail, [RFC 6376](/rfc/6376/)) attaches a
+cryptographic signature to each
 outgoing message. The signing domain publishes a public key in DNS; the
 receiver uses it to verify the signature.
 

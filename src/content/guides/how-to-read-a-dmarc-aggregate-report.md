@@ -5,7 +5,9 @@ publishDate: 2026-07-15
 ---
 
 [Aggregate reports](/glossary/dmarc-aggregate-report/) are XML, verbose, and
-arrive daily from every mailbox provider. Once you know the shape, though, each
+arrive daily from every mailbox provider. The format is specified by
+[RFC 9990](/rfc/9990/) — split out of the main DMARC document in 2026, so that
+is what to cite in a bug report rather than the older RFC 7489. Once you know the shape, though, each
 one answers a single question: *who sent mail as my domain, and did it
 authenticate?*
 

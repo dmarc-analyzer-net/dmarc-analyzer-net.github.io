@@ -5,8 +5,9 @@ publishDate: 2026-07-23
 ---
 
 An [SPF](/glossary/spf/) record is a single line of DNS that lists who may send
-email for your domain. The syntax is small but unforgiving — one wrong qualifier
-or one record too many and it silently fails. This is the field reference.
+email for your domain. The syntax — specified by [RFC 7208](/rfc/7208/) — is
+small but unforgiving: one wrong qualifier or one record too many and it
+silently fails. This is the field reference.
 
 ## Anatomy of a record
 

@@ -5,7 +5,7 @@ aliases: ["TLS-RPT record", "SMTP TLS Reporting", "TLSRPTv1"]
 related: ["mta-sts", "dmarc-aggregate-report", "dmarc"]
 ---
 
-**TLS-RPT** (SMTP TLS Reporting) is a `TXT` record asking the servers that send
+**TLS-RPT** (SMTP TLS Reporting, [RFC 8460](/rfc/8460/)) is a `TXT` record asking the servers that send
 you mail to report whether their connections to your mail servers were encrypted
 and verified. Like [MTA-STS](/glossary/mta-sts/), and unlike
 [DMARC](/glossary/dmarc/), it is about mail *arriving at* your domain — the

@@ -5,7 +5,8 @@ aliases: ["Authenticated Received Chain", "ARC seal", "ARC headers"]
 related: ["dkim", "dmarc-alignment", "dmarc", "dmarc-aggregate-report"]
 ---
 
-**ARC** (Authenticated Received Chain) is a set of mail headers that a forwarder or
+**ARC** (Authenticated Received Chain, [RFC 8617](/rfc/8617/), and still
+Experimental) is a set of mail headers that a forwarder or
 mailing list adds to record what [SPF](/glossary/spf/) and
 [DKIM](/glossary/dkim/) said *before* it handled the message. The idea is that a
 receiver further down the line can see the message authenticated correctly on
