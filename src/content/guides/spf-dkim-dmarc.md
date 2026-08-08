@@ -129,7 +129,8 @@ Anyone sending **more than 5,000 messages a day** to Gmail accounts must:
   [alignment](/glossary/dmarc-alignment/) is the thing to understand rather than
   SPF and DKIM in isolation.
 - **Offer one-click unsubscribe** on marketing and promotional mail, via the
-  `List-Unsubscribe` headers. Transactional mail is out of scope.
+  `List-Unsubscribe` headers specified in [RFC 8058](/rfc/8058/). Transactional
+  mail is out of scope.
 - **Keep the spam rate below 0.30%** as reported in Postmaster Tools.
 
 Yahoo introduced matching requirements on the same timetable, including the 0.3%

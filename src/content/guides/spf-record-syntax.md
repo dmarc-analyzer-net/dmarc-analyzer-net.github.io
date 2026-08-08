@@ -5,8 +5,9 @@ publishDate: 2026-07-23
 ---
 
 An [SPF](/glossary/spf/) record is a single line of DNS that lists who may send
-email for your domain. The syntax is small but unforgiving — one wrong qualifier
-or one record too many and it silently fails. This is the field reference.
+email for your domain. The syntax — specified by [RFC 7208](/rfc/7208/) — is
+small but unforgiving: one wrong qualifier or one record too many and it
+silently fails. This is the field reference.
 
 ## Anatomy of a record
 
@@ -22,9 +23,9 @@ the sending server, then applies that mechanism's **qualifier**.
 
 ## What SPF actually checks
 
-SPF does **not** look at the `From:` address your recipient sees. It checks the
-**envelope sender** — the `MAIL FROM` address, also called the Return-Path — and
-the IP that connected.
+SPF does **not** look at the `From:` address your recipient sees — the one
+[RFC 5322](/rfc/5322/) defines. It checks the **envelope sender**, the
+`MAIL FROM` address, also called the Return-Path, and the IP that connected.
 
 This is the source of most SPF confusion. A message can pass SPF perfectly while
 the visible `From:` shows a completely different domain, which is precisely the

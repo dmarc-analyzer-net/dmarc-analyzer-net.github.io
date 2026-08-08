@@ -5,7 +5,7 @@ aliases: ["Sender Policy Framework"]
 related: ["dkim", "dmarc", "dmarc-alignment"]
 ---
 
-**SPF** (Sender Policy Framework) is a `TXT` record that lists the servers
+**SPF** (Sender Policy Framework, [RFC 7208](/rfc/7208/)) is a `TXT` record that lists the servers
 authorised to send mail for your domain. A receiving server checks the
 connecting server's IP against that list and marks the message as an SPF pass or
 fail.

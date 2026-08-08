@@ -5,8 +5,9 @@ description: DMARC has a new specification. What RFC 9989 changed — pct, ri an
 publishDate: 2026-07-28
 ---
 
-**DMARC has a new specification.** RFC 9989 replaced RFC 7489 in May 2026, along with
-two companion documents covering reporting, and the work is often called DMARCbis after
+**DMARC has a new specification.** [RFC 9989](/rfc/9989/) replaced
+[RFC 7489](/rfc/7489/) in May 2026, along with two companion documents covering
+reporting, and the work is often called DMARCbis after
 the draft it came from. The headline is not any single tag: it is that DMARC is now a
 Standards Track document rather than the Informational one it had been for eleven years.
 
@@ -113,8 +114,8 @@ poor bet — but if you inherit a record with no policy, that is what it is doin
 
 ## Reporting moved into its own documents
 
-Aggregate and failure reporting now have dedicated specifications, RFC 9990 and
-RFC 9991. The rules are largely as they were, with one detail worth knowing if you send
+Aggregate and failure reporting now have dedicated specifications,
+[RFC 9990](/rfc/9990/) and [RFC 9991](/rfc/9991/). The rules are largely as they were, with one detail worth knowing if you send
 reports to a mailbox on another domain: the check that the destination has authorised
 you now compares **organizational domains** rather than exact names, and the wildcard
 form is explicitly sanctioned:

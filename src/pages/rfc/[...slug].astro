@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import JsonLd from '../../components/JsonLd.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('rfcs', ({ data }) => !data.draft);
+  const byNumber = new Map(entries.map((e) => [e.data.number, e]));
+  return entries.map((entry) => ({
+    params: { slug: String(entry.data.number) },
+    props: { entry, byNumber },
+  }));
+}
+
+const { entry, byNumber } = Astro.props;
+const { Content } = await render(entry);
+const d = entry.data;
+const path = `/rfc/${d.number}/`;
+const image = `/open-graph/rfc/${d.number}.png`;
+
+// Only link an obsoletes/obsoleted-by reference when we actually have a page
+// for it; the rest render as plain text rather than as dead links.
+const ref = (n: number) =>
+  byNumber.has(n) ? { n, href: `/rfc/${n}/` } : { n, href: null };
+const obsoletes = d.obsoletes.map(ref);
+const obsoletedBy = d.obsoletedBy.map(ref);
+
+const related = (await getCollection('rfcs', ({ data }) => !data.draft))
+  .filter((e) => e.data.group === d.group && e.data.number !== d.number)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((e) => ({ label: `RFC ${e.data.number} — ${e.data.shortTitle}`, href: `/rfc/${e.data.number}/` }));
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: `RFC ${d.number} — ${d.shortTitle}`,
+  description: d.description,
+  image: new URL(image, Astro.site).href,
+  url: new URL(path, Astro.site).href,
+  about: { '@type': 'Thing', name: d.title },
+};
+---
+<BaseLayout
+  current="rfc"
+  title={`RFC ${d.number}: ${d.shortTitle} — DMARC Analyzer`}
+  description={d.description}
+  path={path}
+  image={image}
+  ogType="article"
+>
+  <JsonLd slot="head" schema={schema} />
+  <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
+    <Breadcrumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'RFCs', href: '/rfc/' },
+      { label: `RFC ${d.number}`, href: path },
+    ]} />
+
+    <h1 style="font-family:'Space Grotesk',sans-serif; font-size:38px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:22px 0 6px;">
+      RFC {d.number} — {d.shortTitle}
+    </h1>
+    <p style="font-size:var(--text-lg); line-height:1.4; color:var(--gray-700); margin:0 0 20px;">{d.title}</p>
+
+    {obsoletedBy.length > 0 && (
+      <div style="border:1px solid var(--border-strong); border-left:4px solid var(--brand); border-radius:var(--radius-md); background:var(--surface-card); padding:14px 18px; margin:0 0 24px; font-size:var(--text-sm); line-height:1.6;">
+        <strong>Obsolete.</strong> Superseded by {obsoletedBy.map((r, i) => (
+          <>{i > 0 && ', '}{r.href ? <a href={r.href}>RFC {r.n}</a> : <span>RFC {r.n}</span>}</>
+        ))}.
+      </div>
+    )}
+
+    <dl style="display:grid; grid-template-columns:auto 1fr; gap:6px 16px; margin:0 0 28px; font-size:var(--text-sm); color:var(--gray-700);">
+      <dt style="font-weight:600; color:var(--text-body);">Status</dt><dd style="margin:0;">{d.status}</dd>
+      <dt style="font-weight:600; color:var(--text-body);">Published</dt><dd style="margin:0;">{d.published}</dd>
+      {obsoletes.length > 0 && (
+        <>
+          <dt style="font-weight:600; color:var(--text-body);">Obsoletes</dt>
+          <dd style="margin:0;">{obsoletes.map((r, i) => (
+            <>{i > 0 && ', '}{r.href ? <a href={r.href}>RFC {r.n}</a> : <span>RFC {r.n}</span>}</>
+          ))}</dd>
+        </>
+      )}
+    </dl>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <RelatedLinks title="Related RFCs" links={related} />
+  </article>
+</BaseLayout>

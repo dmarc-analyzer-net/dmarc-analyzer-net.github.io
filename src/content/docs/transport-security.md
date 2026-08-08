@@ -9,7 +9,8 @@ order: 7
 Where [DMARC](/glossary/dmarc/) tells you *who* sent a message, transport
 security tells you *how it travelled*. The **Transport security** card on the
 [domain detail page](/docs/domain-detail/) covers both halves of that story:
-[MTA-STS](/glossary/mta-sts/), which asks senders to require verified TLS, and
+[MTA-STS](/glossary/mta-sts/) ([RFC 8461](/rfc/8461/)), which asks senders to
+require verified TLS, and
 [TLS-RPT](/glossary/tls-rpt/), which reports back on whether they could.
 
 The card appears for every domain. Monitoring needs no configuration and runs
