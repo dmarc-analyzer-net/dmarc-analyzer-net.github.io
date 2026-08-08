@@ -41,8 +41,9 @@ examples](/guides/spf-record-syntax/) for the full breakdown.)
 
 DKIM (DomainKeys Identified Mail) attaches a cryptographic **signature** to every
 message, generated with a private key only you hold. The matching public key lives
-in your DNS, at a name made of a **selector** you choose and the fixed label
-`_domainkey`:
+in your DNS, at a name made of a
+[**selector**](/guides/find-your-dkim-selector/) naming the key and the fixed
+label `_domainkey`:
 
 ```
 selector1._domainkey.yourdomain.com
