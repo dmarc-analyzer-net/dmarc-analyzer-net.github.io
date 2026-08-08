@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Cta from '../../components/Cta.astro';
+
+const all = (await getCollection('rfcs', ({ data }) => !data.draft)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const GROUPS = [
+  { key: 'dmarc', label: 'DMARC', blurb: 'The protocol and its two reporting formats. Replaced RFC 7489 in 2026.' },
+  { key: 'authentication', label: 'Authentication', blurb: 'The mechanisms DMARC is built on, plus the one that patches forwarding.' },
+  { key: 'transport', label: 'Transport security', blurb: 'Protecting mail in transit — a different problem from who may claim your domain.' },
+  { key: 'message', label: 'Message format', blurb: 'The document that makes the From: header a thing worth aligning against.' },
+] as const;
+
+export const title = 'Email authentication RFCs — DMARC Analyzer';
+export const description =
+  'The RFCs behind DMARC, SPF, DKIM, MTA-STS and ARC — what each one governs, which are current, and which have been replaced.';
+---
+<BaseLayout current="rfc" title={title} description={description} path="/rfc/" image="/open-graph/rfc.png">
+  <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+    <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'RFCs', href: '/rfc/' }]} />
+      <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">RFCs</div>
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px;">The specifications, and which ones still apply.</h1>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:620px;">Email authentication is defined across a dozen documents of varying age and status. This is what each one governs and how they fit together.</p>
+    </div>
+  </section>
+
+  <section style="max-width:720px; margin:0 auto; padding:8px 32px 0;">
+    <div class="prose">
+      <h2>DMARC was re-specified in 2026</h2>
+      <p>
+        If you are looking for the DMARC RFC, the answer changed recently.
+        <a href="/rfc/7489/">RFC 7489</a> — the document nearly every article and
+        vendor page still cites — is <strong>obsolete</strong>. It was replaced
+        by three documents, because the protocol and its two report formats can
+        now evolve independently:
+      </p>
+      <ul>
+        <li><a href="/rfc/9989/"><strong>RFC 9989</strong></a> — the protocol. Also the first time DMARC has been on the standards track at all.</li>
+        <li><a href="/rfc/9990/"><strong>RFC 9990</strong></a> — aggregate reports, the XML your <code>rua=</code> address receives.</li>
+        <li><a href="/rfc/9991/"><strong>RFC 9991</strong></a> — failure reports, requested with <code>ruf=</code>.</li>
+      </ul>
+      <p>
+        Practically, most records need no change: the syntax barely moved. The
+        exceptions are <code>pct</code>, <code>rf</code> and <code>ri</code>,
+        which are now historic — <a href="/rfc/9989/">what changed in RFC 9989</a>
+        covers the replacement for each.
+      </p>
+    </div>
+  </section>
+
+  <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
+    {GROUPS.map((g) => {
+      const rows = all.filter((e) => e.data.group === g.key);
+      return rows.length === 0 ? null : (
+        <div style="margin:0 0 40px;">
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:24px; letter-spacing:-0.02em; font-weight:600; margin:0 0 4px;">{g.label}</h2>
+          <p style="font-size:var(--text-sm); color:var(--gray-700); margin:0 0 16px; max-width:620px;">{g.blurb}</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px;">
+            {rows.map((e) => (
+              <a class="lift" href={`/rfc/${e.data.number}/`} style="display:block; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:18px 20px; color:var(--text-body) !important;">
+                <div style="display:flex; align-items:baseline; gap:8px; margin:0 0 6px;">
+                  <h3 style="font-size:16px; font-weight:600; letter-spacing:-0.01em; margin:0;">RFC {e.data.number}</h3>
+                  <span style="font-size:13px; color:var(--gray-700);">{e.data.shortTitle}</span>
+                </div>
+                <div style="font-size:12px; color:var(--text-faint); margin:0 0 8px;">
+                  {e.data.status} · {e.data.published}
+                  {e.data.obsoletedBy.length > 0 && <span style="color:var(--brand); font-weight:600;"> · superseded</span>}
+                </div>
+                <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">{e.data.description}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+
+    <div class="prose" style="margin:8px 0 0;">
+      <h2>Also worth knowing</h2>
+      <p>
+        These have no page here, but come up often enough to name.
+        <strong>RFC 9091</strong> defined the experimental Public Suffix Domain
+        extension and was folded into <a href="/rfc/9989/">RFC 9989</a> as the
+        <code>psd</code> tag. <strong>RFC 7960</strong> catalogues the
+        interoperability problems DMARC causes for indirect mail flows —
+        essential reading if mailing lists are breaking your authentication.
+        <strong>RFC 6377</strong> is the best-current-practice document for DKIM
+        and mailing lists, and <strong>RFC 8616</strong> extends email
+        authentication to internationalized addresses.
+      </p>
+      <h2>How these were checked</h2>
+      <p>
+        Every number, title, status and obsoletes relationship on these pages was
+        taken from the RFC Editor's own metadata rather than from secondary
+        sources — which matters more than usual here, because RFC 7489 was
+        replaced by three documents and a lot of material published since gets
+        that wrong.
+      </p>
+    </div>
+  </section>
+
+  <Cta />
+</BaseLayout>

@@ -22,9 +22,9 @@ the sending server, then applies that mechanism's **qualifier**.
 
 ## What SPF actually checks
 
-SPF does **not** look at the `From:` address your recipient sees. It checks the
-**envelope sender** — the `MAIL FROM` address, also called the Return-Path — and
-the IP that connected.
+SPF does **not** look at the `From:` address your recipient sees — the one
+[RFC 5322](/rfc/5322/) defines. It checks the **envelope sender**, the
+`MAIL FROM` address, also called the Return-Path, and the IP that connected.
 
 This is the source of most SPF confusion. A message can pass SPF perfectly while
 the visible `From:` shows a completely different domain, which is precisely the

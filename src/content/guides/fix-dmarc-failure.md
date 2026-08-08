@@ -102,6 +102,11 @@ Some forwarders also modify the message — a footer, a rewritten subject — wh
 **breaks DKIM** on top. Either way the result is a DMARC failure for mail you did
 legitimately send.
 
+This is the problem [ARC](/rfc/8617/) was designed for: it lets a forwarder
+record the authentication results it saw, so a later receiver can weigh them.
+It is Experimental, and receivers are free to ignore it — which is why forwarding
+failures never quite go away.
+
 **Fix:** there's no perfect fix, but aligned DKIM survives forwarding that doesn't
 modify the message, and [ARC](/glossary/arc/) lets participating receivers honor a
 prior "pass" — read what it does and doesn't buy before relying on it. Don't

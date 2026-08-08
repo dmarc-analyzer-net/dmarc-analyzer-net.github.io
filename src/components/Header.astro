@@ -17,7 +17,7 @@ import LogoMark from './LogoMark.astro';
  */
 interface Props {
   /** Which page is active, so its nav link gets the highlighted treatment. */
-  current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare' | 'tools' | 'docs';
+  current?: 'home' | 'features' | 'guides' | 'glossary' | 'setup' | 'compare' | 'tools' | 'docs' | 'rfc';
 }
 const { current } = Astro.props;
 
@@ -36,6 +36,7 @@ const RESOURCES = [
   { href: '/glossary/', label: 'Glossary', key: 'glossary' },
   { href: '/dmarc-for/', label: 'Setup', key: 'setup' },
   { href: '/tools/', label: 'Tools', key: 'tools' },
+  { href: '/rfc/', label: 'RFCs', key: 'rfc' },
 ] as const;
 
 const inResources = RESOURCES.some((r) => r.key === current);

@@ -34,6 +34,7 @@ import * as dmarcForIndex from '../dmarc-for/index.astro';
 import * as docsIndex from '../docs/index.astro';
 import * as glossaryIndex from '../glossary/index.astro';
 import * as guidesIndex from '../guides/index.astro';
+import * as rfcIndex from '../rfc/index.astro';
 
 /** The only fields the image template needs, common to every source. */
 type Page = { title: string; description: string };
@@ -43,6 +44,7 @@ const guideEntries = await getCollection('guides', ({ data }) => !data.draft);
 const providerEntries = await getCollection('providers', ({ data }) => !data.draft);
 const glossaryEntries = await getCollection('glossary', ({ data }) => !data.draft);
 const docsEntries = await getCollection('docs', ({ data }) => !data.draft);
+const rfcEntries = await getCollection('rfcs', ({ data }) => !data.draft);
 
 // Keys become the route: `compare/easydmarc` -> /open-graph/compare/easydmarc.png
 const pages: Record<string, Page> = Object.fromEntries([
@@ -54,6 +56,10 @@ const pages: Record<string, Page> = Object.fromEntries([
     { title: e.data.term, description: e.data.description },
   ]),
   ...docsEntries.map((e): [string, Page] => [`docs/${e.id}`, e.data]),
+  ...rfcEntries.map((e): [string, Page] => [
+    `rfc/${e.data.number}`,
+    { title: `RFC ${e.data.number} \u2014 ${e.data.shortTitle}`, description: e.data.description },
+  ]),
 
   ['tools/dmarc-checker', dmarcChecker],
   ['tools/dmarc-generator', dmarcGenerator],
@@ -71,6 +77,7 @@ const pages: Record<string, Page> = Object.fromEntries([
   ['docs', docsIndex],
   ['glossary', glossaryIndex],
   ['guides', guidesIndex],
+  ['rfc', rfcIndex],
 ]);
 
 export const { getStaticPaths, GET } = await OGImageRoute({
