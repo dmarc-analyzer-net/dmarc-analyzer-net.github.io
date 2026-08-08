@@ -12,7 +12,7 @@ const GROUPS = [
   { key: 'dmarc', label: 'DMARC', blurb: 'The protocol and its two reporting formats. Replaced RFC 7489 in 2026.' },
   { key: 'authentication', label: 'Authentication', blurb: 'The mechanisms DMARC is built on, plus the one that patches forwarding.' },
   { key: 'transport', label: 'Transport security', blurb: 'Protecting mail in transit — a different problem from who may claim your domain.' },
-  { key: 'message', label: 'Message format', blurb: 'The document that makes the From: header a thing worth aligning against.' },
+  { key: 'message', label: 'Message and envelope', blurb: 'The two addresses DMARC exists to reconcile, and one bulk-sender requirement that arrived beside it.' },
 ] as const;
 
 export const title = 'Email authentication RFCs — DMARC Analyzer';
@@ -80,17 +80,30 @@ export const description =
     })}
 
     <div class="prose" style="margin:8px 0 0;">
+      <h2>BIMI is not an RFC</h2>
+      <p>
+        Worth stating plainly, because it is asked constantly and most sources
+        are vague about it: <strong>there is no BIMI RFC</strong>. Brand
+        Indicators for Message Identification exists as an IETF Internet-Draft
+        (<code>draft-brand-indicators-for-message-identification</code>) and has
+        never been assigned an RFC number — checked against the IETF datatracker,
+        not inferred.
+      </p>
+      <p>
+        That does not make it unreal. BIMI is deployed, several large mailbox
+        providers honour it, and it has a working specification. It simply is not
+        a standard, which is why implementations differ on details like
+        certificate requirements. See <a href="/glossary/bimi/">BIMI</a> for what
+        it does and what it needs from your DMARC policy.
+      </p>
       <h2>Also worth knowing</h2>
       <p>
-        These have no page here, but come up often enough to name.
-        <strong>RFC 9091</strong> defined the experimental Public Suffix Domain
-        extension and was folded into <a href="/rfc/9989/">RFC 9989</a> as the
-        <code>psd</code> tag. <strong>RFC 7960</strong> catalogues the
-        interoperability problems DMARC causes for indirect mail flows —
-        essential reading if mailing lists are breaking your authentication.
-        <strong>RFC 6377</strong> is the best-current-practice document for DKIM
-        and mailing lists, and <strong>RFC 8616</strong> extends email
-        authentication to internationalized addresses.
+        Two more have no page here.
+        <strong>RFC 8616</strong> extends email authentication to
+        internationalized addresses, and
+        <strong>RFC 8689</strong> defines REQUIRETLS, which lets an individual
+        message demand TLS rather than a domain declaring a policy for all of
+        them.
       </p>
       <h2>How these were checked</h2>
       <p>

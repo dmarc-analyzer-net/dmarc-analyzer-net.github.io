@@ -49,6 +49,11 @@ Check `d=` while you are there: it names the signing domain, and it must
 [DMARC](/glossary/dmarc/) to pass. A valid signature under the wrong `d=` is a
 DMARC failure.
 
+The receiving server's own verdict is in the
+[`Authentication-Results`](/rfc/8601/) header a little further up — it records
+the selector it used and whether the signature verified, which saves you
+guessing at what a report meant.
+
 ### From your provider's DNS instructions
 
 The records your provider asked you to publish contain the selector — it is the
