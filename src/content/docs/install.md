@@ -1,6 +1,6 @@
 ---
 title: Install with Docker
-description: Get DMARC Analyzer running in a few minutes with Docker Compose using the prebuilt image — no build step, no account, and your data stays on your server.
+description: Get DMARC Analyzer running in minutes with Docker Compose and the prebuilt image — no build step, no account, data stays on your server.
 section: Getting started
 order: 1
 ---
