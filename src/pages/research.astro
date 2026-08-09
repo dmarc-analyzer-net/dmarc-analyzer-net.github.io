@@ -88,7 +88,9 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
         <li><code>_mta-sts.&lt;domain&gt;</code> — the <a href="/glossary/mta-sts/">MTA-STS</a> announcement</li>
         <li><code>_smtp._tls.&lt;domain&gt;</code> — the <a href="/glossary/tls-rpt/">TLS-RPT</a> record</li>
         <li><code>default._bimi.&lt;domain&gt;</code> — the <a href="/glossary/bimi/">BIMI</a> record</li>
-        <li><code>MX</code> and <code>DS</code> — whether the domain receives mail, and whether it is DNSSEC-signed</li>
+        <li><code>NS</code> — which nameservers the domain is delegated to</li>
+        <li><code>MX</code> — where the domain receives mail</li>
+        <li><code>DS</code> — whether the domain is DNSSEC-signed</li>
       </ul>
       <p>
         Where a domain announces MTA-STS, we also fetch its published policy over
