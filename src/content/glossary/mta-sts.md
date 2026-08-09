@@ -5,7 +5,8 @@ aliases: ["MTA-STS record", "SMTP MTA Strict Transport Security"]
 related: ["dmarc", "spf", "dkim", "tls-rpt"]
 ---
 
-**MTA-STS** (SMTP MTA Strict Transport Security) tells other mail servers that
+**MTA-STS** (SMTP MTA Strict Transport Security, [RFC 8461](/rfc/8461/)) tells
+other mail servers that
 they **must** use an encrypted, authenticated **TLS** connection when delivering
 mail to your domain — and refuse to deliver if they can't. It closes a gap the
 authentication standards leave open.
@@ -90,4 +91,5 @@ coexist, and large providers support one, the other, or both.
 
 MTA-STS and TLS-RPT are the natural next step after your domain reaches DMARC
 enforcement — the authentication story is finished, so you move on to the
-transport one.
+transport one. [MTA-STS: from testing to
+enforce](/guides/mta-sts-testing-to-enforce/) walks through the rollout.

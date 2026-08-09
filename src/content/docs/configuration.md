@@ -30,7 +30,7 @@ credential encryption key.
 ## Runtime
 
 ### `APP_MODE`
-What the container is for. The same image serves all four.
+What the container is for. The same image serves all five.
 
 | Value | Runs |
 |---|---|
@@ -38,6 +38,7 @@ What the container is for. The same image serves all four.
 | `api` | HTTP API plus the web console. No polling. |
 | `worker` | Mailbox polling only, no HTTP listener. |
 | `migrate` | Applies pending database migrations and exits. Serves nothing. |
+| `mta-sts` | Serves hosted MTA-STS policy files and health probes only — no console, no API, no auth stack, no worker. For an internet-facing policy host; see [hosting MTA-STS policies](/docs/mta-sts-hosting/). |
 
 Anything else **fails at startup** rather than falling back to `api`. That is
 deliberate: a typo like `APP_MODE=woker` would otherwise give you a container that
@@ -297,6 +298,7 @@ together, or a provider walked through screen by screen:
 | `Auth__Oidc__Scopes` | `openid profile email` | Requested scopes. |
 | `Auth__Oidc__DisplayName` | `SSO` | Label on the login button. |
 | `Auth__Oidc__AutoProvision` | `false` | Create a local user on first successful SSO login. |
+| `Auth__Oidc__TrustUnverifiedEmail` | `false` | Link a login to an existing account when the provider asserts *nothing* about the address. For [Entra ID](/docs/single-sign-on/entra-id/#add-the-optional-claims), which sends no `email_verified` claim. Does not override a provider that answers "not verified". Leave off unless the provider's addresses are administered. *(0.9.0 or newer.)* |
 | `Auth__Oidc__DefaultRole` | `client_viewer` | Role given to auto-provisioned users. Deliberately the least privileged. |
 | `Auth__Oidc__RequireHttpsMetadata` | `true` | Only set `false` against a local test IdP over HTTP. |
 | `Auth__Oidc__DisableLocalLogin` | `false` | Turn off password sign-in and redirect the login page straight to this provider. Requires `Enabled=true`. See [requiring SSO for everyone](/docs/single-sign-on/#requiring-sso-for-everyone). |
@@ -304,6 +306,23 @@ together, or a provider walked through screen by screen:
 Local passwords and OIDC are interchangeable front doors by default — both mint
 the same application session, and **authorisation is always evaluated in-app**,
 never delegated to the identity provider.
+
+## MTA-STS (`MtaSts`)
+
+A background pass checks every domain's [MTA-STS](/glossary/mta-sts/) record and
+policy from the outside in. It needs no configuration to run. The last two keys
+matter only if you also *host* policy files here — see [hosting MTA-STS
+policies](/docs/mta-sts-hosting/).
+
+| Key | Default | What it does |
+|---|---|---|
+| `MtaSts__Enabled` | `true` | Run the check pass and keep per-domain state fresh. |
+| `MtaSts__CheckIntervalHours` | `6` | Gap between passes. |
+| `MtaSts__FetchTimeoutSeconds` | `10` | Total budget for one policy-file fetch, connect included. |
+| `MtaSts__MaxConcurrentChecks` | `4` | Domains checked concurrently during a pass. |
+| `MtaSts__AllowPrivateNetworks` | `false` | Let the policy fetch reach loopback, private and link-local addresses. Off because `mta-sts.<domain>` hostnames derive from operator-entered domains; turn it on only for an instance monitoring intranet mail domains. |
+| `MtaSts__PolicyHost` | *(empty)* | The hostname client CNAMEs point at, shown as the CNAME target in the console's publish instructions. Empty shows a configure-me hint. |
+| `MtaSts__ServeCacheSeconds` | `60` | In-memory TTL and `Cache-Control: max-age` for served policy bodies — also how long a dedicated `mta-sts` container may serve a superseded body after a console edit. |
 
 ## Logging
 

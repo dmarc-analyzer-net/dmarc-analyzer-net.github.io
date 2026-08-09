@@ -24,10 +24,15 @@ The IP addresses are the reason this page exists: IP addresses count as
 personal data under GDPR, so the report database should be treated as holding
 personal data even though it holds no mail.
 
-Two deliberate boundaries help here: the app does not ingest **forensic (RUF)
-reports** — the report type that *can* carry message content and headers — and
-SMTP TLS reports that share the mailbox are recognised and skipped. What you
-store is the statistical layer only.
+One deliberate boundary helps here: the app does not ingest **forensic (RUF)
+reports** — the report type that *can* carry message content and headers. What
+you store is the statistical layer only.
+
+[SMTP TLS reports](/glossary/tls-rpt/) sharing the same mailbox *are* ingested,
+and they hold the same category of personal data: the IP addresses of hosts that
+attempted delivery. They live under the same retention and purge schedule as
+aggregate reports, so nothing here needs separate handling — but they are part of
+what the database holds.
 
 ## Where data lives, and where it goes
 

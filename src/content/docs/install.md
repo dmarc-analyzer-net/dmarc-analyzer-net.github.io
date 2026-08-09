@@ -1,6 +1,6 @@
 ---
 title: Install with Docker
-description: Get DMARC Analyzer running in a few minutes with Docker Compose using the prebuilt image — no build step, no account, and your data stays on your server.
+description: Get DMARC Analyzer running in minutes with Docker Compose and the prebuilt image — no build step, no account, data stays on your server.
 section: Getting started
 order: 1
 publishDate: 2026-07-25
@@ -103,7 +103,7 @@ anything you depend on, **pin a version** — it makes an upgrade an explicit ac
 and a rollback unambiguous:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.7.1
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.9.0
 ```
 
 See [upgrading](/docs/upgrading-and-backup/#pinning-a-version).
@@ -127,7 +127,7 @@ There is a Helm chart, published as an OCI artifact on every release:
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.7.1 --namespace dmarc --create-namespace \
+  --version 0.9.0 --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
 

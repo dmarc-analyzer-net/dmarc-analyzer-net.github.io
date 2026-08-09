@@ -5,8 +5,8 @@ aliases: ["Domain-based Message Authentication, Reporting and Conformance"]
 related: ["spf", "dkim", "dmarc-alignment", "dmarc-policy", "dmarc-aggregate-report", "bimi", "mta-sts"]
 ---
 
-**DMARC** (Domain-based Message Authentication, Reporting and Conformance) is a
-published DNS policy that builds on [SPF](/glossary/spf/) and
+**DMARC** (Domain-based Message Authentication, Reporting and Conformance,
+[RFC 9989](/rfc/9989/)) is a published DNS policy that builds on [SPF](/glossary/spf/) and
 [DKIM](/glossary/dkim/). It does two things:
 
 1. **Tells receivers what to do** with mail claiming to be from your domain that

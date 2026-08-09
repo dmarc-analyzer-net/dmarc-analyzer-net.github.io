@@ -20,7 +20,7 @@ installs are a single host.
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.7.1 \
+  --version 0.9.0 \
   --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
@@ -57,7 +57,7 @@ kubectl -n dmarc create secret generic dmarc-creds \
   --from-literal=db-password='…'
 
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.7.1 --namespace dmarc \
+  --version 0.9.0 --namespace dmarc \
   --set auth.existingSecret=dmarc-creds \
   --set postgres.enabled=false \
   --set externalDatabase.host=db.internal \

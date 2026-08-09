@@ -101,10 +101,13 @@ A run reporting `parseFailures` above zero means an attachment couldn't be read.
 Common causes:
 
 - An unusual ZIP compression variant.
-- Something in the mailbox that isn't a DMARC report — many providers also send
-  [TLS-RPT](/glossary/tls-rpt/) reports, and marketing mail lands in shared
-  inboxes. If TLS reports are a steady share of the failures, point their `rua=`
-  at a different mailbox so this count stays meaningful.
+- Something in the mailbox that is neither a DMARC nor a TLS report — marketing
+  mail and bounces land in shared inboxes.
+
+[TLS-RPT](/glossary/tls-rpt/) reports sharing the mailbox are *not* a cause:
+they are recognised, parsed and counted separately as TLS reports. If you are
+upgrading from a version before this was supported, expect the parse-failure
+count to drop on the next sync.
 
 The rest of the run still imports; failures are counted, not fatal. If a mailbox
 shows persistent failures, it's worth

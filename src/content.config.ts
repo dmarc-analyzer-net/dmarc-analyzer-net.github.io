@@ -109,4 +109,34 @@ const docs = defineCollection({
   }).refine(titleBudget(38), { message: budgetMessage(38) }),
 });
 
-export const collections = { guides, glossary, providers, compare, docs };
+// One page per email-authentication RFC, plus the /rfc hub that maps them.
+// Authored in src/content/rfc/ and rendered by src/pages/rfc/[...slug].astro.
+//
+// `obsoletes` / `obsoletedBy` are numbers rather than free text because the
+// template renders them as links and the hub uses them to mark a document
+// superseded. Every value came from rfc-editor.org's own JSON metadata rather
+// than from memory — the DMARC set in particular is easy to get wrong, since
+// RFC 7489 was replaced by *three* documents, not one.
+const rfcs = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/rfc' }),
+  schema: z.object({
+    number: z.number().int().positive(),
+    /** The RFC's official title, verbatim. */
+    title: z.string(),
+    /** What people actually call it — "DMARC" for RFC 9989. */
+    shortTitle: z.string().max(46),
+    /** IETF maturity level, verbatim: "Proposed Standard", "Internet Standard", … */
+    status: z.string(),
+    published: z.number().int(),
+    description: z.string().min(50).max(160),
+    obsoletes: z.array(z.number().int().positive()).default([]),
+    obsoletedBy: z.array(z.number().int().positive()).default([]),
+    /** Groups the hub's sections. */
+    group: z.enum(['dmarc', 'authentication', 'transport', 'message']),
+    /** Sort order within a group. */
+    order: z.number(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { guides, glossary, providers, compare, docs, rfcs };

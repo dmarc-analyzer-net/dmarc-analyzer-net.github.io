@@ -32,6 +32,11 @@ get wrong later.
 Anything not in that list is ignored by receivers, which is why a typo is silent
 rather than fatal.
 
+The list is a registry rather than a fixed set: `pct`, `rf` and `ri` are formally
+**historic** as of [RFC 9989](/rfc/9989/), while `np` and `t` are new there.
+Receivers still honour the historic three, so nothing breaks — they are simply
+not what to reach for in a record you are writing today.
+
 ## The record you actually want
 
 For most domains, starting out:

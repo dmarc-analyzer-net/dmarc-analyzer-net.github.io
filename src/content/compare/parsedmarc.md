@@ -4,7 +4,7 @@ seoTitle: 'parsedmarc alternative: one container'
 competitor: parsedmarc
 description: A parsedmarc alternative that's also open source and self-hosted — a multi-tenant app in one container, rather than a parser you wire to your own stack.
 publishDate: 2026-07-23
-updatedDate: 2026-07-27
+updatedDate: 2026-08-07
 ---
 
 parsedmarc is the best-known open-source DMARC tool, and a genuinely good one: a
@@ -27,7 +27,7 @@ by PostgreSQL, with the console included.
 | Dashboards | Built into the app | Prebuilt Kibana and Grafana dashboards you import into your own stack |
 | Aggregate (RUA) reports | Yes | Yes |
 | Forensic (RUF) reports | — | Yes |
-| SMTP TLS (TLS-RPT) reports | — | Yes |
+| SMTP TLS (TLS-RPT) reports | Yes | Yes |
 | Multi-tenant (many client domains) | Yes, per-client scoping | Not designed for it |
 | Kubernetes | Maintained Helm chart | No official chart as of July 2026 |
 | Maturity | Young project | Long-established, large community |
@@ -36,9 +36,9 @@ by PostgreSQL, with the console included.
 ## Where parsedmarc fits
 
 If you want a scriptable parser to feed a data pipeline you already run, or you
-need **forensic (RUF) or [TLS-RPT](/glossary/tls-rpt/) reports**, parsedmarc is the better tool — we
-handle aggregate reports only. It is also flexible about where data lands, and
-has years of production use behind it.
+need **forensic (RUF) reports**, parsedmarc is the better tool — we handle
+aggregate and [TLS-RPT](/glossary/tls-rpt/) reports, not forensic ones. It is
+also flexible about where data lands, and has years of production use behind it.
 
 ## Where DMARC Analyzer fits
 
