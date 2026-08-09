@@ -3,6 +3,7 @@ title: Hosting MTA-STS policies
 description: Serve every domain's MTA-STS policy file from your own instance — one CNAME and one TXT record per domain, with certificates issued automatically.
 section: Configuration
 order: 5
+publishDate: 2026-08-07
 ---
 
 [MTA-STS](/glossary/mta-sts/) (RFC 8461) lets a domain tell sending mail servers
