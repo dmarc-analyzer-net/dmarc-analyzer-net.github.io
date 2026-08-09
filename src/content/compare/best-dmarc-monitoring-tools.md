@@ -45,7 +45,8 @@ often — check each vendor before deciding.*
 
 Two things this table deliberately does not show, because we would lose them:
 every hosted platform here offers vendor support with an SLA, and most manage
-BIMI, MTA-STS and TLS-RPT alongside DMARC. We do neither.
+BIMI alongside DMARC. We do neither — though we do handle
+[MTA-STS](/glossary/mta-sts/) and [TLS-RPT](/glossary/tls-rpt/) ourselves.
 
 ## Hosted platforms
 

@@ -89,8 +89,9 @@ Auto-forwarded mail — someone forwards from `@yourdomain` to a personal Gmail 
 explanation is backwards.
 
 Plain forwarding breaks SPF *because the envelope doesn't change.* The forwarder
-relays your original `MAIL FROM` from **its own** IP address, and that IP is not in
-your SPF record, so the check fails. Nothing was rewritten; that is the problem.
+relays your original [`MAIL FROM`](/rfc/5321/) from **its own** IP address, and
+that IP is not in your SPF record, so the check fails. Nothing was rewritten;
+that is the problem.
 
 Forwarders that *do* rewrite the envelope — the technique is called SRS — make SPF
 **pass**, for their domain. Which then fails

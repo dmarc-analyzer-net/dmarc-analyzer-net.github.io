@@ -1,6 +1,6 @@
 ---
 title: Security
-description: What DMARC Analyzer stores, how mailbox credentials and passwords are protected, how sessions and roles work, and the handful of settings worth getting right.
+description: What DMARC Analyzer stores, how mailbox credentials and passwords are protected, how roles work, and the settings worth getting right.
 section: Operations
 order: 2
 ---

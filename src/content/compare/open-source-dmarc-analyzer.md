@@ -3,7 +3,7 @@ title: "Best open-source & self-hosted DMARC analyzers"
 seoTitle: 'Best open-source DMARC analyzers'
 competitor: Open source & self-hosted
 roundup: true
-description: The open-source, self-hosted DMARC analyzers worth knowing — parsedmarc, DMARC Analyzer, and lighter-weight projects — compared on setup, dashboards, and scale.
+description: The open-source, self-hosted DMARC analyzers worth knowing — parsedmarc and lighter projects — compared on setup, dashboards, and scale.
 publishDate: 2026-07-23
 ---
 
@@ -46,7 +46,7 @@ heavy" and "so light it keeps no history."
   you would rather run it on Kubernetes than on a single host.
 - **dmarc-report-viewer** — the smallest credible option: a single Rust binary or
   a small container with an IMAP client built in. It also reads SMTP TLS
-  (TLS-RPT) reports, as parsedmarc does and this project does not. As of July
+  (TLS-RPT) reports, as parsedmarc and this project both do. As of July
   2026 its documentation describes no database and a single IMAP mailbox per
   instance, so how much history you keep depends on what is still in the mailbox
   and there is no per-client separation — check the project before relying on
@@ -66,9 +66,9 @@ heavy" and "so light it keeps no history."
 - **Already run Elasticsearch, or want a scriptable parser** → parsedmarc.
 - **One mailbox, and you only care about recent reports** → a lightweight viewer
   such as dmarc-report-viewer.
-- **You need SMTP TLS reporting today** → parsedmarc or dmarc-report-viewer both
-  read [TLS-RPT](/glossary/tls-rpt/); this project is DMARC-only for now. parsedmarc also parses
-  forensic (RUF) reports, which we do not.
+- **You need forensic (RUF) reports** → parsedmarc parses them; this project does
+  not. [TLS-RPT](/glossary/tls-rpt/) is no longer a deciding factor — parsedmarc,
+  dmarc-report-viewer and this project all read it.
 - **You want a scheduled artifact, not a dashboard** → dmarc-report-converter.
 - **Want turnkey dashboards, many client domains, and no search stack** →
   that's the gap DMARC Analyzer was built for.

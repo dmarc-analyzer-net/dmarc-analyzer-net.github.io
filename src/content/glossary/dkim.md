@@ -5,7 +5,8 @@ aliases: ["DomainKeys Identified Mail"]
 related: ["spf", "dmarc", "dmarc-alignment", "dkim-selector", "arc"]
 ---
 
-**DKIM** (DomainKeys Identified Mail) attaches a cryptographic signature to each
+**DKIM** (DomainKeys Identified Mail, [RFC 6376](/rfc/6376/)) attaches a
+cryptographic signature to each
 outgoing message. The signing domain publishes a public key in DNS; the
 receiver uses it to verify the signature.
 
@@ -27,8 +28,9 @@ a [**selector**](/glossary/dkim-selector/) under `_domainkey`:
 selector._domainkey.yourdomain.com
 ```
 
-The signature names both halves: `s=` is the selector to look up, `d=` is the
-domain claiming responsibility. For DKIM to help [DMARC](/glossary/dmarc/), `d=`
+The signature names both halves: `s=` is the selector to look up — the fastest
+way to [find yours](/guides/find-your-dkim-selector/) — and `d=` is the domain
+claiming responsibility. For DKIM to help [DMARC](/glossary/dmarc/), `d=`
 must [align](/glossary/dmarc-alignment/) with the domain in the `From:` address —
 which is why a `dkim=pass` from your email provider's own domain does nothing for
 you, and why the failure is easy to miss.

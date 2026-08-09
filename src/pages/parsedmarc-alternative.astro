@@ -42,10 +42,9 @@ const schema = {
           Elasticsearch or OpenSearch plus Kibana or Grafana, and that is a lot
           of infrastructure to keep alive for a few XML files a day.
         </p>
-        <p>Three cases where you should stay exactly where you are:</p>
+        <p>Two cases where you should stay exactly where you are:</p>
         <ul>
           <li><strong>You need forensic (RUF) reports.</strong> parsedmarc parses them. We do not.</li>
-          <li><strong>You need SMTP TLS (TLS-RPT) reports.</strong> Same — parsedmarc reads them, we are DMARC-only for now.</li>
           <li><strong>You already run a search stack, or you want a parser to feed your own pipeline.</strong> parsedmarc writes to OpenSearch, Splunk, PostgreSQL, Kafka, S3, Microsoft Sentinel, Graylog, syslog or a webhook. That flexibility is the whole point of it, and we deliberately do not compete there — you get one application with one database.</li>
         </ul>
         <p>

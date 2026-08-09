@@ -108,6 +108,13 @@ Either way:
   already has a local account at that address gets it attached rather than
   duplicated, and an *unverified* address is refused, so it cannot be used to
   take over an account.
+- Some providers assert nothing either way — Microsoft Entra ID sends no
+  `email_verified` claim at all. That silence is refused too, since an address
+  nobody vouched for should not open somebody else's account, and it has its own
+  message so you can tell it apart from a genuine "not verified". Entra's
+  [`xms_edov` optional claim](/docs/single-sign-on/entra-id/#add-the-optional-claims)
+  is the fix; `Auth__Oidc__TrustUnverifiedEmail` is the escape hatch for
+  providers that cannot be made to answer. *(0.9.0 or newer.)*
 - Returning users are matched on issuer and subject, not email, so a later email
   change at the provider does not strand the account or create a second one.
 - Keep one local `agency_admin` password as the way back in — see [below](#keep-a-local-admin).
