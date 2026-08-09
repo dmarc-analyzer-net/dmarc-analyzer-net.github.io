@@ -84,10 +84,6 @@ the token exchange no matter what else is configured — PKCE, which the app
 always uses, does not remove the requirement. Without a secret the login fails
 with `AADSTS7000218`.
 
-This is where Entra differs from a provider like
-[Zitadel](/docs/single-sign-on/zitadel/), which will tell you outright that no
-secret exists for a PKCE client.
-
 Go to **Certificates & secrets → Client secrets → New client secret**.
 
 <img src="/docs/single-sign-on/entra-id/05-add-client-secret.webp" alt="The Add a client secret panel, with a description and an expiry dropdown set to the recommended 180 days" width="560" height="145" loading="lazy" />

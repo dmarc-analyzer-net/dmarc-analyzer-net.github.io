@@ -13,10 +13,9 @@ are already self-hosting DMARC Analyzer. Read [how SSO fits
 together](/docs/single-sign-on/) first if you have not — this page is only
 the Keycloak-specific half.
 
-Like [Zitadel](/docs/single-sign-on/zitadel/), Keycloak supports a PKCE client
-with **no client secret** to store, rotate or leak — the opposite of
-[Entra ID](/docs/single-sign-on/entra-id/), which requires one regardless.
-Keycloak's own default leaves one gap worth closing yourself, covered below.
+Keycloak supports a PKCE client with **no client secret** to store, rotate
+or leak. Keycloak's own default leaves one gap worth closing yourself,
+covered below.
 
 ## Create a realm
 
@@ -47,8 +46,7 @@ then turn **Require PKCE** on:
 **This one default is worth overriding.** Keycloak ships new clients with
 Require PKCE **off**, flagged with its own warning icon, even when Client
 authentication is also off. A public client with neither a secret nor
-enforced PKCE is weaker than either alone — Zitadel, by contrast, preselects
-PKCE as its recommended default. Leave **PKCE Method** at `S256`.
+enforced PKCE is weaker than either alone. Leave **PKCE Method** at `S256`.
 
 **Login settings** — the redirect URI:
 
@@ -58,9 +56,9 @@ https://dmarc-analyzer.agency.tld/api/v1/auth/oidc/callback
 
 <img src="/docs/single-sign-on/keycloak/04-redirect-uri.webp" alt="Login settings step with the Valid redirect URIs field containing the callback URL, and Root URL, Home URL, post logout URIs and Web origins all left empty" width="745" height="395" loading="lazy" />
 
-Unlike Zitadel, there is no development-mode flag to enable first — Keycloak
-validates a redirect URI by matching the string you register, `http://`
-included, so nothing extra is needed even for a local test.
+There is no development-mode flag to enable first — Keycloak validates a
+redirect URI by matching the string you register, `http://` included, so
+nothing extra is needed even for a local test.
 
 ## Copy the client ID
 
@@ -124,7 +122,7 @@ app did not restart. Check `GET /api/v1/auth/providers`.
 ## Trying it locally
 
 The repository's development stack ships a Keycloak container for exactly
-this, alongside the Zitadel one, with a walkthrough in
+this, with a walkthrough in
 [`docs/ops/oidc-keycloak.md`](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/docs/ops/oidc-keycloak.md).
 Against a plain-HTTP local instance you will also need
 `Auth__Oidc__RequireHttpsMetadata: "false"` — never in production.
