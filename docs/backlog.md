@@ -907,7 +907,38 @@ inferred. What follows is what that found and what it left.
       pinned to 4.x because the `latest` tag peers on Astro 7. One guide is authored
       as `.mdx` so far; the rest stay plain Markdown until a page needs a component.
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
-- [ ] (todo) **Add a blog/changelog collection** to announce releases and roadmap progress.
-- [ ] (todo) **Cross-post blog posts to dev.to** for backlink/distribution reach once the blog collection exists. dev.to supports canonical URLs, so posts there should point back at the site's version to avoid duplicate-content dilution.
-- [ ] (todo) **Get links from https://hn.svelte.dev/ to our site.**
-- [ ] (todo) **Add RFC overview and per-RFC pages** under `/rfc` — email RFCs (7489, 7208, 6376, etc.) with what each covers and how they relate to DMARC setup. `rfc` queries carry real volume (e.g. `rfc 5322` at 590/mo, KD 20) and we have authority to write this content.
+- [ ] (todo) **Add a `blog` collection and `/blog`.** Shape decided 2026-08-08 —
+      the editorial rules are §6a of the `seo` repo's `content-style-guide.md`,
+      which is the binding version; this entry is the build work.
+      - One section, three `type` values: `research`, `engineering`, `release`.
+        Not separate sections — two thin ones read worse than one real one.
+      - **Bylined** (guides are not): schema.org `Person` with `sameAs` to
+        [GitHub](https://github.com/michaelTBF) and
+        [LinkedIn](https://www.linkedin.com/in/mfjeldsted).
+      - **Release posts are monthly roundups, skipped when nothing shipped** —
+        not one per release. Eight shipped in August 2026, several the same day,
+        and GitHub Releases already has good notes plus `releases.atom`.
+      - **The blog targets no keywords.** Every search-intent cluster is already
+        assigned to guides/glossary/`dmarc-for`/compare/tools/docs/`rfc`, so a
+        post chasing one competes with our own page — which is exactly what went
+        wrong twice on 2026-08-08 (`/glossary/dkim-selector/` and `/rfc/9989/`).
+- [ ] (todo) **Add RSS via `@astrojs/rss`** (4.0.19), **blog only** — a feed that
+      fires on guide edits is noise. Depends on the collection above.
+- [ ] (todo) ~~**Cross-post blog posts to dev.to**~~ — **deprioritised, not
+      blocked.** It was blocked on the collection above, but the 2026-08-08
+      `serp_competitors` pull also puts dev.to at median position 37 with
+      visibility 0.05 for our terms, so the backlink value is far lower than this
+      entry assumed. Canonical-URL support means it costs little if done anyway.
+      See `link-building.md` in the `seo` repo for better-ranked targets.
+- [ ] (todo) ~~**Get links from https://hn.svelte.dev/**~~ — **cannot be done as
+      written.** That URL is *Svelte Hacker News*, a SvelteKit demo rendering the
+      HN API; it has no editorial content and links nowhere. Presumably meant
+      posting to Hacker News proper — rewrite this entry with whatever was
+      actually intended.
+- [x] (done) **Add RFC overview and per-RFC pages** under `/rfc` — hub plus 21
+      pages, shipped in #99. Note for the record that the volume rationale in the
+      original entry did not hold: `rfc 5322` at 590/mo is a generic RFC lookup
+      that rfc-editor.org owns, and the DMARC-specific terms measure at or below
+      DataForSEO's floor. It was built as a **first-mover bet** instead — RFC 9989
+      was published in 2026 and obsoletes RFC 7489 with *three* documents, which
+      almost nothing published elsewhere reflects yet.
