@@ -1,0 +1,146 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import JsonLd from '../components/JsonLd.astro';
+
+/*
+ * This page exists to be found from a log file. Its hostname is the PTR record
+ * for the scanner's IPv4 and IPv6 addresses, and its URL is in the scanner's
+ * HTTP User-Agent — so an operator who wonders who queried their nameserver can
+ * resolve the address and land here.
+ *
+ * Deliberately no <Cta> band. Someone arriving from an abuse investigation is
+ * not a lead, and pitching them would undercut the only thing this page is for.
+ */
+export const title = 'Our DNS research scanner';
+export const description =
+  'Why research-scanner.dmarc-analyzer.net queried your nameserver, exactly which records it requests, and how to have a domain excluded.';
+const path = '/research/';
+const image = '/open-graph/research.png';
+
+const HOSTNAME = 'research-scanner.dmarc-analyzer.net';
+const IPV4 = '178.105.202.3';
+const IPV6 = '2a01:4f8:c014:da0e::1';
+const USER_AGENT = 'DmarcAnalyzerResearch/1.0 (+https://dmarc-analyzer.net/research/)';
+const CONTACT = 'research@dmarc-analyzer.net';
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description,
+  image: new URL(image, Astro.site).href,
+  url: new URL(path, Astro.site).href,
+};
+
+const cell = 'padding:8px 12px; border-bottom:1px solid var(--border-default); vertical-align:top;';
+const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:var(--text-sm); word-break:break-all;";
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path} image={image}>
+  <JsonLd slot="head" schema={schema} />
+  <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+    <div style="max-width:900px; margin:0 auto; padding:64px 32px 24px;">
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Research scanner', href: path },
+      ]} />
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-4xl); line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:22px 0 20px; max-width:760px;">Our DNS research <span style="color:var(--brand);">scanner</span>.</h1>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">If you found <code style={mono}>{HOSTNAME}</code> in your logs, this page explains exactly what it asked for, why, and how to make it stop.</p>
+    </div>
+  </section>
+
+  <section style="max-width:760px; margin:0 auto; padding:36px 32px 64px;">
+    <div class="prose">
+      <h2>What it is</h2>
+      <p>
+        We run a long-running survey of how domains configure email
+        authentication — DMARC, SPF, MTA-STS, TLS-RPT and BIMI. It reads public
+        DNS records and nothing else. The point is measuring <em>change</em>:
+        anyone can look up how many domains publish a strict policy today, but
+        how that share moves over years only exists if somebody was already
+        recording it.
+      </p>
+
+      <h2>Where the traffic comes from</h2>
+      <p>
+        All of it originates from one host. Both addresses have matching forward
+        and reverse DNS, so you can confirm it is us rather than someone
+        borrowing the name.
+      </p>
+      <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm);">
+        <tbody>
+          <tr><td style={cell}><strong>Hostname</strong></td><td style={cell + mono}>{HOSTNAME}</td></tr>
+          <tr><td style={cell}><strong>IPv4</strong></td><td style={cell + mono}>{IPV4}</td></tr>
+          <tr><td style={cell}><strong>IPv6</strong></td><td style={cell + mono}>{IPV6}</td></tr>
+          <tr><td style={cell}><strong>User-Agent</strong></td><td style={cell + mono}>{USER_AGENT}</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Most queries arrive over IPv6, since that is what the host prefers when
+        a nameserver publishes both.
+      </p>
+
+      <h2>What it requests</h2>
+      <p>For each domain, a small fixed set of public DNS lookups:</p>
+      <ul>
+        <li><code>_dmarc.&lt;domain&gt;</code> — the <a href="/glossary/dmarc/">DMARC</a> policy record</li>
+        <li><code>&lt;domain&gt;</code> TXT — to find the <a href="/glossary/spf/">SPF</a> record, and the records its <code>include</code> and <code>redirect</code> terms point to</li>
+        <li><code>_mta-sts.&lt;domain&gt;</code> — the <a href="/glossary/mta-sts/">MTA-STS</a> announcement</li>
+        <li><code>_smtp._tls.&lt;domain&gt;</code> — the <a href="/glossary/tls-rpt/">TLS-RPT</a> record</li>
+        <li><code>default._bimi.&lt;domain&gt;</code> — the <a href="/glossary/bimi/">BIMI</a> record</li>
+        <li><code>MX</code> and <code>DS</code> — whether the domain receives mail, and whether it is DNSSEC-signed</li>
+      </ul>
+      <p>
+        Where a domain announces MTA-STS, we also fetch its published policy over
+        HTTPS at <code>/.well-known/mta-sts.txt</code> on the
+        <code>mta-sts</code> subdomain — the same request any sending mail server
+        makes, carrying the User-Agent above. That is the only HTTP traffic we
+        generate.
+      </p>
+
+      <h2>What it never does</h2>
+      <ul>
+        <li><strong>No port scanning.</strong> We open no connections other than DNS and the single HTTPS request above.</li>
+        <li><strong>No authentication, ever.</strong> Nothing is logged into, guessed at, or probed for weaknesses.</li>
+        <li><strong>No mail.</strong> The survey sends none and receives none.</li>
+        <li><strong>Public records only.</strong> Everything read is already served to anyone who asks.</li>
+      </ul>
+
+      <h2>How often</h2>
+      <p>
+        The broad survey runs <strong>once a month</strong> across a public
+        ranking of the most-visited domains, so a given domain sees roughly one
+        pass of the queries above every thirty days. A much smaller curated list
+        is checked <strong>daily</strong> to catch policy changes quickly. We
+        rate-limit per nameserver and back off on failures rather than retrying
+        hard — if our traffic is ever noticeable, something is wrong on our side
+        and we want to hear about it.
+      </p>
+
+      <h2>Excluding a domain</h2>
+      <p>
+        Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> with the domain or
+        nameserver, and we will exclude it. No justification needed and no
+        argument — an operator who does not want to be surveyed is entitled not
+        to be. The same address reaches us for corrections, method questions, or
+        anything that looks wrong.
+      </p>
+
+      <h2>What we publish</h2>
+      <p>
+        <strong>Aggregate statistics only.</strong> Findings are reported as
+        percentages across a population — never as a list naming individual
+        organisations as misconfigured. Every published figure states the
+        population, the date, how many domains resolved, and what counted as
+        what, so the result can be checked or reproduced.
+      </p>
+      <p>
+        The survey is run by the team behind <a href="/">DMARC Analyzer</a>, an
+        open-source, self-hosted DMARC monitoring tool. It reads the same public
+        records for the domains you choose to monitor — the difference is that
+        there you point it at your own domains deliberately, and the reports stay
+        on your own infrastructure.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

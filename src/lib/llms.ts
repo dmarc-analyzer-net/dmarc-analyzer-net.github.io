@@ -118,6 +118,13 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'Our DNS research scanner',
+          url: `${SITE}/research/`,
+          description:
+            'Identifies the host that surveys public DMARC/SPF/MTA-STS/TLS-RPT/BIMI records: its addresses, exactly which records it requests, what it never does, and how to have a domain excluded.',
+          body: '',
+        },
+        {
           title: 'Source code',
           url: REPO,
           description:

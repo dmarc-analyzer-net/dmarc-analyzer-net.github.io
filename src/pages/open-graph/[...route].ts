@@ -28,6 +28,7 @@ import * as brand from '../brand.astro';
 import * as features from '../features.astro';
 import * as freeDmarcAnalyzer from '../free-dmarc-analyzer.astro';
 import * as parsedmarcAlternative from '../parsedmarc-alternative.astro';
+import * as research from '../research.astro';
 import * as selfHostedDmarcMonitoring from '../self-hosted-dmarc-monitoring.astro';
 import * as compareIndex from '../compare/index.astro';
 import * as dmarcForIndex from '../dmarc-for/index.astro';
@@ -71,6 +72,7 @@ const pages: Record<string, Page> = Object.fromEntries([
   ['features', features],
   ['free-dmarc-analyzer', freeDmarcAnalyzer],
   ['parsedmarc-alternative', parsedmarcAlternative],
+  ['research', research],
   ['self-hosted-dmarc-monitoring', selfHostedDmarcMonitoring],
   ['compare', compareIndex],
   ['dmarc-for', dmarcForIndex],
