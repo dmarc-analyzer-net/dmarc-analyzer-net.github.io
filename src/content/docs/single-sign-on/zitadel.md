@@ -3,6 +3,8 @@ title: Zitadel
 description: Set up SSO with Zitadel — a PKCE app with no client secret to store, rotate or leak, walked through the v4 console screen by screen.
 section: Configuration
 order: 8
+publishDate: 2026-08-06
+updatedDate: 2026-08-07
 parent: single-sign-on
 ---
 

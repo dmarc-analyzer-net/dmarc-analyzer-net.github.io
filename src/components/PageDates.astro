@@ -1,0 +1,20 @@
+---
+// Visible "Published … · Updated …" line, next to the same two dates the
+// page's Article JSON-LD and OG tags already carry. `updatedDate` is the raw
+// optional frontmatter field, not a publishDate-defaulted fallback — passing
+// the fallback in would make every page claim an update it never had.
+interface Props {
+  publishDate: Date;
+  updatedDate?: Date;
+}
+const { publishDate, updatedDate } = Astro.props;
+
+// UTC: frontmatter dates are date-only ("2026-08-07"), which z.coerce.date()
+// parses as UTC midnight. Formatting in the build machine's local zone can
+// shift that back a day for anyone building west of Greenwich.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+<p style="font-size:var(--text-sm); color:var(--text-faint); margin:0 0 24px;">
+  Published {fmt(publishDate)}{updatedDate && <> · Updated {fmt(updatedDate)}</>}
+</p>

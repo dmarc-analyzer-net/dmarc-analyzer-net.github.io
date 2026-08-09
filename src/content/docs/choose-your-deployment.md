@@ -3,6 +3,7 @@ title: Choosing a deployment
 description: Bundled or external PostgreSQL, one container or two, Docker Compose or Kubernetes — what each choice costs and when it is worth making.
 section: Getting started
 order: 3
+publishDate: 2026-07-26
 ---
 
 There are three independent choices, and the defaults are right for most people.

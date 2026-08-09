@@ -3,6 +3,8 @@ title: Security
 description: What DMARC Analyzer stores, how mailbox credentials and passwords are protected, how roles work, and the settings worth getting right.
 section: Operations
 order: 2
+publishDate: 2026-07-26
+updatedDate: 2026-07-27
 ---
 
 Self-hosting means the security posture is yours. This page is what you need to

@@ -3,6 +3,8 @@ title: Troubleshooting
 description: Fixes for the common problems — no reports arriving, mailbox authentication failures, a worker that stopped, parse failures, and lost admin access.
 section: Operations
 order: 3
+publishDate: 2026-07-25
+updatedDate: 2026-07-28
 ---
 
 ## No reports are arriving

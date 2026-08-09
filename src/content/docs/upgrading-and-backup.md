@@ -3,6 +3,8 @@ title: Upgrading and backup
 description: Pull a new image, let migrations run, and know what to back up — a continuous configuration export, a pre-upgrade database dump, and the encryption key.
 section: Operations
 order: 1
+publishDate: 2026-07-25
+updatedDate: 2026-08-05
 ---
 
 ## Upgrading

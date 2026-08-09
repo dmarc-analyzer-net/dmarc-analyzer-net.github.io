@@ -4,6 +4,7 @@ seoTitle: MTA-STS and TLS-RPT in the console
 description: Read the per-domain MTA-STS and TLS-RPT panel — what the monitoring checks mean, how TLS failures are grouped, and when it is safe to enforce.
 section: Using the console
 order: 7
+publishDate: 2026-08-07
 ---
 
 Where [DMARC](/glossary/dmarc/) tells you *who* sent a message, transport

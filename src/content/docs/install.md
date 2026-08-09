@@ -3,6 +3,8 @@ title: Install with Docker
 description: Get DMARC Analyzer running in minutes with Docker Compose and the prebuilt image — no build step, no account, data stays on your server.
 section: Getting started
 order: 1
+publishDate: 2026-07-25
+updatedDate: 2026-08-05
 ---
 
 DMARC Analyzer ships as a **single container image**. By default one container runs

@@ -96,6 +96,8 @@ const docs = defineCollection({
     description: z.string().min(50).max(160),
     section: z.enum(DOCS_SECTIONS),
     order: z.number(),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
     /**
      * Slug of another docs entry this one nests under in the sidebar only —
      * reading order (`section`/`order`), the URL, and every other listing are

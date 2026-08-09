@@ -3,6 +3,8 @@ title: Single sign-on (OIDC)
 description: Let operators sign in with your existing identity provider over OIDC, alongside or instead of local passwords, with roles still enforced in-app.
 section: Configuration
 order: 4
+publishDate: 2026-07-25
+updatedDate: 2026-08-07
 ---
 
 DMARC Analyzer can authenticate operators against any OpenID Connect provider —
