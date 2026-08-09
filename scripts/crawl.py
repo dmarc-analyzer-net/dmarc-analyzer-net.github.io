@@ -18,6 +18,21 @@ Zoning each link by the element it sits in separates the two.
 In CI it crawls the local preview build so a regression fails the pull request
 before it can reach production.
 
+**Serve the build with `npm run preview` and nothing else.** Two obvious
+alternatives fail in ways that look like content bugs rather than tooling bugs,
+and both cost real debugging time on 2026-08-08:
+
+- `npx serve -s dist` runs in SPA mode, so every unknown path falls back to
+  `index.html` with HTTP 200. This crawler then sees the homepage's title and
+  canonical on all 80 URLs and reports duplicate titles, duplicate meta
+  descriptions and a broken 404 page — a plausible-looking catastrophe caused
+  entirely by the `-s` flag.
+- `python3 -m http.server` returns **0 crawled pages**, after which the sitemap
+  check reports every URL unreachable.
+
+`npm run preview` is Astro's own static server and resolves routes exactly as
+production does.
+
 Standard library only. Exits non-zero if any error-level issue is found, so it
 can gate CI.
 """
@@ -38,6 +53,24 @@ MAX_PAGES = 500
 MAX_EXTERNAL = 60     # cap outbound checks so a run stays quick
 
 TITLE_MAX, TITLE_MIN = 60, 15
+# DESC_MAX is a *character* cap, and it does not catch what Google truncates.
+# Google cuts the snippet on rendered **width**, around 990px. On 2026-08-08 a
+# third-party audit (seo-reporter) flagged 27 pages over that width while this
+# check flagged none — every page was inside 160 characters. No character cap can
+# separate them either: the flagged descriptions ran 148-160 characters and the
+# unflagged ones ran up to 154, so the bands overlap. Capitals and wide glyphs
+# decide it.
+#
+# Measuring width here would mean carrying a per-character metrics table for a
+# font we do not control, so this stays a character check and the width question
+# is handled out of band. The method that worked, if it is needed again: build a
+# per-character width table, scale it against a third-party tool's own reported
+# widths, and confirm it classifies that tool's pass/fail set correctly before
+# trusting it (72 of 79 pages agreed, with every disagreement inside 30px of the
+# threshold, so it was only unreliable in a narrow band around 990px). Rewrites
+# targeted <=930px to stay clear of that band. 20 pages remain over width, all at
+# search positions past 20 where the snippet is not seen; worth revisiting only
+# if one of them reaches the top 20.
 DESC_MAX, DESC_MIN = 160, 50
 # 150 caught nothing — the site never once dipped under it, so it was
 # indistinguishable from no check at all. A third-party audit (Morningscore)
