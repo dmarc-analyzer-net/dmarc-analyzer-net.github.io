@@ -1,17 +1,20 @@
 ---
 title: Google
-description: Set up SSO with a Google Cloud OAuth client — no self-hosted option, a secret shown exactly once, and a redirect-URI trap that surfaces the moment you go live.
+description: Set up SSO with a Google Cloud OAuth client — a secret shown exactly once, and a redirect-URI trap that surfaces the moment you go live.
 section: Configuration
-order: 9
+order: 6
 parent: single-sign-on
 ---
 
-Google is the odd one out of the providers on this site: it is the only one
-with no self-hosted option. Entra ID, Zitadel, Keycloak and Authentik all let
-you stand up a real instance to test against; Google's OAuth consent screen
-and client only exist inside a real Google Cloud project, reachable over real
-HTTPS. Read [how SSO fits together](/docs/single-sign-on/) first if you have
-not — this page is only the Google-specific half.
+Sign operators in with their Google account, while DMARC Analyzer keeps
+deciding what each of them may see. Read [how SSO fits
+together](/docs/single-sign-on/) first if you have not — this page is only
+the Google-specific half.
+
+Testing this needs a real Google Cloud project and a real deployment
+reachable over HTTPS from the very first attempt — there is no local dev
+container to stand up first, so plan on testing against wherever you are
+actually deploying.
 
 ## Create a Google Cloud project
 
@@ -45,17 +48,15 @@ https://dmarc-analyzer.agency.tld/api/v1/auth/oidc/callback
 <img src="/docs/single-sign-on/google/02-create-client.webp" alt="The Web application client form with the Name field filled in and one Authorized redirect URI entered ending in /api/v1/auth/oidc/callback" width="765" height="670" loading="lazy" />
 
 Google's issuer is fixed at `https://accounts.google.com` — there is no
-per-project or per-tenant path the way Entra has a tenant ID in its authority
-URL.
+per-project or per-tenant path to add to it.
 
 ## The client secret is shown exactly once
 
-**Copy it now, and copy it correctly.** Every other provider on this site
-keeps some way to inspect a client's existing secret; Google does not. Close
-that one-time reveal dialog before it's copied — or transcribe it with even
-one character wrong — and there is no way back. The console says so plainly
-if you go looking afterward: *"Viewing and downloading client secrets is no
-longer available."*
+**Copy it now, and copy it correctly.** There is no way to inspect a client's
+existing secret afterward. Close that one-time reveal dialog before it's
+copied — or transcribe it with even one character wrong — and there is no
+way back. The console says so plainly if you go looking afterward:
+*"Viewing and downloading client secrets is no longer available."*
 
 <img src="/docs/single-sign-on/google/03-client-secrets-one-time.webp" alt="The Client secrets panel showing two masked secrets, one Disabled and one Enabled, above the warning that viewing or downloading a secret is no longer available once its reveal dialog is closed" width="500" height="610" loading="lazy" />
 
@@ -80,17 +81,15 @@ Restart and the login page gains the button. What happens on the [first
 sign-in](/docs/single-sign-on/#the-first-sign-in) is the same for every
 provider.
 
-> **Behind a reverse proxy, set `Network__UseForwardedHeaders`.** This is the
-> one place on this site where you'll hit it before you even reach a sign-in
-> prompt — see below.
+> **Behind a reverse proxy, set `Network__UseForwardedHeaders`.** You'll hit
+> this before you even reach a sign-in prompt — see below.
 
 ## The redirect-URI trap you'll hit first
 
-Because Google requires a real HTTPS redirect URI, testing it — unlike the
-four self-hosted providers here — means going live behind a real reverse
-proxy or ingress from the very first attempt. That surfaces a failure the
-docker-compose providers can hide entirely: the app has to get the **scheme**
-of its own redirect URI right before Google ever shows a sign-in prompt.
+Because Google requires a real HTTPS redirect URI, testing it means going
+live behind a real reverse proxy or ingress from the very first attempt. The
+app has to get the **scheme** of its own redirect URI right before Google
+ever shows a sign-in prompt.
 
 Without `Network__UseForwardedHeaders` set, the app does not believe
 `X-Forwarded-Proto` from the proxy in front of it, and builds `redirect_uri`
@@ -98,9 +97,7 @@ with whatever scheme it sees directly — almost always plain `http://`, even
 when every real request arrives over `https://`. Google checks this exactly
 and refuses the request outright: `redirect_uri_mismatch`, before any
 account picker or consent screen appears. The fix is the same setting the
-[generic guide](/docs/single-sign-on/#configure-the-app) already calls out,
-just surfacing earlier here than it does for a provider you can test on
-`localhost` first:
+[generic guide](/docs/single-sign-on/#configure-the-app) already calls out:
 
 ```yaml
 environment:

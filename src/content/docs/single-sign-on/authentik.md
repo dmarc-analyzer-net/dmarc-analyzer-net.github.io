@@ -2,20 +2,18 @@
 title: Authentik
 description: Set up SSO with Authentik — two objects rather than one, a confidential client by default, and grant types worth trimming before you finish.
 section: Configuration
-order: 8
+order: 9
 parent: single-sign-on
 ---
 
-Authentik is open source and self-hostable, like
-[Keycloak](/docs/single-sign-on/keycloak/). Read [how SSO fits
+Authentik is open source and self-hostable. Read [how SSO fits
 together](/docs/single-sign-on/) first if you have not — this page is only the
 Authentik-specific half.
 
-Two things make it different from the other providers documented here. It
-splits the client into **two objects** — a provider and an application — and
-the provider defaults to **confidential**, so unlike Zitadel and Keycloak you
-will have a client secret to store. Its grant-type defaults are also worth
-trimming, covered at the end.
+It splits the client into **two objects** — a provider and an application —
+and the provider defaults to **confidential**, so you will have a client
+secret to store by default. Its grant-type defaults are also worth trimming,
+covered at the end.
 
 ## Create the provider
 
@@ -34,12 +32,10 @@ both the generated Client ID and Client Secret:
 
 <img src="/docs/single-sign-on/authentik/02-client-type.webp" alt="Protocol settings showing Client Type set to Confidential rather than Public, with the generated Client ID and a masked Client Secret below" width="655" height="305" loading="lazy" />
 
-**Confidential is the default here, and that is a real difference.** Zitadel
-preselects PKCE with no secret, and Keycloak's wizard starts you on a public
-client; Authentik starts you on a confidential one. The app uses PKCE either
-way, so switching **Client Type** to **Public** works too and leaves you
-nothing to rotate — but if you accept the default, `Auth__Oidc__ClientSecret`
-is required and the token exchange fails without it.
+**Confidential is the default here.** The app uses PKCE either way, so
+switching **Client Type** to **Public** works too and leaves you nothing to
+rotate — but if you accept the default, `Auth__Oidc__ClientSecret` is
+required and the token exchange fails without it.
 
 Then add one **Redirect URI** entry — mode **Strict**, type **Authorization**:
 
@@ -130,11 +126,6 @@ rest is provider surface that nothing here asks for, and two are worth naming:
 the **password** grant turns your identity provider into a password-checking
 API, and **implicit** is deprecated for the same reasons the code flow exists.
 Untick everything except **Authorization Code** and **Refresh token**.
-
-Both other self-hosted providers documented here ship a default worth changing,
-but this is the larger one — Keycloak's is [an unenforced
-PKCE](/docs/single-sign-on/keycloak/) setting, where this one is extra flows
-left switched on.
 
 ## Troubleshooting
 
