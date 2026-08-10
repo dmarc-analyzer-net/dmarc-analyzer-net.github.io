@@ -133,9 +133,9 @@ Add `email` even if sign-ins already carry one — without it the app has nothin
 to match an account against and refuses with `no_account`.
 
 > **On 0.8.1 or earlier**, `xms_edov` is ignored and every Entra user with an
-> existing account is refused. Upgrade to **0.9.0**, which is the release that
-> reads it. If you cannot add the optional claim at all — no access to the
-> registration, or a policy against manifest edits — 0.9.0 also has
+> existing account is refused. Upgrade to **0.9.0 or newer**, which is where it
+> is read. If you cannot add the optional claim at all — no access to the
+> registration, or a policy against manifest edits — 0.9.0 and newer also have
 > `Auth__Oidc__TrustUnverifiedEmail`, which accepts a provider that says nothing.
 > It still refuses one that says "not verified", and it is only safe on a
 > single-tenant authority like the one above: on `/common`, any tenant anywhere
