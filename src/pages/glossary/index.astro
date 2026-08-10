@@ -7,7 +7,7 @@ const terms = (await getCollection('glossary', ({ data }) => !data.draft)).sort(
   (a, b) => a.data.term.localeCompare(b.data.term),
 );
 
-export const title = 'DMARC glossary — DMARC Analyzer';
+export const title = 'DMARC glossary: SPF, DKIM and alignment — DMARC Analyzer';
 export const description =
   'Plain-language definitions of DMARC, SPF, DKIM, alignment, aggregate reports, and the policy tags you meet while securing email.';
 ---
@@ -45,6 +45,24 @@ export const description =
           <a href="/glossary/bimi/">BIMI</a> and
           <a href="/glossary/mta-sts/">MTA-STS</a> build on that foundation
           rather than replacing any part of it.
+        </p>
+        <p>
+          Two of the terms here sit slightly apart from the rest. MTA-STS and
+          TLS-RPT are about transport rather than identity: they govern whether
+          the connection carrying a message was encrypted and verified, not who
+          was allowed to send it. ARC covers what happens when a message is
+          forwarded, which is the most common reason a perfectly legitimate email
+          fails a check it should have passed.
+        </p>
+        <p>
+          The definitions are deliberately short. Each says what the term means,
+          where it appears in a record or a header, and — usually the part worth
+          reading — what it does not cover. That last part is where most of the
+          confusion starts, because these standards overlap enough to look
+          interchangeable and differ enough that treating one as a substitute for
+          another quietly breaks something months later. Where a term needs a
+          procedure rather than a definition, the entry links out to the guide
+          that has it.
         </p>
       </div>
     </section>

@@ -389,6 +389,39 @@ inferred. What follows is what that found and what it left.
       production run (2026-07-28, the first time the outbound links had ever been
       checked): **64 pages, 12 of 13 outbound links checked, 0 errors, 5 warnings**
       (4 thin pages + og.png), 6 editorial-orphan notes.
+- [x] (done) **Titles that were too short, and hubs that only linked** — a
+      Morningscore audit on 2026-08-10 flagged 10 pages with a `<title>` under 30
+      characters and 3 with a low word count, and both findings were real in a way
+      the site's own crawler could not see.
+
+      The title floor was `TITLE_MIN = 15`, which no page had ever hit — the same
+      dead check `DESC_MIN` and `THIN_WORDS` each started as. The pages it missed
+      were the ones where the template does most of the work: a glossary entry
+      renders `` `${term} — DMARC glossary` ``, so `/glossary/spf/` shipped a
+      20-character title of which 17 characters are on all eleven siblings. Nothing
+      in it is a phrase anyone searches. `seoTitle` (already on four collections)
+      was added to `glossary` and used on the eight shortest entries, plus the five
+      SSO pages and `security` in `docs`, and five standalone pages. The floor is
+      now 30, which is where the audit's own pass/fail set divides. The RFC pages
+      sit exactly on 30 by construction (`RFC 7208: SPF`), so it is inclusive and
+      they are left alone — that format is deliberate.
+
+      The word-count finding needed a **new metric**, not a recalibrated one.
+      `THIN_WORDS` measured `/guides/` at 467 words and was right: a collection
+      index is a grid of cards and the cards are full of text. But every word of a
+      card sits inside its `<a>`, so the page said 31 words in its own voice.
+      Counting non-anchor text separates the two cleanly, and the split reproduces
+      the audit exactly: `/guides/`, `/docs/` and `/glossary/` measured 31, 62 and
+      98, and the next page up was `/compare/` at 165. `PROSE_MIN = 120` sits in
+      that gap. It is `elif` after the `THIN_WORDS` branch — a page already
+      reported as thin gains nothing from a second number — and skips `noindex`,
+      which is what keeps the `/docs/entra-id/` redirect stub (3 words) quiet.
+
+      All three hubs got real prose: how the guides sequence and why the order
+      matters, what a self-hosted deployment actually consists of, and where the
+      transport terms sit relative to the authentication ones. They now measure
+      304, 306 and 254. `/compare/` (165) and `/tools/` (208) clear the floor but
+      are the next-thinnest hubs if this is ever revisited.
 - [x] (done) **Header nav grouped under `Resources ▾`** — shipped in #23 alongside
       the responsive work, before this item was re-read. Features / How it works /
       Compare stay in the top row; Docs, Guides, Glossary, Setup and Tools moved into

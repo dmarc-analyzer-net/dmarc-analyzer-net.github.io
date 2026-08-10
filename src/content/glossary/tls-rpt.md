@@ -1,5 +1,6 @@
 ---
 term: TLS-RPT
+seoTitle: "TLS-RPT: reports on TLS delivery failures"
 description: TLS-RPT asks sending servers to report when encrypted delivery to your domain fails. It is the reporting half of MTA-STS, published at _smtp._tls.
 aliases: ["TLS-RPT record", "SMTP TLS Reporting", "TLSRPTv1"]
 related: ["mta-sts", "dmarc-aggregate-report", "dmarc"]

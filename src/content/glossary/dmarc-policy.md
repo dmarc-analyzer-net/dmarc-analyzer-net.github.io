@@ -1,5 +1,6 @@
 ---
 term: DMARC policy
+seoTitle: "DMARC policy: p=none, quarantine, reject"
 description: The DMARC policy (p=) tells receivers whether to monitor, quarantine, or reject mail that fails authentication — the dial you turn toward enforcement.
 aliases: ["p=none", "p=quarantine", "p=reject"]
 related: ["dmarc", "dmarc-aggregate-report", "dmarc-alignment", "dmarc-quarantine-vs-reject"]

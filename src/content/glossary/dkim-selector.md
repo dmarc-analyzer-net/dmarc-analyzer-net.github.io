@@ -1,5 +1,6 @@
 ---
 term: DKIM selector
+seoTitle: "DKIM selector: how receivers find the key"
 description: A DKIM selector is the label that points to a specific DKIM public key in DNS, letting a domain publish and rotate multiple signing keys at once.
 aliases: ["DKIM selectors", "selector"]
 related: ["dkim", "dmarc", "spf"]

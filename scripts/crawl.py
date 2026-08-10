@@ -4,8 +4,8 @@
 Screaming Frog's free tier is GUI-only and its headless CLI is licence-gated, so
 this covers the same ground from a terminal: broken links, redirect chains,
 title/description/H1/H2/H3 problems, heading order, a missing custom 404 page,
-canonical mismatches, thin pages, images missing alt text or weighing more than
-100 KB, orphan pages, and sitemap coverage.
+canonical mismatches, thin pages, hub pages that only link, images missing alt
+text or weighing more than 100 KB, orphan pages, and sitemap coverage.
 
 It also reports something a crawler usually can't tell you: which pages nothing
 but the site's own chrome links to. Header, footer, breadcrumbs, sidebars and
@@ -52,7 +52,16 @@ DELAY = 0.35          # be polite; GitHub Pages throttles fast crawls with 503s
 MAX_PAGES = 500
 MAX_EXTERNAL = 60     # cap outbound checks so a run stays quick
 
-TITLE_MAX, TITLE_MIN = 60, 15
+# 15 was the same kind of dead floor DESC_MIN and THIN_WORDS started with: no page
+# ever hit it, so it never said anything. A third-party audit (Morningscore) on
+# 2026-08-10 flagged 10 pages this crawl passed, every one of them a page whose
+# <title> was a bare label plus the site suffix — "SPF — DMARC glossary", 20
+# characters, of which 17 are on every other page too. Nothing in that title is a
+# phrase anyone searches for. 30 is where the audit's own pass/fail set divides:
+# everything it flagged measured 29 or fewer, everything it left alone measured 30
+# or more. The RFC pages sit exactly on 30 by construction ("RFC 7208: SPF"), which
+# is the deliberate format, so the floor is inclusive rather than one higher.
+TITLE_MAX, TITLE_MIN = 60, 30
 # DESC_MAX is a *character* cap, and it does not catch what Google truncates.
 # Google cuts the snippet on rendered **width**, around 990px. On 2026-08-08 a
 # third-party audit (seo-reporter) flagged 27 pages over that width while this
@@ -79,6 +88,16 @@ DESC_MAX, DESC_MIN = 160, 50
 # below); the shortest confirmed-fine page it left alone measured 334 by the
 # same method. 300 sits just under that line.
 THIN_WORDS = 300
+# THIN_WORDS alone cannot see the thing that is actually wrong with a hub page. A
+# collection index is a grid of cards, and every word in a card sits inside the
+# <a> that wraps it, so /guides/ counted 467 words while saying 31 in its own
+# voice. The same audit flagged all three collection indexes and nothing else,
+# which is exactly the set this separates: measured on non-anchor text, /guides/,
+# /docs/ and /glossary/ came out at 31, 62 and 98 words, and the next page up was
+# /compare/ at 165. 120 sits in that gap. Anchor text is not worthless — it is
+# just not the page saying anything, and a hub that only lists its children gives
+# a search engine no reason to rank it over the children themselves.
+PROSE_MIN = 120
 IMAGE_MAX_BYTES = 100 * 1024   # Screaming Frog's own "large images" threshold
 MAX_IMAGES = 100
 
@@ -119,9 +138,14 @@ class Page(HTMLParser):
         self._in_h1 = False
         self._h1_buf: list[str] = []
         self._text: list[str] = []
+        # `_text` minus anything inside an <a>. See PROSE_MIN: on a card grid the
+        # two numbers diverge by an order of magnitude, and the smaller one is
+        # the page's own contribution.
+        self._prose: list[str] = []
         self._skip = 0
         self._nav = 0
         self._chrome = 0
+        self._anchor = 0
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
@@ -149,6 +173,7 @@ class Page(HTMLParser):
         elif tag == "link" and (a.get("rel") or "").lower() == "canonical":
             self.canonical = (a.get("href") or "").strip()
         elif tag == "a":
+            self._anchor += 1
             href = (a.get("href") or "").strip()
             if href:
                 self.links.append(href)
@@ -179,6 +204,8 @@ class Page(HTMLParser):
         elif tag == "h1":
             self._in_h1 = False
             self.h1.append(" ".join("".join(self._h1_buf).split()))
+        elif tag == "a":
+            self._anchor = max(self._anchor - 1, 0)
         elif tag in ("script", "style", "nav", "footer", "aside"):
             self._skip = max(self._skip - 1, 0)
             if tag == "nav":
@@ -194,10 +221,16 @@ class Page(HTMLParser):
             self._h1_buf.append(data)
         if not self._skip:
             self._text.append(data)
+            if not self._anchor:
+                self._prose.append(data)
 
     @property
     def word_count(self) -> int:
         return len(" ".join(self._text).split())
+
+    @property
+    def prose_word_count(self) -> int:
+        return len(" ".join(self._prose).split())
 
 
 def fetch(url: str, method: str = "GET"):
@@ -500,6 +533,12 @@ def main() -> int:
 
         if p.word_count < THIN_WORDS:
             warnings.append(f"thin content ({p.word_count} words): {url}")
+        elif p.prose_word_count < PROSE_MIN and not (p.robots and "noindex" in p.robots):
+            # `elif`, because a page under THIN_WORDS is already being reported
+            # and the prose figure adds nothing to that. This is for the pages
+            # that look substantial only because they link a lot.
+            warnings.append(f"only {p.prose_word_count} words outside links "
+                            f"({p.word_count} total): {url}")
 
         if p.images_without_alt:
             warnings.append(f"{p.images_without_alt}/{p.images} images without alt: {url}")

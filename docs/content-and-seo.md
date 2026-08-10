@@ -93,6 +93,7 @@ const glossary = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/glossary' }),
   schema: z.object({
     term: z.string(),
+    seoTitle: z.string().optional(),            // <title> only; h1 stays the bare term
     description: z.string().min(50).max(160),
     aliases: z.array(z.string()).default([]),   // e.g. ["RUA"] for "aggregate report"
     related: z.array(z.string()).default([]),   // slugs of related entries
@@ -313,6 +314,20 @@ Most of this is already handled; the rest is a few small additions.
 
 **Already done by this site**
 - ✅ Unique `<title>` + meta description per page (via `BaseLayout` props)
+- ✅ A **floor** on title length as well as a ceiling — `crawl.py` warns on a
+      title under 30 characters. The ceiling is the obvious one; the floor catches
+      the opposite mistake, which this site made ten times over. A glossary
+      entry's h1 wants to be the bare term, and `` `${term} — DMARC glossary` ``
+      renders a 20-character title of which 17 characters appear on every sibling
+      page. Every collection except `rfcs` takes a `seoTitle` that overrides the
+      `<title>` alone, so the h1 stays short and the title carries a phrase
+      someone might actually search. (`rfcs` renders `RFC 7208: SPF` from
+      `number` + `shortTitle`, which is the deliberate format and sits on 30.)
+- ✅ Hub pages say something in their **own** voice. A collection index is a grid
+      of cards, and every word of a card sits inside its `<a>`, so a page can
+      measure 467 words and contribute 31 of them. `crawl.py` counts non-anchor
+      text separately and warns under `PROSE_MIN`, because that is the number a
+      search engine has any reason to rank the hub on rather than its children.
 - ✅ Canonical URL, Open Graph, Twitter cards (`BaseLayout`)
 - ✅ `sitemap-index.xml` auto-generated — new pages are included automatically
 - ✅ Fast, static, zero-JS pages (great Core Web Vitals)

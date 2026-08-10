@@ -1,5 +1,6 @@
 ---
 term: DKIM
+seoTitle: "DKIM (DomainKeys Identified Mail)"
 description: DKIM signs outgoing mail so a receiver can verify which domain took responsibility for the message, and that the signed parts were not altered.
 aliases: ["DomainKeys Identified Mail"]
 related: ["spf", "dmarc", "dmarc-alignment", "dkim-selector", "arc"]

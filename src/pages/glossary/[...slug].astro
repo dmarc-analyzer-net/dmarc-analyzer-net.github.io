@@ -36,7 +36,7 @@ const definedTermSchema = {
   url: new URL(path, Astro.site).href,
 };
 ---
-<BaseLayout current="glossary" title={`${entry.data.term} — DMARC glossary`} description={entry.data.description} path={path} image={image} ogType="article">
+<BaseLayout current="glossary" title={`${entry.data.seoTitle ?? entry.data.term} — DMARC glossary`} description={entry.data.description} path={path} image={image} ogType="article">
   <JsonLd slot="head" schema={definedTermSchema} />
     <article style="max-width:720px; margin:0 auto; padding:40px 32px 72px;">
       <Breadcrumbs items={[

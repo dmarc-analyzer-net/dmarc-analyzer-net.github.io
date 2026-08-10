@@ -19,7 +19,7 @@ const sections = DOCS_SECTIONS.map((section) => ({
 
 const first = sections[0]?.items[0];
 
-export const title = 'Documentation — DMARC Analyzer';
+export const title = 'Documentation: install, configure, operate — DMARC Analyzer';
 export const description =
   'Install, configure, and operate your own DMARC Analyzer: Docker quick start, configuration reference, mailbox setup, and upgrades.';
 ---
@@ -48,6 +48,38 @@ export const description =
             <a class="btn-ghost" href={GH} style="display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 16px; border:1px solid var(--border-strong); border-radius:var(--radius-md); background:#fff; color:var(--text-body) !important; font-size:var(--text-base); font-weight:500;"><Icon name="github" style="font-size:16px;" /> Source on GitHub</a>
           </div>
         )}
+
+        <div class="prose" style="margin-bottom:36px;">
+          <h2>What you are running</h2>
+          <p>
+            DMARC Analyzer is one application with two jobs. A polling loop
+            connects outbound to the mailbox your reports arrive in, parses the
+            aggregate XML, and writes the result to PostgreSQL; a web console
+            reads that database and is the part you and your clients look at.
+            Both come out of the same image, so the default deployment is a
+            single container plus a database, and splitting them apart is a
+            decision you can defer until a sync pass is heavy enough to compete
+            with the console for CPU.
+          </p>
+          <p>
+            None of it needs to face the internet. The application never accepts
+            inbound SMTP and never needs an inbound connection to collect
+            reports, so running it on a private network with no ingress at all is
+            a legitimate choice — the console is the only thing anyone has to
+            reach, and only if you want them to. What gets stored is
+            statistical: sending addresses, message counts and a pass or fail per
+            report, never the contents of anyone's mail.
+          </p>
+          <p>
+            Three choices shape a deployment — bundled or external PostgreSQL,
+            one container or two, Compose or Kubernetes — and they are
+            independent of each other. Every combination reads the same
+            environment variables, so moving between them is a deployment change
+            rather than a reconfiguration. That is the main reason it is safe to
+            take the defaults now and revisit them once you know how much mail
+            you are actually ingesting.
+          </p>
+        </div>
 
         {sections.map((group) => (
           <section style="margin-bottom:32px;">

@@ -1,5 +1,6 @@
 ---
 title: Microsoft Entra ID
+seoTitle: "Single sign-on with Entra ID"
 description: Set up SSO with Microsoft Entra ID — register the app, add the client secret Entra requires, and get the redirect URI right first time.
 section: Configuration
 order: 5
