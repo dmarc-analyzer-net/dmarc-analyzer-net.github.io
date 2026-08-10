@@ -1,5 +1,6 @@
 ---
 term: SPF
+seoTitle: "SPF (Sender Policy Framework)"
 description: SPF is a DNS record listing which servers are allowed to send mail for your domain, so receivers can reject forgeries from everywhere else.
 aliases: ["Sender Policy Framework"]
 related: ["dkim", "dmarc", "dmarc-alignment"]

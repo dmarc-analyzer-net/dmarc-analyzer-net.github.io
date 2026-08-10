@@ -37,10 +37,19 @@ const glossary = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/glossary' }),
   schema: z.object({
     term: z.string(),
+    /**
+     * Overrides `term` in the <title> tag only; keeps the h1 a bare term.
+     * A definition page's h1 wants to be the word itself ("SPF"), which
+     * renders a 20-character <title> — half of what a SERP will show, and
+     * nothing a searcher can match against. This is where the rest goes.
+     */
+    seoTitle: z.string().optional(),
     description: z.string().min(50).max(160),
     aliases: z.array(z.string()).default([]), // e.g. ["RUA"] for "aggregate report"
     related: z.array(z.string()).default([]), // slugs of related glossary entries
     draft: z.boolean().default(false),
+  }).refine((d) => (d.seoTitle ?? d.term).length <= 43, {
+    message: 'term (or seoTitle) must be <= 43 chars so the rendered <title> stays under 60',
   }),
 });
 

@@ -1,5 +1,6 @@
 ---
 term: BIMI
+seoTitle: "BIMI: your logo in authenticated email"
 description: BIMI (Brand Indicators for Message Identification) displays your brand logo beside authenticated email — but only once your domain is at DMARC enforcement.
 aliases: ["BIMI record", "Brand Indicators for Message Identification"]
 related: ["dmarc", "dmarc-policy", "dkim"]

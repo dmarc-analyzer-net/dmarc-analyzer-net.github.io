@@ -5,6 +5,9 @@ import LogoMark from '../components/LogoMark.astro';
 import Icon from '../components/Icon.astro';
 
 export const title = 'Brand assets';
+// The h1 and breadcrumb want the short label; the <title> needs enough words to
+// be worth showing in a SERP. Same split as `seoTitle` in the collections.
+const seoTitle = 'Brand assets: logo, colours and usage';
 export const description =
   'Download the DMARC Analyzer logo in SVG and PNG, with the colour palette, type stack and plain-English terms for using the name and mark.';
 const path = '/brand/';
@@ -71,7 +74,7 @@ const donts = [
   { note: 'Don’t add effects or outlines.', css: 'filter:drop-shadow(0 0 6px rgba(0,0,0,0.65)); outline:3px dashed var(--red-600); outline-offset:3px;' },
 ];
 ---
-<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path={path} image="/open-graph/brand.png">
+<BaseLayout title={`${seoTitle} — DMARC Analyzer`} description={description} path={path} image="/open-graph/brand.png">
   <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
     <div style="max-width:960px; margin:0 auto; padding:56px 32px 32px;">
       <Breadcrumbs items={[

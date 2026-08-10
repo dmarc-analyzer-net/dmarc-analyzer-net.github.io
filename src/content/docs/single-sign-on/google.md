@@ -1,5 +1,6 @@
 ---
 title: Google
+seoTitle: "Single sign-on with Google"
 description: Set up SSO with a Google Cloud OAuth client — a secret shown exactly once, and a redirect-URI trap that surfaces the moment you go live.
 section: Configuration
 order: 6

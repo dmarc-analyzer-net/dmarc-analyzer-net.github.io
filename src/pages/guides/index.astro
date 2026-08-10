@@ -8,7 +8,7 @@ const guides = (await getCollection('guides', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime(),
 );
 
-export const title = 'DMARC guides — DMARC Analyzer';
+export const title = 'DMARC guides: from p=none to enforcement — DMARC Analyzer';
 export const description =
   'Practical, no-fluff guides to DMARC: publish your first record, read aggregate reports, and move safely to full p=reject enforcement.';
 ---
@@ -29,7 +29,50 @@ export const description =
         <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:600px;">Step-by-step guides for getting a domain from no protection to full enforcement — without breaking legitimate mail.</p>
       </div>
     </section>
-    <section style="max-width:960px; margin:0 auto; padding:32px 32px 72px;">
+    <section style="max-width:720px; margin:0 auto; padding:8px 32px 0;">
+      <div class="prose">
+        <h2>Where to start</h2>
+        <p>
+          Every domain takes the same route, and the order matters more than the
+          pace. Publish a monitoring-only record so reports start arriving, spend
+          a few weeks finding out who really sends mail as you, authorise or fix
+          each of those senders, and only then turn the policy up. Going straight
+          to <code>p=reject</code> before the reports have shown you the full list
+          is how legitimate mail gets thrown away — and it is rarely the mail
+          anyone notices missing on the first day. Invoice reminders, password
+          resets and the output of a forgotten cron job all send without anyone
+          testing them.
+        </p>
+        <p>
+          Three of the guides below cover that route end to end.
+          <a href="/guides/publish-your-first-dmarc-record/">Publish your first
+          DMARC record</a> is the five-minute DNS change that starts the report
+          flow and changes nothing about how your mail is treated.
+          <a href="/guides/how-to-read-a-dmarc-aggregate-report/">How to read a
+          DMARC aggregate report</a> turns the XML that follows into a short list
+          of senders worth chasing.
+          <a href="/guides/from-monitoring-to-enforcement/">From monitoring to
+          enforcement</a> is the staged move through quarantine to full
+          enforcement, and the point at which a domain is actually protected
+          rather than merely observed.
+        </p>
+        <p>
+          The rest answer one question each. Some explain a standard: how the
+          <a href="/guides/spf-dkim-dmarc/">three records divide the work</a>
+          between them, what every
+          <a href="/guides/dmarc-record-tags/">tag in a DMARC record</a> does and
+          what it quietly defaults to when you leave it out, or how
+          <a href="/guides/spf-record-syntax/">SPF syntax</a> behaves once a
+          domain runs into the ten-lookup limit. Others start where most people
+          actually start — an error message from a checker, a report full of
+          failures, or a client asking why their invoices went to spam. If that
+          is you, read the guide that matches the symptom first, then come back
+          to the route above; fixing one sender is worth little if the policy
+          never moves off monitoring.
+        </p>
+      </div>
+    </section>
+    <section style="max-width:960px; margin:0 auto; padding:24px 32px 72px;">
       <ul style="list-style:none; margin:0; padding:0; display:grid; gap:16px;">
         {guides.map((g) => (
           <li>

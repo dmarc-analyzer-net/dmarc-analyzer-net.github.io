@@ -1,5 +1,6 @@
 ---
 term: MTA-STS
+seoTitle: "MTA-STS: enforced TLS for inbound mail"
 description: MTA-STS forces mail sent to your domain to use encrypted TLS, closing a downgrade-attack gap that SPF, DKIM, and DMARC don't address.
 aliases: ["MTA-STS record", "SMTP MTA Strict Transport Security"]
 related: ["dmarc", "spf", "dkim", "tls-rpt"]

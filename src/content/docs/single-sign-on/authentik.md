@@ -1,5 +1,6 @@
 ---
 title: Authentik
+seoTitle: "Single sign-on with Authentik"
 description: Set up SSO with Authentik — two objects rather than one, a confidential client by default, and grant types worth trimming before you finish.
 section: Configuration
 order: 9

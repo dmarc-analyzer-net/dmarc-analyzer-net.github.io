@@ -1,5 +1,6 @@
 ---
 term: DMARC
+seoTitle: "DMARC: policy, alignment and reports"
 description: DMARC tells receiving mail servers what to do with mail that fails authentication or alignment, and reports back on who is sending as your domain.
 aliases: ["Domain-based Message Authentication, Reporting and Conformance"]
 related: ["spf", "dkim", "dmarc-alignment", "dmarc-policy", "dmarc-aggregate-report", "bimi", "mta-sts"]

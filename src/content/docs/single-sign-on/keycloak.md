@@ -1,5 +1,6 @@
 ---
 title: Keycloak
+seoTitle: "Single sign-on with Keycloak"
 description: Set up SSO with Keycloak — a dedicated realm and a public PKCE client, with one default worth overriding for a properly secured setup.
 section: Configuration
 order: 7
