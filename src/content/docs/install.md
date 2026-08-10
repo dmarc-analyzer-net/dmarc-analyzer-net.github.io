@@ -103,7 +103,7 @@ anything you depend on, **pin a version** — it makes an upgrade an explicit ac
 and a rollback unambiguous:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.9.0
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.10.0
 ```
 
 See [upgrading](/docs/upgrading-and-backup/#pinning-a-version).
@@ -127,7 +127,7 @@ There is a Helm chart, published as an OCI artifact on every release:
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.9.0 --namespace dmarc --create-namespace \
+  --version 0.10.0 --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
 
