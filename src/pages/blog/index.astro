@@ -1,0 +1,91 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { FEED_PATH, TYPE_LABEL, byNewest } from '../../lib/blog';
+
+const posts = byNewest(await getCollection('blog', ({ data }) => !data.draft));
+
+export const title = 'Blog — research and engineering notes';
+export const description =
+  'Original measurements of email-authentication adoption, notes on how the tooling is built, and monthly release roundups from the DMARC Analyzer project.';
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout title={`${title} — DMARC Analyzer`} description={description} path="/blog/" image="/open-graph/blog.png">
+  <link slot="head" rel="alternate" type="application/rss+xml" title="DMARC Analyzer blog" href={FEED_PATH} />
+  <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+    <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
+      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Blog', href: '/blog/' }]} />
+      <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">Blog</div>
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:760px;">What we measured, and how we built it.</h1>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Original data on how the internet actually configures email authentication, plus engineering notes. Not how-to guides — those live in <a href="/guides/">Guides</a>.</p>
+    </div>
+  </section>
+
+  <section style="max-width:760px; margin:0 auto; padding:8px 32px 0;">
+    <div class="prose">
+      <h2>What is here</h2>
+      <p>
+        Three kinds of post, and no how-to guides. <strong>Research</strong> posts
+        report original measurements — we survey the DNS of a million domains
+        every month and publish what changed, with the population, date and
+        method attached to every figure so it can be checked. <strong>Engineering</strong>
+        posts are about how the tooling is built and what broke.
+        <strong>Release notes</strong> are a monthly roundup, skipped entirely
+        when nothing shipped.
+      </p>
+      <h2>Where the data comes from</h2>
+      <p>
+        Once a month we survey the DNS of a million domains — the
+        <a href="https://tranco-list.eu/">Tranco</a> top 1M, plus every domain we
+        have seen in any previous run — and record what each publishes for DMARC,
+        SPF, MTA-STS, TLS-RPT and BIMI. Each snapshot names the exact list it
+        measured, so a figure can be traced to a population rather than to
+        "the internet".
+      </p>
+      <p>
+        Two rules govern every number here. Domains whose lookups failed are
+        excluded from denominators rather than counted as having no record —
+        treating a timeout as an absence biases adoption downward by exactly the
+        domains with unreliable DNS. And no figure is published without the
+        population, the date and the definitions behind it, because a number
+        nobody can check is decoration. The scanner
+        <a href="/research/">identifies itself</a> and can be asked to skip any
+        domain.
+      </p>
+
+      <h2>What is not here</h2>
+      <p>
+        Anything answering "how do I …". Those are
+        <a href="/guides/">guides</a>, and keeping the two apart is deliberate:
+        a guide is neutral reference material that gets corrected quietly, while
+        a post is dated, bylined, and gets a correction note rather than a silent
+        rewrite — because a claim someone linked to should stay legible.
+      </p>
+    </div>
+  </section>
+
+  <section style="max-width:960px; margin:0 auto; padding:8px 32px 64px;">
+    {posts.length === 0 && (
+      <p style="color:var(--gray-700);">No posts yet.</p>
+    )}
+    <ul style="list-style:none; padding:0; margin:0;">
+      {posts.map((post) => (
+        <li style="border-bottom:1px solid var(--border-default); padding:26px 0;">
+          <div style="display:flex; gap:10px; align-items:center; font-size:var(--text-sm); color:var(--text-faint); margin-bottom:8px;">
+            <span style="color:var(--brand); font-weight:600;">{TYPE_LABEL[post.data.type]}</span>
+            <span>·</span>
+            <time datetime={post.data.publishDate.toISOString()}>{fmt(post.data.publishDate)}</time>
+          </div>
+          <a href={`/blog/${post.id}/`} style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-xl); font-weight:600; line-height:1.25; text-decoration:none; display:block; margin-bottom:8px;">{post.data.title}</a>
+          <p style="margin:0; color:var(--gray-700); line-height:1.55;">{post.data.description}</p>
+        </li>
+      ))}
+    </ul>
+    <p style="margin:28px 0 0; font-size:var(--text-sm); color:var(--text-faint);">
+      <a href={FEED_PATH}>RSS feed</a> — the blog only. A feed that fires on guide edits is noise.
+    </p>
+  </section>
+</BaseLayout>

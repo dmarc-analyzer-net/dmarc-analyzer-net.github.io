@@ -148,4 +148,47 @@ const rfcs = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary, providers, compare, docs, rfcs };
+// Research findings, engineering write-ups and monthly release roundups.
+// Authored in src/content/blog/ and rendered by src/pages/blog/[...slug].astro.
+//
+// One collection with a `type`, not three thin sections — and deliberately no
+// `seoTitle`. §6a of the private style guide: the blog targets no keywords,
+// because every search-intent cluster is already assigned to guides, glossary,
+// dmarc-for, compare, tools, docs or rfc. A post chasing one competes with a
+// page we already own, which is exactly what went wrong twice on 2026-08-08.
+// Omitting seoTitle removes the tool for doing it by accident.
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
+  schema: z.object({
+    title: z.string().max(43),
+    description: z.string().min(50).max(160),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    /** research: original data. engineering: how it was built. release: monthly roundup. */
+    type: z.enum(['research', 'engineering', 'release']),
+    /** Posts are bylined; guides are not. A named author is what earns
+     *  credibility in the communities the blog is written for. */
+    author: z.string().default('Michael Fjeldsted'),
+    /** Population, date and method for a research post — never a figure without
+     *  one. Required for type: research, enforced by the refine below. */
+    method: z.string().optional(),
+    /** Licence attribution a data source requires, e.g. CC BY for a ccTLD zone. */
+    attribution: z.string().optional(),
+    /** A dated claim someone linked to should stay legible: posts get a
+     *  correction note rather than a silent rewrite. */
+    corrections: z.array(z.object({
+      date: z.coerce.date(),
+      note: z.string(),
+    })).default([]),
+    draft: z.boolean().default(false),
+  }).refine(titleBudget(43), { message: budgetMessage(43) })
+    .refine((d) => d.type !== 'research' || (d.method && d.method.length >= 40), {
+    message:
+      'a research post must carry `method`: population, date, list/zone id, how ' +
+      'many domains resolved, and what counted as what. A figure nobody can ' +
+      'check is decoration.',
+    path: ['method'],
+  }),
+});
+
+export const collections = { guides, glossary, providers, compare, docs, rfcs, blog };
