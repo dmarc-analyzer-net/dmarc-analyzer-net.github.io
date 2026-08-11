@@ -118,6 +118,13 @@ export async function buildSections(): Promise<Section[]> {
           body: '',
         },
         {
+          title: 'Blog',
+          url: `${SITE}/blog/`,
+          description:
+            'Original measurements of email-authentication adoption, engineering notes and monthly release roundups. Bylined; targets no keywords by design.',
+          body: '',
+        },
+        {
           title: 'Our DNS research scanner',
           url: `${SITE}/research/`,
           description:

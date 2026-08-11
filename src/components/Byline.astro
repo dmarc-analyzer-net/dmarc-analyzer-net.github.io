@@ -1,0 +1,27 @@
+---
+// Posts are bylined; guides are not. That distinction is deliberate rather than
+// inconsistent: guides are neutral reference material, posts are research and
+// opinion, and a named author is what earns credibility in the communities the
+// blog is written for — and what E-E-A-T rewards.
+interface Props {
+  author: string;
+  publishDate: Date;
+  updatedDate?: Date;
+  type: 'research' | 'engineering' | 'release';
+}
+const { author, publishDate, updatedDate, type } = Astro.props;
+
+// UTC, for the same reason PageDates uses it: frontmatter dates are date-only,
+// and formatting in the build machine's zone shifts them a day west of Greenwich.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+const label = { research: 'Research', engineering: 'Engineering', release: 'Release notes' }[type];
+---
+<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:var(--text-sm); color:var(--text-faint); margin:0 0 28px;">
+  <span style="display:inline-block; padding:3px 10px; border-radius:999px; background:var(--surface-raised, rgba(20,184,166,0.10)); color:var(--brand); font-weight:600;">{label}</span>
+  <span style="color:var(--gray-700); font-weight:500;">{author}</span>
+  <span>·</span>
+  <time datetime={publishDate.toISOString()}>{fmt(publishDate)}</time>
+  {updatedDate && <><span>·</span><span>updated {fmt(updatedDate)}</span></>}
+</div>

@@ -940,7 +940,7 @@ inferred. What follows is what that found and what it left.
       pinned to 4.x because the `latest` tag peers on Astro 7. One guide is authored
       as `.mdx` so far; the rest stay plain Markdown until a page needs a component.
 - [ ] (todo) Add Astro `redirects` config entries as/when URLs are renamed (GitHub Pages has no server-side redirects).
-- [ ] (todo) **Add a `blog` collection and `/blog`.** Shape decided 2026-08-08 —
+- [x] (done) **Add a `blog` collection and `/blog`.** Shape decided 2026-08-08 —
       the editorial rules are §6a of the `seo` repo's `content-style-guide.md`,
       which is the binding version; this entry is the build work.
       - One section, three `type` values: `research`, `engineering`, `release`.
@@ -955,8 +955,9 @@ inferred. What follows is what that found and what it left.
         assigned to guides/glossary/`dmarc-for`/compare/tools/docs/`rfc`, so a
         post chasing one competes with our own page — which is exactly what went
         wrong twice on 2026-08-08 (`/glossary/dkim-selector/` and `/rfc/9989/`).
-- [ ] (todo) **Add RSS via `@astrojs/rss`** (4.0.19), **blog only** — a feed that
-      fires on guide edits is noise. Depends on the collection above.
+- [x] (done) **Add RSS via `@astrojs/rss`** (4.0.19), **blog only** — a feed that
+      fires on guide edits is noise. Shipped with the collection at
+      `/blog/rss.xml`, linked from the blog index and from `<head>` there only.
 - [ ] (todo) ~~**Cross-post blog posts to dev.to**~~ — **deprioritised, not
       blocked.** It was blocked on the collection above, but the 2026-08-08
       `serp_competitors` pull also puts dev.to at median position 37 with
