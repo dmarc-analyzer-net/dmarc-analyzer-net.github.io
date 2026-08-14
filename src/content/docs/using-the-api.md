@@ -119,7 +119,7 @@ anywhere in the API, and only one endpoint paginates at all:
 |---|---|---|
 | `GET /admin/audit-events` | `limit` (default 200, clamped 1–1000) and `offset` | The only one. Returns `{"total":N,"items":[…]}`. Also takes `days` (default 30, clamped 1–730), `eventType`, `actor`, `clientId`. |
 | `GET /alerts` | none | Takes `days` (default 30, clamped 1–365) and returns **at most 500 rows**, newest first, with no total and no cursor. A busy tenant gets a silently incomplete list. |
-| `GET /mailbox-sync-runs` | `limit` (default 50, clamped 1–200) | Optionally filtered by `reportSourceId`. **This parameter was renamed in 0.11.0** — see [what changed](#what-changed-in-0110) below, because the old name fails quietly. |
+| `GET /mailbox-sync-runs` | `limit` (default 50, clamped 1–200) | Optionally filtered by `reportSourceId`. **This parameter was renamed in 0.11.1** — see [what changed](#what-changed-in-0111) below, because the old name fails quietly. |
 
 Errors are a flat `{"error":"…"}` — not RFC 7807 `problem+json`:
 
@@ -204,7 +204,7 @@ owner no matter which mailbox it arrived in; see
 [a domain landed under the wrong client](/docs/troubleshooting/#a-domain-landed-under-the-wrong-client)
 when it bites.
 
-## What changed in 0.11.0
+## What changed in 0.11.1
 
 Three renames landed together, and they fail in three different ways. If you have
 a script written against 0.10.0 or earlier, this is the list.
