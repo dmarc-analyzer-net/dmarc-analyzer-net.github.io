@@ -5,7 +5,7 @@ description: What DMARC Analyzer stores, how mailbox credentials and passwords a
 section: Operations
 order: 2
 publishDate: 2026-07-26
-updatedDate: 2026-07-27
+updatedDate: 2026-08-18
 ---
 
 Self-hosting means the security posture is yours. This page is what you need to
@@ -22,12 +22,12 @@ DKIM". There are no subjects, no bodies, no recipients, no attachments.
 |---|---|
 | Sending IPs, message counts, pass/fail per report | Message content of any kind |
 | Domains, clients, retention settings | Your users' mail |
-| Mailbox host, username, encrypted password | The mail in that mailbox after parsing |
+| Source address (mailbox host or bucket), username, encrypted password | The mail in that mailbox after parsing |
 | Audit entries: who did what, when, from where | |
 
-The application connects **outbound** to your IMAP mailbox. It never needs inbound
-SMTP, and it does not need to be internet-facing at all unless you want the console
-to be.
+The application connects **outbound** to the sources you configure — an IMAP or
+POP3 mailbox, or an S3 bucket. It never needs inbound SMTP, and it does not need to
+be internet-facing at all unless you want the console to be.
 
 ## The encryption key
 
@@ -112,9 +112,10 @@ front of anything internet-facing.
 
 Nothing in the application needs to accept inbound connections from the internet.
 A perfectly reasonable deployment keeps the console on a private network or behind
-your VPN and lets only its outbound connections cross a boundary — IMAP to your
-mailbox, plus DNS for published-policy lookups, SMTP if you enable alert or digest
-mail, and HTTPS to your identity provider if you enable SSO.
+your VPN and lets only its outbound connections cross a boundary — IMAP, POP3 or
+HTTPS to the report sources you configured, plus DNS for published-policy lookups,
+SMTP if you enable alert or digest mail, and HTTPS to your identity provider if you
+enable SSO.
 
 > **Plain HTTP on a private network works, and costs you something.** The session
 > cookie's `Secure` flag follows the request scheme, so reaching the console at

@@ -4,7 +4,7 @@ description: What personal data DMARC reports actually contain, where it lives i
 section: Operations
 order: 5
 publishDate: 2026-07-27
-updatedDate: 2026-08-02
+updatedDate: 2026-08-18
 ---
 
 DMARC monitoring processes personal data — less than most people fear, more
@@ -51,11 +51,12 @@ sub-processor of its own**. What you choose around it still counts: a mailbox at
 a hosted provider and a bucket at a cloud provider are processors you name in
 your own records, and possibly international transfers.
 
-Outbound connections, exhaustively: IMAP to the mailboxes you configured, DNS
+Outbound connections, exhaustively: IMAP or POP3 to the mailboxes you configured,
+HTTPS to any [report bucket](/docs/mailbox-setup/#an-s3-bucket) you poll, DNS
 lookups for published policies, SMTP to your relay if you enable alert or
 digest email, HTTPS to your identity provider if you enable
 [SSO](/docs/single-sign-on/), and HTTPS to your object-storage endpoint if you
-enable backup offload. Object storage is the fifth, and the newest — a list is
+enable backup offload. The report bucket is the sixth, and the newest — a list is
 only worth calling exhaustive if it is kept that way.
 
 ## The personal-data inventory
@@ -66,13 +67,13 @@ the backup bucket. Each has its own window.
 | Data | Where | Notes |
 |---|---|---|
 | Sending-server IP addresses | report records | The bulk of the data; aged out by [retention](#retention-and-erasure) |
-| The same IPs and outcomes, in the mail they arrived in | **your IMAP mailbox** | Ingestion only reads, so by default this copy outlives the retention window that governs the database. Bounded by enabling mailbox retention deletion per source — see [the mailbox copy](#the-mailbox-copy) |
+| The same IPs and outcomes, in the mail they arrived in | **your mailbox**, or the bucket you poll | Ingestion only reads, so by default this copy outlives the retention window that governs the database. Bounded by enabling retention deletion per source — see [the mailbox copy](#the-mailbox-copy) |
 | Operator accounts | `agency_user` | Name, email, salted password hash |
 | Sessions | `user_session` | Includes sign-in **IP and user agent**; expired rows persist until [pruned](/docs/monitoring/) |
 | SSO identity links | `user_identity` | Issuer + subject only; no tokens stored |
 | Audit trail | `audit_event` | Actor email, **IP and user agent** per entry |
 | Notification recipients | `notification_recipient` | Email addresses you added |
-| Mailbox credentials | `mailbox_source` | Encrypted at rest with AES-256-GCM; the shipped Compose files and Helm chart refuse to start without the key — see [security](/docs/security/) |
+| Source credentials | `report_source` | Mailbox passwords and S3 secret keys, encrypted at rest with AES-256-GCM; the shipped Compose files and Helm chart refuse to start without the key — see [security](/docs/security/) |
 | A copy of most of the rows above | **your object-storage bucket**, if you enable [backup offload](/docs/upgrading-and-backup/#offloading-it-to-object-storage) | Configuration, operator accounts with their hashes, encrypted mailbox credentials, the audit trail — and the report mail itself if you turn the report archive on. Expiry is whatever lifecycle rule you put on the bucket; the app never deletes objects. See [archive and erasure](#archive-and-erasure-pull-in-opposite-directions) |
 
 ## Retention and erasure
@@ -92,6 +93,9 @@ Those three describe **the database**. The other two locations are governed
 separately, and the daily purge does not touch either of them.
 
 ### The mailbox copy
+
+Everything here applies the same way to a bucket you poll: the copy upstream of
+the database is the point, not the transport that reached it.
 
 Ingestion only ever reads: it sets no flags on the mail it parses and expunges
 nothing, which is deliberate — it is what lets a rebuild replay the mailbox. The
@@ -116,8 +120,8 @@ app does not own, which is why it is hedged:
   A database exemption is worthless while the upstream copy is being deleted.
 - If the [report archive](/docs/upgrading-and-backup/#offloading-it-to-object-storage)
   is enabled, a message is deleted only after its copy exists in the bucket.
-- Deletion is by the message's own date, so mail that never parsed ages out too,
-  and every pass is audited.
+- Deletion is by the message's own date — the object's last-modified time on a
+  bucket — so what never parsed ages out too, and every pass is audited.
 
 An admin can see exactly what the next pass would do, per source, without deleting
 anything:

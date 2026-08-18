@@ -4,7 +4,7 @@ description: A tour of the DMARC Analyzer console — every screen, who can see 
 section: Using the console
 order: 1
 publishDate: 2026-07-27
-updatedDate: 2026-07-28
+updatedDate: 2026-08-18
 ---
 
 The console is what you get after [installing](/docs/install/) and signing in.
@@ -22,7 +22,7 @@ status vocabulary.
 | **Alerts** | everyone | Compliance drops and policy regressions, with triage |
 | **Clients** | admin + analyst | Tenants: retention, legal hold, alert thresholds |
 | **Users** | admin | Accounts, roles, and per-client grants |
-| **Mailbox sources** | admin + analyst | The inboxes reports arrive in — see [mailbox setup](/docs/mailbox-setup/) |
+| **Report sources** | admin + analyst | Where reports arrive — a mailbox, a bucket, or a pushed source; see [mailbox setup](/docs/mailbox-setup/) |
 | **Notifications** | admin + analyst | Who receives alert emails and the monthly digest |
 | **Audit trail** | admin | Who did what, when, from where |
 

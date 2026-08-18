@@ -4,7 +4,7 @@ description: Get DMARC Analyzer running in minutes with Docker Compose and the p
 section: Getting started
 order: 1
 publishDate: 2026-07-25
-updatedDate: 2026-08-05
+updatedDate: 2026-08-18
 ---
 
 DMARC Analyzer ships as a **single container image**. By default one container runs
@@ -103,7 +103,7 @@ anything you depend on, **pin a version** — it makes an upgrade an explicit ac
 and a rollback unambiguous:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.11.1
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.12.0
 ```
 
 See [upgrading](/docs/upgrading-and-backup/#pinning-a-version).
@@ -127,7 +127,7 @@ There is a Helm chart, published as an OCI artifact on every release:
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.11.1 --namespace dmarc --create-namespace \
+  --version 0.12.0 --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
 

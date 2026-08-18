@@ -4,7 +4,7 @@ description: Pull a new image, let migrations run, and know what to back up — 
 section: Operations
 order: 1
 publishDate: 2026-07-25
-updatedDate: 2026-08-05
+updatedDate: 2026-08-18
 ---
 
 ## Upgrading
@@ -70,7 +70,7 @@ Tracking `latest` means you get changes whenever you pull. To control that, pin 
 version tag in `compose.yml`:
 
 ```yaml
-image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.11.1
+image: ghcr.io/dmarc-analyzer-net/dmarc-analyzer:0.12.0
 ```
 
 Then upgrading is an explicit edit. Available tags: `latest`, `sha-<commit>`, and

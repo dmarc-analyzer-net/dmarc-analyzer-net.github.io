@@ -4,7 +4,7 @@ description: After installing, set up a client, a domain, and a mailbox source, 
 section: Getting started
 order: 2
 publishDate: 2026-07-25
-updatedDate: 2026-07-27
+updatedDate: 2026-08-18
 ---
 
 You have the console open and an administrator account. This page takes you from
@@ -46,15 +46,17 @@ covers this in more depth, and there are per-provider walkthroughs under
 
 ## 4. Connect the mailbox
 
-**Mailbox sources → New mailbox source** with the IMAP details for the inbox
-receiving those `rua=` reports. See [connecting a mailbox](/docs/mailbox-setup/)
-for provider specifics, app passwords, and the "default client" setting.
+**Report sources → Add report source** with the IMAP details for the inbox
+receiving those `rua=` reports. POP3 works too, and an
+[S3 bucket](/docs/mailbox-setup/#an-s3-bucket) if that is where your reports land
+instead. See [connecting a mailbox](/docs/mailbox-setup/) for provider specifics,
+app passwords, and the "default client" setting.
 
 ## 5. Wait for reports
 
 Reports arrive **once a day per receiving provider**, so expect the first ones
 roughly 24 hours after publishing your record — not immediately. The worker polls
-every 60 minutes by default; you can also trigger a sync by hand from the mailbox
+every 60 minutes by default; you can also trigger a sync by hand from the report
 source list.
 
 On the first sync the worker backfills the mailbox from the **oldest** message
