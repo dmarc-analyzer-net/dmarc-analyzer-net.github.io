@@ -135,9 +135,11 @@ Two consequences worth knowing:
 ## Backfill
 
 The first sync walks the source **oldest first**, checkpointing as it goes, so
-years of history import without intervention. It processes
-`Worker__MaxMessagesPerSync` messages or objects per pass (200 by default) — raise
-it temporarily to speed up a large initial import.
+years of history import without intervention. A pass keeps drawing batches of
+[`Worker__MaxMessagesPerSync`](/docs/configuration/#worker-tuning) messages
+or objects — 500 — until the source is drained or
+`Worker__MailboxDrainBudgetMinutes` runs out, so one large mailbox cannot starve
+the others. Whatever is left resumes from the checkpoint on the next pass.
 
 Duplicate reports are ignored: the same report arriving twice, or via two
 sources, is deduplicated on domain + report ID + date range. That is what makes it
