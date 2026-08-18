@@ -173,8 +173,16 @@ s3://dmarc-backups/dmarc/
   config/2026-07-27.json                                ← dated daily copy
   history/audit_event/2026/07/2026-07-27T0800.jsonl     ← written once, never rewritten
   history/alert_event/…  history/digest_delivery/…  history/mailbox_sync_run/…
-  reports/2026/07/27/<source-id>/<uidvalidity>-<uid>.eml.gz   ← only with the archive on
+  reports/2026/07/27/<source-id>/<generation>-<name>.eml.gz    ← only with the archive on
 ```
+
+The last segment names the message in whatever terms its protocol has: an IMAP
+message is `<uidvalidity>-<uid>`, a POP3 one is `pop3-<uidl>`, and an object pulled
+from a [report bucket](/docs/mailbox-setup/#an-s3-bucket) is `s3-<key>`. A name
+carrying anything that would be ambiguous in a key — a slash, most obviously — is
+replaced by `h-<sha256>` of itself, deterministically, so nothing lands in a prefix
+below the one documented here and a lifecycle rule cannot miss it. That is the
+common case for S3 keys and rare for the other two.
 
 The history objects are named after the tables they hold and are never rewritten,
 which is what makes shipping them every half hour cheap: each pass is one new
