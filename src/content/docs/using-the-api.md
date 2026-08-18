@@ -4,7 +4,7 @@ description: 'Script against the same API the console uses: signing in, the bear
 section: Operations
 order: 6
 publishDate: 2026-08-02
-updatedDate: 2026-08-13
+updatedDate: 2026-08-18
 ---
 
 The console is a client of this API. Every screen it draws comes from an endpoint
@@ -119,7 +119,7 @@ anywhere in the API, and only one endpoint paginates at all:
 |---|---|---|
 | `GET /admin/audit-events` | `limit` (default 200, clamped 1–1000) and `offset` | The only one. Returns `{"total":N,"items":[…]}`. Also takes `days` (default 30, clamped 1–730), `eventType`, `actor`, `clientId`. |
 | `GET /alerts` | none | Takes `days` (default 30, clamped 1–365) and returns **at most 500 rows**, newest first, with no total and no cursor. A busy tenant gets a silently incomplete list. |
-| `GET /mailbox-sync-runs` | `limit` (default 50, clamped 1–200) | Optionally filtered by `reportSourceId`. **This parameter was renamed in 0.11.1** — see [what changed](#what-changed-in-0111) below, because the old name fails quietly. |
+| `GET /mailbox-sync-runs` | `limit` (default 50, clamped 1–200) | Optionally filtered by `reportSourceId`. **This parameter was renamed** in [0.11.1](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/releases/tag/v0.11.1) — see [earlier releases](#what-changed-in-earlier-releases), because the old name fails quietly. |
 
 Errors are a flat `{"error":"…"}` — not RFC 7807 `problem+json`:
 
@@ -204,7 +204,54 @@ owner no matter which mailbox it arrived in; see
 [a domain landed under the wrong client](/docs/troubleshooting/#a-domain-landed-under-the-wrong-client)
 when it bites.
 
-## What changed in 0.11.1
+## What changed in 0.12.0
+
+Two new kinds of report source, and the fields that come with them. Nothing was
+renamed and nothing was removed, so a script written against the previous release
+keeps working.
+
+**`pop3` is accepted again** as a `protocol`, and this time the worker polls it.
+It was accepted for a long time, never ingested anything, and was then removed for
+exactly that reason; the code that reads it now exists. A source created with it
+syncs on the next pass — see [POP3](/docs/mailbox-setup/#pop3) for the two things
+the protocol makes harder than IMAP.
+
+**`s3` is a new `protocol`**, for reports that land in object storage rather than a
+mailbox. It takes its own fields instead of `host` and `port`, and refuses the
+mail-transport ones:
+
+```bash
+curl -s -b /tmp/cj -X POST "$BASE/api/v1/report-sources" \
+  -H 'Content-Type: application/json' \
+  -d "{\"name\":\"Reports bucket\",\"protocol\":\"s3\",
+       \"s3Bucket\":\"acme-dmarc-reports\",\"s3Prefix\":\"rua/\",
+       \"s3Region\":\"eu-west-1\",\"username\":\"AKIA…\",\"password\":\"…\",
+       \"defaultClientId\":\"$CLIENT\",\"isActive\":true}"
+```
+
+| Field | Notes |
+|---|---|
+| `s3Bucket` | Required on an `s3` source, and refused on any other. |
+| `s3Prefix` | Optional. Also what bounds the cost of a pass, which lists every key under it. |
+| `s3Region` | Ignored when `s3Endpoint` is set. |
+| `s3Endpoint` | For MinIO, R2, B2 and anything else S3-compatible. |
+| `s3ForcePathStyle` | Defaults to `true`, which is what the S3-compatible services need and AWS tolerates. |
+| `username` / `password` | Access key ID and secret. **Send neither** to use the ambient credential chain; sending one without the other is a `400`. |
+
+Sending any `s3*` field on an `imap`, `pop3` or `api` source is a
+`400 {"error":"a source with protocol 'imap' takes no s3 settings"}`. Switching an
+existing source's protocol clears whatever no longer applies rather than refusing
+the save.
+
+**`/mailbox-health` and `/report-sources` carry two more checkpoints.**
+`lastProcessedUid` and `lastProcessedUidValidity` are IMAP's and are `null` on
+anything else; `lastProcessedUidl` is POP3's; `lastProcessedObjectAtUtc` and
+`lastProcessedObjectKey` are S3's. Existing fields kept their meaning, so nothing
+reading `lastProcessedUid` breaks — it is simply `null` on the new source types.
+
+## What changed in earlier releases
+
+### [0.11.1](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/releases/tag/v0.11.1)
 
 Three renames landed together, and they fail in three different ways. If you have
 a script written against 0.10.0 or earlier, this is the list.
@@ -222,10 +269,11 @@ and manual sync. The old path does not `404`; it does the thing described in
 console's HTML to a signed-in caller, or `401` to one that is not. Assert on the
 shape of the response, not on the status.
 
-**`pop3` is no longer accepted** as a `protocol` when creating a source or changing
-one. Existing rows are untouched and stay editable — only a *change* to `pop3` is
-refused. Nothing is lost either way: a POP3 source has never ingested anything,
-because the worker has only ever polled IMAP.
+**`pop3` was no longer accepted** as a `protocol` when creating a source or
+changing one, because a POP3 source had never ingested anything — the worker only
+polled IMAP. **Superseded:** 0.12.0 accepts it again, and polls it. Rows that
+predate the removal start syncing on the next pass, which is what they were always
+meant to do.
 
 The entity was renamed because it was named for how the first implementation
 reached reports, rather than for what it holds — which is exactly what the next
@@ -234,7 +282,7 @@ section is about.
 ## Pushing reports in, instead of polling a mailbox
 
 The usual arrangement is that you publish a `rua=mailto:` address, reports arrive
-there, and this application polls that mailbox over IMAP. If something upstream
+there, and this application polls that mailbox. If something upstream
 already holds the reports — a mail gateway, an archive, another system that
 receives them for you — it can hand them over directly instead.
 

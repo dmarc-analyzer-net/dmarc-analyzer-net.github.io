@@ -4,7 +4,7 @@ description: Install DMARC Analyzer with the Helm chart — the same two deploym
 section: Getting started
 order: 4
 publishDate: 2026-07-26
-updatedDate: 2026-08-05
+updatedDate: 2026-08-18
 ---
 
 There is a Helm chart, published as an OCI artifact on every release. It exposes
@@ -20,7 +20,7 @@ installs are a single host.
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.11.1 \
+  --version 0.12.0 \
   --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
@@ -57,7 +57,7 @@ kubectl -n dmarc create secret generic dmarc-creds \
   --from-literal=db-password='…'
 
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.11.1 --namespace dmarc \
+  --version 0.12.0 --namespace dmarc \
   --set auth.existingSecret=dmarc-creds \
   --set postgres.enabled=false \
   --set externalDatabase.host=db.internal \

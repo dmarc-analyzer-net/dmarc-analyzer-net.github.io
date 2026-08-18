@@ -4,7 +4,7 @@ description: Fixes for the common problems — no reports arriving, mailbox auth
 section: Operations
 order: 3
 publishDate: 2026-07-25
-updatedDate: 2026-07-28
+updatedDate: 2026-08-18
 ---
 
 ## No reports are arriving
@@ -20,7 +20,7 @@ Work down the chain — most often it's the first item.
    The Domain detail page's record inspection shows the same thing, parsed.
 3. **Does `rua=` point at the mailbox you connected?** A typo here fails silently —
    receivers just send reports somewhere else.
-4. **Is the mailbox syncing?** Check Mailbox sources for the latest run status, and
+4. **Is the source syncing?** Check Report sources for the latest run status, and
    trigger a manual sync rather than waiting an hour.
 5. **Is anyone actually sending mail from the domain?** A parked domain with no
    traffic legitimately produces no reports.
@@ -31,12 +31,49 @@ Nearly always credentials rather than configuration:
 
 - Use an **app password**, not the account password — see [connecting a
   mailbox](/docs/mailbox-setup/#app-passwords).
-- Confirm IMAP is enabled for the account. Many Microsoft 365 tenants disable IMAP
-  basic auth entirely; if so, that mailbox can't be used yet.
-- Verify host and port (usually `993` with TLS).
+- Confirm IMAP (or POP3) is enabled for the account. Many Microsoft 365 tenants
+  disable IMAP basic auth entirely; if so, that mailbox can't be used yet.
+- Verify host and port — `993` for IMAP, `995` for POP3, both with TLS.
 - If you added `Security__CredentialEncryptionKey` *after* saving a mailbox, its
   password is re-encrypted on the next sync — re-save the mailbox if the key
   changed.
+
+## A POP3 source refuses to sync
+
+**`the POP3 server does not support UIDL`** on the source's health row. UIDL is
+optional in the protocol, and without it nothing identifies a message across
+sessions — so there is no position to resume from and every pass would re-read the
+whole mailbox for ever. The sync refuses rather than doing that.
+
+Move the mailbox to IMAP, or use a POP3 server that implements UIDL. Nothing else
+about the source is wrong, and no data is lost by switching the protocol on the
+existing source.
+
+## A POP3 or S3 source re-scans everything every pass
+
+The counter for messages or objects scanned stays equal to the whole mailbox or
+prefix on every run, which is work rather than incorrect data — deduplication means
+nothing is ingested twice.
+
+- **POP3** — the checkpoint UIDL is no longer in the mailbox, so there is no
+  position to resume from. The worker logs a warning saying exactly that. Usually
+  something else is deleting from the same mailbox; a second client configured to
+  "remove from server after download" is the classic one.
+- **S3** — the checkpoint isn't advancing, or something is rewriting the objects
+  and moving their last-modified time forward. Compare
+  `lastProcessedObjectKey` on `/api/v1/mailbox-health` against the newest key in
+  the prefix.
+
+## An S3 source fails with "Access Denied" or "no such bucket"
+
+The run row carries the AWS SDK's own message, so read it before changing
+anything — the bucket name, the region or the credential is wrong, or the key is
+missing a permission.
+
+A read-only source needs `s3:ListBucket` and `s3:GetObject`; retention deletion
+also needs `s3:DeleteObject`. If you set an endpoint for MinIO or R2, the region is
+ignored, and if you left both credential fields empty the ambient chain has to
+supply one — an instance role or IRSA that the container can actually reach.
 
 ## The worker isn't ingesting anything
 
@@ -52,7 +89,8 @@ docker compose logs --tail=50 app
   split stack the worker waits for the console to report healthy; if you wrote your
   own compose file, reproduce that ordering.
 - **Running but idle** — with default settings it polls every 60 minutes. Confirm
-  at least one mailbox source is **active**, and that its protocol is IMAP.
+  at least one report source is **active** and is a polled one: `imap`, `pop3` and
+  `s3` are polled, `api` is pushed to and is never polled by the worker.
 - **Repeated `Worker scheduler pass failed`** — the message includes the underlying
   error; a database connection problem is the usual cause.
 
