@@ -204,7 +204,9 @@ owner no matter which mailbox it arrived in; see
 [a domain landed under the wrong client](/docs/troubleshooting/#a-domain-landed-under-the-wrong-client)
 when it bites.
 
-## What changed in 0.12.0
+## What changed in earlier releases
+
+### [0.12.0](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/releases/tag/v0.12.0)
 
 Two new kinds of report source, and the fields that come with them. Nothing was
 renamed and nothing was removed, so a script written against the previous release
@@ -248,8 +250,6 @@ the save.
 anything else; `lastProcessedUidl` is POP3's; `lastProcessedObjectAtUtc` and
 `lastProcessedObjectKey` are S3's. Existing fields kept their meaning, so nothing
 reading `lastProcessedUid` breaks — it is simply `null` on the new source types.
-
-## What changed in earlier releases
 
 ### [0.11.1](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/releases/tag/v0.11.1)
 
