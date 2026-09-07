@@ -14,6 +14,76 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [ ] (todo) **Move hosting to Bunny.net, and pull its raw access logs into a
+      self-hosted Matomo.** Two goals in one change: server-side visitor
+      statistics, which the site has none of today, and getting off a host with no
+      control over response headers.
+
+      **The analytics requirement is what decides the host.** Statistics must be
+      server-side only — the audience is email and security administrators, who
+      block trackers at rates that would make a JS beacon undercount exactly the
+      readers who matter. GitHub Pages exposes **no access logs in any form**: no
+      export, no drain, no API. So the requirement cannot be met where the site
+      currently lives, and this is a migration rather than an addition.
+
+      The alternatives were checked against the same test and lose on it.
+      Cloudflare Pages is the better *host* — free, unlimited bandwidth, real
+      header control — but raw HTTP request logs (Logpush) are Enterprise-only and
+      free-tier zone analytics has no page-level or referrer detail. There is a
+      cheaper path there (serve via Workers Static Assets and Logpush the Workers
+      trace events to R2 on the $5 Workers Paid plan), but whether those trace
+      events carry `referer` and user-agent is **unverified** — confirm before
+      betting on it. Netlify Analytics is genuinely log-derived and needs no JS,
+      but $9/mo/site buys a 30-day window, no documented export and no session
+      reconstruction. Bunny is the only cheap option that hands over **raw logs we
+      own**, which is the thing that makes the Matomo half possible at all.
+
+      Matomo's `import_logs.py` ingests access logs directly and reconstructs
+      visits, making it the one path to genuine session-level reporting with zero
+      client-side code. It runs on `hermes-agent`, so the log data stays on our own
+      infrastructure — consistent with how the product itself is positioned.
+
+      Riders, including the limits worth knowing before anyone trusts the numbers:
+
+      - Sessions are **reconstructed**, not observed — IP + user-agent + a
+        30-minute inactivity window. Fine for trend lines, wrong for anyone behind
+        carrier NAT or a corporate proxy, which for this audience is a large share
+        of them. Bot traffic will dominate unless it is filtered on import. Core
+        Web Vitals, scroll depth and viewport are not available at all; that is the
+        price of the requirement, not a gap to close later.
+      - Deploy changes little. Astro already builds to `dist/`, so only the publish
+        step in `deploy.yml` swaps to a Bunny upload; `public/CNAME` and the
+        Pages-specific steps go away. `site` in `astro.config.mjs` is unaffected
+        because the domain does not change.
+      - DNS is at ClouDNS rather than tied to GitHub, so the cutover is repointing
+        records — the apex ALIAS currently pointing at
+        `dmarc-analyzer-net.github.io`.
+      - **Header control is the second reason to go, and probably the durable
+        one.** GitHub Pages cannot set custom response headers at all — no CSP, no
+        `Permissions-Policy`, no HSTS control — and pins every asset at
+        `cache-control: max-age=600`, so nothing caches for longer than ten
+        minutes. A Bunny edge rule fixes both, and it also removes the constraint
+        behind the Astro `redirects` entry in the Parking Lot, which exists only
+        because Pages has no server-side redirects.
+
+      **This is not a reliability fix and should not be recorded as one.** It was
+      prompted by a pile of 5xx in an external site audit, and that did not
+      reproduce: 412 requests across all 103 sitemap URLs at concurrency 30, sent
+      with that crawler's user-agent, returned **412x 200** — no 429, no 5xx — and
+      404s, `www` and plain-`http` redirects all behave correctly. The likeliest
+      explanations are burst throttling at GitHub's edge (which sheds load as 5xx,
+      not 429) or the auditing crawler filing its own connection timeouts under
+      5xx. Before blaming the host, check Search Console crawl stats — Googlebot is
+      the crawler that matters for rankings, and it crawls far more politely — and
+      check whether the reported 5xx all cluster inside one crawl window.
+
+      **Worth doing first, regardless of which host wins:** there is no uptime
+      monitoring of this site at all — the Dash0 org has zero synthetic checks
+      configured — so "is the site up?" has no answer today except a third-party
+      crawler's say-so. Add a synthetic check on the home page before the
+      migration, so the move can be judged against a baseline instead of an
+      impression.
+
 - [x] (done) **Make the site responsive.** Breakpoints 480/768/1024/1280 per the
       design system's `guidelines/responsive.md`; header collapses to a
       `<details>` drawer below 768px and the nav is edited down to four items
