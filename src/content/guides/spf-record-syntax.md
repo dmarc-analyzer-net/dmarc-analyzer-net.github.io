@@ -2,6 +2,7 @@
 title: SPF record syntax and examples
 description: A field reference for SPF record syntax — every mechanism and qualifier, the 10-lookup limit, and copy-paste examples for common email providers.
 publishDate: 2026-07-23
+updatedDate: 2026-08-08
 ---
 
 An [SPF](/glossary/spf/) record is a single line of DNS that lists who may send
@@ -40,14 +41,14 @@ Eight mechanisms exist. In practice you will write four of them.
 
 | Mechanism | Matches | DNS lookups | Example |
 |---|---|---|---|
-| [`all`](#the-all-mechanism) | Everything — always last | 0 | `-all` |
-| [`ip4`](#the-ip4-mechanism) | An IPv4 address or range | 0 | `ip4:198.51.100.0/24` |
-| [`ip6`](#the-ip6-mechanism) | An IPv6 address or range | 0 | `ip6:2001:db8::/32` |
-| [`a`](#the-a-mechanism) | The domain's own A/AAAA records | 1 | `a` or `a:mail.yourdomain.com` |
-| [`mx`](#the-mx-mechanism) | The domain's MX hosts | 1 | `mx` |
-| [`include`](#the-include-mechanism) | Another domain's SPF (e.g. a provider) | 1 | `include:_spf.google.com` |
-| [`exists`](#the-exists-mechanism) | Whether a name resolves, after macro expansion | 1 | `exists:%{ir}.spf.yourdomain.com` |
-| [`ptr`](#the-ptr-mechanism) | Reverse DNS of the connecting IP | 1 | `ptr` — **deprecated, don't** |
+| `all` | [Everything — always last](#the-all-mechanism) | 0 | `-all` |
+| `ip4` | [An IPv4 address or range](#the-ip4-mechanism) | 0 | `ip4:198.51.100.0/24` |
+| `ip6` | [An IPv6 address or range](#the-ip6-mechanism) | 0 | `ip6:2001:db8::/32` |
+| `a` | [The domain's own A/AAAA records](#the-a-mechanism) | 1 | `a` or `a:mail.yourdomain.com` |
+| `mx` | [The domain's MX hosts](#the-mx-mechanism) | 1 | `mx` |
+| `include` | [Another domain's SPF (e.g. a provider)](#the-include-mechanism) | 1 | `include:_spf.google.com` |
+| `exists` | [Whether a name resolves, after macro expansion](#the-exists-mechanism) | 1 | `exists:%{ir}.spf.yourdomain.com` |
+| `ptr` | [Reverse DNS of the connecting IP](#the-ptr-mechanism) | 1 | `ptr` — **deprecated, don't** |
 
 The lookup column is the one to watch: only `ip4` and `ip6` are free, and the
 total across a record must stay at or below ten. That budget is what
@@ -241,8 +242,8 @@ never set one.
 - **Ten DNS-lookup limit.** Six terms cost a lookup — `include`, `a`, `mx`,
   `ptr`, `exists` and `redirect` — and the total must stay **≤ 10**. Ten is
   allowed; eleven `permerror`s. Chained providers blow past this fast.
-- **[`mx`](#the-mx-mechanism) and [`ptr`](#the-ptr-mechanism) have their own
-  sub-limits**, which is how a record with a term count of 1 still fails: each is
+- **The [`mx` mechanism](#the-mx-mechanism) and the [`ptr` mechanism](#the-ptr-mechanism)
+  have their own sub-limits**, which is how a record with a term count of 1 still fails: each is
   capped at **10 address lookups** of its own. Over the cap, `mx` is fatal while
   `ptr` merely ignores the extras — the difference being that you control your MX
   records and not the reverse DNS of whoever is connecting.

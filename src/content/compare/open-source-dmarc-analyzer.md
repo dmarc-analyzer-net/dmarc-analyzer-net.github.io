@@ -75,3 +75,9 @@ heavy" and "so light it keeps no history."
 
 Prefer a managed service, or comparing against the hosted platforms too? See the
 [full buyer's guide](/compare/best-dmarc-monitoring-tools/).
+
+Whichever you pick, the reports themselves are the same. If the XML is new to
+you, start with [how to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report/);
+when a source shows up failing, [why email fails DMARC](/guides/fix-dmarc-failure/)
+and the [SPF record syntax reference](/guides/spf-record-syntax/) are where the
+fixes usually are.
