@@ -14,6 +14,21 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [x] (done) **Sitemap `<lastmod>` from git, and homepage prose links to the P0
+      pages.** Search Console's URL Inspection API (run 2026-09-13 across 54
+      content pages) showed 24 had not been crawled since late July — every page
+      edited on 2026-08-08 included, so the SPF-syntax restructure had never been
+      seen by Google when it was judged a failure. The sitemap carried no
+      `<lastmod>`, so an edit was indistinguishable from an untouched page. Now:
+      `astro.config.mjs` dates each URL from the last commit touching its source
+      (frontmatter as a floor, since it is not reliably bumped — the SPF guide
+      still said 07-23), `deploy.yml` checks out full history so those dates are
+      real, and the homepage carries a prose "Learn" block linking every P0 page
+      plus `/dmarc-for/cloudflare/`, which Google reported as unknown after seven
+      weeks in the sitemap. Requesting indexing for the stale pages is a GSC UI
+      action and stays with Michael. Analysis and the daily crawl-date feed live in
+      the private `seo` repo (`gsc_crawl.csv`, `gsc-daily-review.md` trap 6).
+
 - [ ] (todo) **Move hosting to Bunny.net, and pull its raw access logs into a
       self-hosted Matomo.** Two goals in one change: server-side visitor
       statistics, which the site has none of today, and getting off a host with no

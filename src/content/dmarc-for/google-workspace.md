@@ -2,7 +2,7 @@
 title: Set up SPF, DKIM & DMARC for Google Workspace
 seoTitle: 'DMARC for Google Workspace: setup'
 provider: Google Workspace
-description: How to configure SPF, DKIM, and DMARC for Google Workspace (Gmail) — the exact DNS records, where to enable DKIM, and the gotchas specific to Google.
+description: How to set up SPF, DKIM and DMARC for Google Workspace (Gmail) — the exact DNS records, where to turn DKIM on, and the Google-specific gotchas.
 publishDate: 2026-07-23
 updatedDate: 2026-07-25
 ---

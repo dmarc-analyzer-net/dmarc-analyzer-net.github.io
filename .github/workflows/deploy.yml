@@ -22,6 +22,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          # Full history: astro.config.mjs dates every sitemap <lastmod> from
+          # the last commit that touched the page's source. On the default
+          # shallow clone every file dates to HEAD, so every page would claim
+          # to have changed on every deploy — the config drops the dates in
+          # that case, which is safe but leaves Google with no signal again.
+          fetch-depth: 0
       - name: Install, build, and upload the Astro site
         uses: withastro/action@v6
         # Defaults: package manager auto-detected, build runs `astro build`,

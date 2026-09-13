@@ -384,6 +384,23 @@ const FAQS: FaqItem[] = [
         </div>
       </section>
 
+      <!-- LEARN — prose links to the reference pages. Added 2026-09-13: Search
+           Console showed the guides and glossary had not been recrawled since
+           late July while this page is fetched weekly, so this is the shortest
+           path from a page Google visits to the pages it had stopped visiting.
+           Sentences rather than a card grid on purpose: scripts/crawl.py counts
+           only prose links as editorial, and so, in effect, does Google. -->
+      <section id="learn" style="max-width:820px; margin:0 auto; padding:64px 32px 8px; border-top:1px solid var(--border-default);">
+        <div style="margin-bottom:20px;">
+          <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">Learn</div>
+          <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0;">The reference, for when the reports raise questions.</h2>
+        </div>
+        <div class="prose" style="font-size:var(--text-body-lg); line-height:1.6; color:var(--gray-700);">
+          <p>Start with how <a href="/guides/spf-dkim-dmarc/">SPF, DKIM and DMARC fit together</a>, then <a href="/guides/how-to-read-a-dmarc-aggregate-report/">how to read an aggregate report</a> — the XML this tool turns into a dashboard. When a source fails, <a href="/guides/fix-dmarc-failure/">why email fails DMARC</a> and the meaning of <a href="/glossary/dmarc-alignment/">alignment</a> cover most cases; a checker saying <a href="/guides/dmarc-policy-not-enabled/">"DMARC policy not enabled"</a> or <a href="/guides/no-dmarc-record-found/">"no DMARC record found"</a> each has its own fix.</p>
+          <p>On the DNS side there is a field reference for <a href="/guides/spf-record-syntax/">SPF record syntax</a>, a guide to <a href="/guides/find-your-dkim-selector/">finding your DKIM selector</a>, and the call between <a href="/glossary/dmarc-quarantine-vs-reject/">quarantine and reject</a>. Provider walkthroughs cover <a href="/dmarc-for/google-workspace/">Google Workspace</a>, <a href="/dmarc-for/microsoft-365/">Microsoft 365</a>, <a href="/dmarc-for/godaddy/">GoDaddy</a> and <a href="/dmarc-for/cloudflare/">Cloudflare</a>. Once you are at enforcement, <a href="/glossary/mta-sts/">MTA-STS</a> and <a href="/glossary/bimi/">BIMI</a> are the next two records worth publishing.</p>
+        </div>
+      </section>
+
       <!-- FAQ -->
       <section id="faq" style="max-width:820px; margin:0 auto; padding:64px 32px;">
         <div style="margin-bottom:36px;">
