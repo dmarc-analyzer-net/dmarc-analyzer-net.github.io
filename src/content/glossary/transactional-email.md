@@ -32,15 +32,14 @@ user has decided your product is broken.
 | **Recipients** | one person | a list |
 | **Timing** | immediately | whenever suits the sender |
 | **Permission to send** | comes with the service the user asked for | consent, or at least an opt-out, depending on the country |
-| **Unsubscribe link** | not expected | required |
+| **Unsubscribe** | not expected | an opt-out is required |
 
 The line is drawn by the message's main purpose, not by what system sent it.
-A receipt with a discreet "you might also like" block is usually still a
-receipt. A "receipt" that is mostly a promotion is marketing in disguise, and
-anti-spam law such as the US CAN-SPAM Act and mailbox providers both judge it
-that way. Google's sender
-guidelines are blunt about it: don't mix different types of content in the
-same message.
+Under the US CAN-SPAM Act, a receipt with a short promotion after the order
+details usually stays transactional; one that is mostly a promotion does not.
+Mailbox providers are stricter than the law: Google's sender guidelines advise
+against promotions in receipts at all, and against mixing types of content in
+one message.
 
 ## Why the two should not share a sending identity
 
@@ -97,8 +96,9 @@ never received; they just stop trying. Three signals catch it early:
   under 0.1%. A rising rate on transactional mail usually means promotional
   content has crept into it.
 - **DMARC results per sending source.** Your
-  [aggregate reports](/glossary/dmarc-aggregate-report/) show each service
-  sending as your domain, and whether it aligns. A new app or a provider
+  [aggregate reports](/glossary/dmarc-aggregate-report/) list every IP
+  address sending as your domain, with its SPF, DKIM and alignment results.
+  Those IPs are how you tell one sending service from another. A new app or a provider
   migration shows up there before users notice anything missing. Reading
   those reports across every service, or across every client domain if you
   run them for others, is what an analyzer like [DMARC Analyzer](/) is for.
