@@ -24,7 +24,7 @@ v=BIMI1; l=https://yourdomain.com/logo.svg; a=https://yourdomain.com/vmc.pem
 
 `default` is the selector. A message can name a different one with a
 `BIMI-Selector` header, which is how a brand runs distinct logos for, say,
-transactional and marketing streams.
+[transactional](/glossary/transactional-email/) and marketing streams.
 
 ## The catch: BIMI needs DMARC enforcement
 
