@@ -1,0 +1,78 @@
+---
+import { getCollection, render } from 'astro:content';
+import { hasToc } from '../../lib/toc';
+import { AUTHOR, TYPE_LABELS } from '../../lib/blog';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import JsonLd from '../../components/JsonLd.astro';
+import PageDates from '../../components/PageDates.astro';
+import Toc from '../../components/Toc.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('blog', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, all: entries },
+  }));
+}
+
+const { entry, all } = Astro.props;
+const { Content, headings } = await render(entry);
+const path = `/blog/${entry.id}/`;
+const image = `/open-graph/blog/${entry.id}.png`;
+const showToc = hasToc(headings, { maxDepth: 3 });
+
+// Newest first, sorted before slicing: getCollection returns glob order, and an
+// unsorted slice makes the build non-reproducible.
+const related = all
+  .filter((e) => e.id !== entry.id)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 3)
+  .map((e) => ({ label: e.data.title, href: `/blog/${e.id}/` }));
+
+const published = entry.data.publishDate.toISOString();
+const modified = (entry.data.updatedDate ?? entry.data.publishDate).toISOString();
+const postSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: entry.data.title,
+  description: entry.data.description,
+  image: new URL(image, Astro.site).href,
+  datePublished: published,
+  dateModified: modified,
+  author: { '@type': 'Person', name: AUTHOR.name, url: AUTHOR.url, sameAs: AUTHOR.sameAs },
+  publisher: { '@type': 'Organization', name: 'DMARC Analyzer' },
+  mainEntityOfPage: new URL(path, Astro.site).href,
+};
+---
+<BaseLayout current="blog" title={`${entry.data.seoTitle ?? entry.data.title} — DMARC Analyzer`} description={entry.data.description} path={path} image={image} ogType="article" publishedTime={published} modifiedTime={modified}>
+  <JsonLd slot="head" schema={postSchema} />
+  <link slot="head" rel="alternate" type="application/rss+xml" title="DMARC Analyzer blog" href="/blog/rss.xml" />
+    <article style={`max-width:${showToc ? 1044 : 760}px; margin:0 auto; padding:40px 32px 72px;`}>
+      <Breadcrumbs items={[
+        { label: 'Home', href: '/' },
+        { label: 'Blog', href: '/blog/' },
+        { label: entry.data.title, href: path },
+      ]} />
+      <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:22px 0 0;">{TYPE_LABELS[entry.data.type]}</div>
+      <h1 style="font-family:'Space Grotesk',sans-serif; font-size:40px; line-height:1.1; letter-spacing:-0.03em; font-weight:600; margin:10px 0 10px;">{entry.data.title}</h1>
+      <p style="font-size:var(--text-lg); line-height:1.5; color:var(--text-faint); margin:0 0 12px;">{entry.data.description}</p>
+      <p style="font-size:var(--text-sm); color:var(--text-body); margin:0 0 4px;">
+        By <a href={AUTHOR.url} rel="author">{AUTHOR.name}</a>
+      </p>
+      <PageDates publishDate={entry.data.publishDate} updatedDate={entry.data.updatedDate} />
+
+      <div class="article-body" style={showToc ? 'display:grid; grid-template-columns:minmax(0,760px) 240px;' : undefined}>
+        <div class="article-content">
+          <div class="prose">
+            <Content />
+          </div>
+        </div>
+
+        {showToc && <Toc headings={headings} maxDepth={3} />}
+      </div>
+
+      <RelatedLinks title="More from the blog" links={related} />
+    </article>
+</BaseLayout>

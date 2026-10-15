@@ -50,7 +50,7 @@ import mdx from '@astrojs/mdx';
 // lastmod. deploy.yml checks out with fetch-depth: 0 for this reason; the
 // depth guard below drops the dates entirely if that ever regresses.
 const SITE = 'https://dmarc-analyzer.net';
-const CONTENT_DIRS = ['guides', 'glossary', 'dmarc-for', 'compare', 'docs', 'rfc'];
+const CONTENT_DIRS = ['guides', 'glossary', 'dmarc-for', 'compare', 'docs', 'rfc', 'blog'];
 
 function git(args) {
   try {

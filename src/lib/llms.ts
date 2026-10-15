@@ -41,7 +41,7 @@ const plainBody = (body: string): string =>
     .trim();
 
 const item = (
-  entry: CollectionEntry<'guides' | 'compare' | 'providers' | 'docs'>,
+  entry: CollectionEntry<'guides' | 'compare' | 'providers' | 'docs' | 'blog'>,
   base: string,
 ): Item => ({
   title: entry.data.title,
@@ -62,12 +62,13 @@ export type Section = {
 };
 
 export async function buildSections(): Promise<Section[]> {
-  const [guides, glossary, providers, compare, docs] = await Promise.all([
+  const [guides, glossary, providers, compare, docs, blog] = await Promise.all([
     getCollection('guides', notDraft),
     getCollection('glossary', notDraft),
     getCollection('providers', notDraft),
     getCollection('compare', notDraft),
     getCollection('docs', notDraft),
+    getCollection('blog', notDraft),
   ]);
 
   // Docs keep their sidebar order; everything else sorts by title.
@@ -138,6 +139,14 @@ export async function buildSections(): Promise<Section[]> {
     {
       name: 'Set up DMARC for your provider',
       items: providers.map((e) => item(e, '/dmarc-for')).sort(byTitle),
+    },
+    // Newest first: posts are dated, and their order is the one thing a reader
+    // of a blog expects to be meaningful.
+    {
+      name: 'Blog',
+      items: blog
+        .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+        .map((e) => item(e, '/blog')),
     },
     {
       name: 'Optional',
