@@ -73,6 +73,26 @@ const postSchema = {
         {showToc && <Toc headings={headings} maxDepth={3} />}
       </div>
 
+      {entry.data.method && (
+        <aside style="max-width:760px; border-left:3px solid var(--brand); padding:14px 18px; margin:40px 0 0; background:var(--surface-card); font-size:var(--text-sm); line-height:1.6;">
+          <strong style="display:block; margin-bottom:6px;">Method</strong>
+          <span style="color:var(--gray-700);">{entry.data.method}</span>
+        </aside>
+      )}
+
+      {entry.data.corrections.length > 0 && (
+        <aside style="max-width:760px; border-top:1px solid var(--border-default); margin:32px 0 0; padding:20px 0 0;">
+          <strong style="display:block; font-size:var(--text-sm); margin-bottom:10px;">Corrections</strong>
+          <ul style="font-size:var(--text-sm); color:var(--gray-700); margin:0; padding-left:18px;">
+            {entry.data.corrections.map((c) => (
+              <li style="margin-bottom:6px;">
+                <time datetime={c.date.toISOString().slice(0, 10)}>{c.date.toISOString().slice(0, 10)}</time>: {c.note}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+
       <RelatedLinks title="More from the blog" links={related} />
     </article>
 </BaseLayout>
