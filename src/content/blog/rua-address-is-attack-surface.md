@@ -6,58 +6,58 @@ type: engineering
 publishDate: 2026-10-15
 ---
 
-The question that started this was a boring one. It was an evening session,
-since DMARC Analyzer is a spare-time project and most of my sessions are. I was
-in Claude Code, working through the ingestion code, and I asked what happens to
-a report attachment between the mailbox and the parser.
+The question that started this was a boring one. It was an evening session (most
+of my sessions are). I was in Claude Code, working through the ingestion code, 
+and I asked what flow a report attachment have from the mailbox, to the parser
+and into the db.
 
-The answer came back in about four lines. The attachment is read into memory.
-If it's a zip, every entry is decompressed into a `MemoryStream`. If it's gzip,
-the same. Then it goes to the parser.
+The answer came back more or less as espected. The attachment is read into 
+memory. Every entry is decompressed into a `MemoryStream`, if it is compressed, 
+and then it goes to the parser.
 
-I read it twice, and then asked the follow-up that should have been asked
-months earlier: *how big is it allowed to get?*
+I then got the thinking of decompression and security, and asked: *how big is 
+it allowed to get? What limits are there?* This can go 2 ways - noboddy thought
+about security or somebody did and now we have no limits or too little limits.
 
-It wasn't. There was no byte cap, no entry cap and no ratio check. The only
+There was none. There was no byte cap, no entry cap and no ratio check. The only
 limit anywhere in that method was a timer on the loop, which does nothing to
 stop one attachment eating memory until the process falls over. And that code
 had been there, more or less unchanged, since the first ingestion pipeline in
-April.
+April. So the no limit saved me from problems early, but no limits also seemed
+a bit too optimistic.
 
 ## Who can send me an attachment?
 
-Here's the part that made my stomach drop a little. Look at any DMARC record
-with reporting turned on:
+The detail that could make this a problem. Look at any DMARC record with 
+reporting turned on:
 
 ```
 v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@yourdomain.com
 ```
 
 That `rua=` tag is a public instruction to the entire internet: *send your
-reports here.* That's the whole point of it. Mailbox providers do exactly that,
-usually once a day, as compressed XML attached to an email. And then something
-like my analyzer opens every one of those attachments automatically, with no
-human in the loop.
+reports here.* That's the whole point of it. ESP's do exactly that once a day, 
+as compressed XML attached to an email. And then something like this dmarc 
+analyzer opens every one of those attachments automatically.
 
 Most decompression bugs hide behind some friction. You have to find the upload
-form, or get an account, or guess an API. Mine had none:
+form, or get an account, or guess an API. Here you just put the email out to 
+everyone:
 
 - **The address is published in DNS.** Nobody has to discover it. One lookup
   and you know where to send a payload, and you know it will be opened.
-- **The sender picks the file names.** I only looked at entries ending in
-  `.xml` or `.json`. That filter was there to skip junk from real reporters. It
-  was never a defence, because whoever builds the archive chooses the names.
 - **One email stops everything.** DMARC Analyzer runs exactly one ingestion
   worker per database, behind a lock, so two workers never fight over the same
   mailbox. That's correct. It also means that if one attachment exhausts that
   worker, report ingestion stops for every client on the instance. For an
   agency monitoring forty client domains on one install, that's all forty, gone
-  quiet, from one message.
+  quiet, from one message. Some try catch could help here, but not much if the
+  process crashes...
 
-I did the arithmetic to see how bad it was. 64 MB of zeroes gzips to 65,150
-bytes, roughly 1,000 to 1. So an email of a megabyte or two could ask my worker
-for more than a gigabyte, and my code would have cheerfully tried to give it
-one.
+I asked Claude to test a bit - to see how bad it could get. 64 MB of zeroes gzips
+to 65,150 bytes, roughly 1,000 to 1. So an email of a megabyte or two could ask 
+my worker for more than a gigabyte, and my code would happily have tried to read 
+it all.
 
 ## Three limits, and one I refused
 
@@ -70,11 +70,11 @@ The fix itself was not complicated. We settled on three absolute limits:
 | `Worker__MaxReportArchiveEntries` | 512 | An archive of millions of tiny members |
 
 All three sit far above any real aggregate report. They exist to stop an
-attack, not to police size.
+attack (or just bad code from the ESP), not to police size.
 
 The one I refused was a compression ratio, the "refuse anything that expands
-more than 100×" rule. It was suggested to me, and on paper it's the elegant
-answer. But a ratio needs to know the compressed size of each entry, and the
+more than 100×" rule. Claude suggested it, and it could seem elegant. 
+But a ratio needs to know the compressed size of each entry, and the
 formats I receive don't reliably say. The archive can simply lie about itself.
 A ratio check that quietly doesn't apply on some code paths is worse than no
 ratio check at all, because it lets you believe you're protected. Plain byte
@@ -92,8 +92,6 @@ allocated and the bomb has gone off. The new code reads 80 KB at a time, counts
 as it goes, and throws the moment it crosses a line.
 
 ## The bug hiding inside the fix
-
-This is the bit I actually wanted to write about.
 
 We didn't describe bombs in comments; we built them in the test suite. 64 MB of
 zeroes, gzipped. The same thing inside a zip, hiding behind one perfectly
