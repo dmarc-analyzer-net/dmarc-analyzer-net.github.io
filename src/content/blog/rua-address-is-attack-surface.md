@@ -3,7 +3,7 @@ title: Your rua= address is a published attack surface
 seoTitle: DMARC report addresses are attack surface
 description: My DMARC analyzer would unpack anything mailed to an address I'd published in DNS. How one email could have stopped it, and the bug inside the fix.
 type: engineering
-publishDate: 2026-10-15
+publishDate: 2026-10-16
 ---
 
 The question that started this was a boring one. It was an evening session (most
