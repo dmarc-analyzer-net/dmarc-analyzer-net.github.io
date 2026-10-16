@@ -91,14 +91,44 @@ and the examples being copied are out of date.
 
 ## Is anyone using pct for what it was for?
 
-`pct` below 100 is the old way to ramp up enforcement gradually. 13,212 domains
-did that in August and 13,234 in October, so the ramp is as popular as ever.
-`pct=0`, the old way to say "watching, don't act yet", held about 1,090 domains
-both months. The new way to say that, `t=y`, held 106.
+`pct` between 1 and 99 is the old way to ramp up enforcement gradually: apply
+the policy to a quarter of failing mail, then half, then all of it. In October,
+12,147 domains in this population had a value in that range. The favourites are
+exactly the round numbers ramp advice suggests: 10 (2,655 domains), 50 (2,405),
+25 (2,137), 5 (1,322) and 1 (799).
 
-That's the one comparison between the two tags that's fair, because it's the
-one place they do the same job. For every domain using the new test mode,
-about ten are still using the old one.
+`pct=0`, the old way to say "watching, don't act yet", held about 1,090 domains
+in both months. The new way to say that, `t=y`, held 106. That's the one fair
+comparison between the two tags, because it's the one job they both do. For
+every domain using the new test mode, about ten still use the old one.
+
+So some people are using `pct` properly. Or so it looks, until you check two
+things.
+
+## Ramps that can't ramp, and ramps that don't
+
+**First, a fifth of them are on a policy that does nothing.** `pct` scales the
+policy, and `p=none` has nothing to scale. 2,304 of the 12,147 domains with a
+ramp value, and 655 of the `pct=0` domains, publish `p=none`. Half of "none" is
+still none. The ramps that can actually do something are the 8,162 on
+`quarantine` and 1,672 on `reject`.
+
+**Second, the ramps aren't moving.** 12,070 domains had a value between 1 and 99
+in August and still had a DMARC record in October. Two months later, **11,383 of
+them, 94%, had exactly the same value**. 465 changed it, and 222 removed `pct`
+altogether.
+
+A ramp is supposed to be a few weeks at each step. A ramp that sits at 25% for
+months is just a permanent half-measure: three quarters of failing mail still
+gets treated one level softer than the policy says. Which, on a `quarantine`
+policy, means delivered normally. I'd bet a fair few of these were set to "start
+low and raise it later", and later never came.
+
+The new records follow the same pattern. Of the 1,172 brand-new records with
+`pct`, 95 use a value other than 100, mostly 25, 50 and 10. Among existing
+records that added `pct` since August, 414 did, and 175 of those chose 25. The
+same handful of round numbers everywhere, which looks a lot like the same
+handful of examples being copied.
 
 ## Why measure something this boring
 
