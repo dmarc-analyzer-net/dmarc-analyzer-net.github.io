@@ -186,8 +186,10 @@ reports arrive late won't look like an outage.
 
 ### Who gets notified
 
-Add recipients with `POST /api/v1/notification-recipients`. Omit `clientId` to
-have an address receive alerts for **every** client:
+Add recipients on the Notifications page, or with
+`POST /api/v1/notification-recipients`. A recipient with a `clientId` covers that
+one client. Omit `clientId` and the address covers several clients — every client
+by default:
 
 ```bash
 curl -s -b /tmp/cj -X POST https://dmarc.example.com/api/v1/notification-recipients \
@@ -195,15 +197,25 @@ curl -s -b /tmp/cj -X POST https://dmarc.example.com/api/v1/notification-recipie
   -d '{"clientId":"<id>","email":"ops@client.example","kind":"alert"}'
 ```
 
-`kind` is `alert`, `digest`, or `both`. Alert history is at
+`kind` is `alert`, `digest`, or `both`. For an address covering several clients,
+each client is set to `rollup`, `separate` or `off` (Notifications → the
+recipient's client dialog, or `PUT /api/v1/notification-recipients/{id}/routing`).
+**`off` also stops that client's alerts to that address**, so a contact who
+covers two clients never hears about a third. Clients added later take the
+recipient's default mode.
+
+Alert history is at
 `GET /api/v1/alerts?days=30`, and `POST /api/v1/admin/alerts/evaluate` runs an
 evaluation immediately instead of waiting for the next pass.
 
 ## Monthly digest
 
-Once a month each client's recipients get a summary of the previous whole month:
-compliance and how it moved, volume, unauthenticated sources, how many domains are
-enforcing, and the domains needing attention.
+Once a month recipients get a summary of the previous whole month: compliance and
+how it moved, volume, the failing sources grouped by IP, every domain with its
+effective policy, and the domains needing attention. It is HTML with a plain-text
+part. An address covering several clients gets one **roll-up** for the clients set
+to `rollup` and a mail of its own for each client set to `separate` — see
+[who gets notified](#who-gets-notified). Clients with no domains get no digest.
 
 | Variable | Default | What it does |
 |---|---|---|
@@ -211,17 +223,47 @@ enforcing, and the domains needing attention.
 | `Digest__DayOfMonth` | `1` | Earliest day of the month the previous month's digest may go out (1–28). |
 | `Digest__CheckIntervalHours` | `6` | How often the worker checks whether one is due. |
 
+A domain is flagged as needing attention on the triggers below. These are the
+instance defaults: each client can override any of them on the Clients page, and
+for the numeric ones `0` switches the trigger off.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Digest__LowCompliancePercent` | `98` | Flag a domain whose aligned pass rate for the month is below this percentage. |
+| `Digest__ComplianceDropPoints` | `2` | Flag a domain whose pass rate fell by at least this many percentage points on the month before. |
+| `Digest__MinMessages` | `100` | Domains with fewer messages in the month are not judged on their pass rate — on a quiet domain one forwarded message is a whole point. |
+| `Digest__NoReports` | `true` | Flag a domain whose reports stopped: at least `Digest__MinMessages` the month before, none this month — usually a broken `rua=` address. A domain that is always quiet is not flagged. |
+| `Digest__TightenAfterDays` | `60` | Suggest a stricter policy for a domain at `p=none` or `p=quarantine` that has held `Digest__TightenCompliancePercent` for this many days. A suggestion, not a problem: it does not count towards "needs attention". |
+| `Digest__TightenCompliancePercent` | `98` | The pass rate a domain must hold before a stricter policy is suggested. |
+
 Sending is **idempotent** — a month already sent is never sent again, even across
 restarts — so the check interval is safe to lower.
 
-Preview exactly what a client would receive, without sending it:
+Preview exactly what would be sent, without sending it — for one client, or every
+mail one recipient would get (roll-up included):
 
 ```bash
 curl -s -b /tmp/cj 'https://dmarc.example.com/api/v1/admin/digest/preview?clientId=<id>'
+curl -s -b /tmp/cj 'https://dmarc.example.com/api/v1/admin/digest/preview?recipientId=<id>'
 ```
 
+Both return `{ "mails": [...] }`, each with its subject, text and HTML. Before
+0.14.0 this endpoint returned `{ summary, body }`. The Notifications page shows the
+same preview, rendered.
+
 `POST /api/v1/admin/digest/send` sends anything due immediately. Recipients need
-`kind` of `digest` or `both` — see [who gets notified](#who-gets-notified).
+`kind` of `digest` or `both`.
+
+### Branding
+
+The agency's identity on digest mail — the digest is the agency speaking to its
+clients. One brand for the whole instance.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `Branding__Name` | `DMARC Analyzer` | Name shown at the top and bottom of every digest. |
+| `Branding__LogoUrl` | *(empty)* | Absolute `https://` URL of a logo, shown in place of the name at the top. The footer still names the agency in text, because many mail clients hold images back. Anything that is not an http(s) URL is ignored. |
+| `Branding__AccentColor` | `#0c7568` | Six-digit hex colour for the top rule, links and the button. Anything else falls back to the default. |
 
 ## Retention
 
