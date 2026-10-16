@@ -6,9 +6,10 @@ type: engineering
 publishDate: 2026-10-15
 ---
 
-The question that started this was a boring one. I was in a Claude Code session,
-working through the ingestion code of DMARC Analyzer, and I asked what happens
-to a report attachment between the mailbox and the parser.
+The question that started this was a boring one. It was an evening session,
+since DMARC Analyzer is a spare-time project and most of my sessions are. I was
+in Claude Code, working through the ingestion code, and I asked what happens to
+a report attachment between the mailbox and the parser.
 
 The answer came back in about four lines. The attachment is read into memory.
 If it's a zip, every entry is decompressed into a `MemoryStream`. If it's gzip,
