@@ -17,15 +17,14 @@ and then it goes to the parser.
 
 Then I started thinking about decompression and security, and asked: *how big
 is it allowed to get? What limits are there?* That can go two ways: either
-nobody thought about security, or somebody did, and you find out whether the
-limits are missing or just too generous.
+somebody thought about it and set limits, or nobody did.
 
 There were none: no byte cap, no entry cap and no ratio check. The only
 limit anywhere in that method was a timer on the loop, which does nothing to
 stop one attachment eating memory until the process falls over. And that code
 had been there, more or less unchanged, since the first ingestion pipeline in
-April. Having no limits had spared me problems early on, but it also seemed a
-bit too optimistic.
+April. No limits also meant no real report had ever been rejected, so nothing
+had ever complained. That's not the same as being safe; it was just optimistic.
 
 ## Who can send me an attachment?
 
@@ -75,8 +74,8 @@ All three sit far above any real aggregate report. They exist to stop an
 attack (or just a buggy reporter), not to police size.
 
 The one I refused was a compression ratio, the "refuse anything that expands
-more than 100×" rule. Claude suggested it, and it could seem elegant.
-But a ratio needs to know the compressed size of each entry, and the
+more than 100×" rule. Claude suggested it, and on paper it looks
+elegant. But a ratio needs to know the compressed size of each entry, and the
 formats I receive don't reliably say. The archive can simply lie about itself.
 A ratio check that quietly doesn't apply on some code paths is worse than no
 ratio check at all, because it lets you believe you're protected. Plain byte
@@ -88,7 +87,7 @@ attachment before it parses any of them, so they're all in memory at once. A
 thousand entries just under the cap is the same attack as one giant entry, with
 more steps.
 
-And the reading had to stop *while* reading. The tidy way to write this is to
+And it had to stop *while* reading. The tidy way to write this is to
 copy the stream out and then check how much came out, but by then the memory is
 allocated and the bomb has gone off. The new code reads 80 KB at a time, counts
 as it goes, and throws the moment it crosses a line.
@@ -107,9 +106,9 @@ The gzip path did what it should: hit the limit and threw. The zip path hit the
 same limit, caught its own exception and returned an empty list. So a refused
 zip bomb looked like an attachment with nothing in it. It never reached the
 parse-failure counter and never showed up in the sync run's statistics, which
-is the only place you would look as the one running the instance.
+is the one place you'd look if you run the instance.
 
-So the attack would fail, and nobody would know it had happened.
+The attack would fail, and nobody would know it had happened.
 
 Neither Claude nor I had seen that by reading the code. I had reviewed it and it
 looked fine. The test caught it because it asked a slightly stricter question:
@@ -124,7 +123,7 @@ out of it. I don't want partial results from an archive that tried that.
 
 ## Same limit, different answer
 
-A few days later DMARC Analyzer got a second way in: an HTTP endpoint where
+Shortly after, DMARC Analyzer got a second way in: an HTTP endpoint where
 another system can push reports. Same extractor, same limits, but one of them
 behaves differently there, on purpose.
 
