@@ -42,6 +42,15 @@ domains in August, 106 in October. Twelve left it and twelve arrived.
 
 So `t` isn't going backwards. It's standing still.
 
+And it should mostly stay that way, which is the part I had wrong in August.
+`t=n` adds nothing to a record, and `t=y` is meant to be temporary: you switch
+it on while you roll out a stricter policy and remove it when you're done. A
+healthy internet publishes almost no `t` at all. `t` will never reach 20%, and
+it shouldn't. Success here doesn't look like `t` growing. It looks like `pct`
+disappearing.
+
+Which is why the next number is the one that matters.
+
 ## Who is still adding pct
 
 Here's the part that surprised me. Between August and October, **2,259
@@ -87,15 +96,16 @@ did that in August and 13,234 in October, so the ramp is as popular as ever.
 `pct=0`, the old way to say "watching, don't act yet", held about 1,090 domains
 both months. The new way to say that, `t=y`, held 106.
 
-That gap is the honest measure of adoption so far: for every domain using the
-new test mode, about ten are still using the old one.
+That's the one comparison between the two tags that's fair, because it's the
+one place they do the same job. For every domain using the new test mode,
+about ten are still using the old one.
 
 ## Why measure something this boring
 
 Because it can't be measured later. There's no archive of what every domain's
-DMARC record said last month. If `t` gets anywhere by 2028, the interesting
-question will be *how*: slowly, in a jump when a big provider updates its
-setup page, or only once receivers stop honouring `pct`. Answering that needs a
+DMARC record said last month. If `pct` is mostly gone by 2028, the interesting
+question will be *how* it went: slowly, in a jump when a big provider updated
+its setup page, or only once receivers stopped honouring it. Answering that needs a
 series, and a series needs every point. A month I don't collect is gone.
 
 So I'll keep collecting. The next snapshot is on November 10.
