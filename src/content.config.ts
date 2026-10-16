@@ -163,8 +163,26 @@ const blog = defineCollection({
     type: z.enum(['research', 'engineering', 'release']),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
+    /**
+     * Population, dates, list IDs, how many lookups were conclusive and what
+     * counted as what. Required for research posts by the refine below: a figure
+     * nobody can check is decoration. Rendered as a box under the post.
+     */
+    method: z.string().optional(),
+    /**
+     * Posts are dated and may age. A wrong claim someone already linked to gets a
+     * dated note here rather than a silent rewrite, so it stays legible.
+     */
+    corrections: z.array(z.object({ date: z.coerce.date(), note: z.string() })).default([]),
     draft: z.boolean().default(false),
-  }).refine(titleBudget(43), { message: budgetMessage(43) }),
+  })
+    .refine(titleBudget(43), { message: budgetMessage(43) })
+    .refine((d) => d.type !== 'research' || (d.method?.length ?? 0) >= 40, {
+      message:
+        'a research post must carry `method`: population, date, list ID, how many ' +
+        'lookups were conclusive, and what counted as what',
+      path: ['method'],
+    }),
 });
 
 export const collections = { guides, glossary, providers, compare, docs, rfcs, blog };
