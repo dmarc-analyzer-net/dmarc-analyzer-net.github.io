@@ -39,16 +39,17 @@ Python or shell scripts — they take arguments, and `npm run x -- --flag` is a 
 
 - `src/pages/` — one file per route. `[...slug].astro` templates render the content
   collections; `tools/*.astro` are hand-built and are the only pages shipping JS.
-- `src/content/` + `src/content.config.ts` — five collections: `guides`, `glossary`,
-  `providers` (in `dmarc-for/`), `compare`, `docs`. Zod schemas enforce
-  description length and a **rendered** `<title>` budget, so a too-long title fails
-  the build rather than truncating in search results.
+- `src/content/` + `src/content.config.ts` — seven collections: `guides`, `glossary`,
+  `providers` (in `dmarc-for/`), `compare`, `docs`, `rfcs` (in `rfc/`), `blog`.
+  The blog is the only one that is bylined and has an RSS feed (`/blog/rss.xml`).
+  Zod schemas enforce description length and a **rendered** `<title>` budget, so a
+  too-long title fails the build rather than truncating in search results.
 - `src/components/` — `Header`, `Footer`, `Icon` (Lucide geometry in a map),
   `Breadcrumbs`, `RelatedLinks`, `Cta`, `JsonLd`, `Toc`, `Faq`, `Callout`,
   `Terminal`, `BrowserFrame`, `LogoMark`, `DocsSidebar`.
 - `src/lib/` — `doh.ts` (DNS-over-HTTPS for the tools), `clipboard.ts`, `llms.ts`
   (generates `/llms.txt` + `/llms-full.txt`), `docs.ts` (`DOCS_SECTIONS`),
-  `motion.ts` (`revealResults`).
+  `motion.ts` (`revealResults`), `blog.ts` (the byline and post-type labels).
 - `src/styles/global.css` — design tokens as CSS custom properties. **Never
   hard-code a hex**; use `var(--teal-600)` and friends.
 - `scripts/` — `crawl.py`, `check-doc-versions.sh`, `verify-docs-snippets.sh`.

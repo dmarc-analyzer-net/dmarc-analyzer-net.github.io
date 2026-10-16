@@ -148,4 +148,23 @@ const rfcs = defineCollection({
   }),
 });
 
-export const collections = { guides, glossary, providers, compare, docs, rfcs };
+// Dated, bylined posts: research findings, engineering write-ups and monthly
+// release roundups. Authored in src/content/blog/ and rendered by
+// src/pages/blog/[...slug].astro. Unlike every other collection the blog targets
+// no keyword — each search intent already belongs to a guide, glossary entry,
+// RFC page or tool, and a post chasing one competes with our own page.
+const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
+  schema: z.object({
+    /** Overrides `title` in the <title> tag only; keeps the h1 readable. */
+    seoTitle: z.string().optional(),
+    title: z.string().max(80),
+    description: z.string().min(50).max(160),
+    type: z.enum(['research', 'engineering', 'release']),
+    publishDate: z.coerce.date(),
+    updatedDate: z.coerce.date().optional(),
+    draft: z.boolean().default(false),
+  }).refine(titleBudget(43), { message: budgetMessage(43) }),
+});
+
+export const collections = { guides, glossary, providers, compare, docs, rfcs, blog };

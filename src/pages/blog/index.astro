@@ -1,0 +1,92 @@
+---
+import { getCollection } from 'astro:content';
+import { AUTHOR, BLOG_DESCRIPTION, TYPE_LABELS } from '../../lib/blog';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import Icon from '../../components/Icon.astro';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime(),
+);
+
+// UTC, for the same reason as PageDates: date-only frontmatter parses as UTC midnight.
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+
+export const title = 'Blog: DMARC research and engineering — DMARC Analyzer';
+export const description = BLOG_DESCRIPTION;
+---
+<BaseLayout current="blog"
+  title={title}
+  description={description}
+  path="/blog/"
+  image="/open-graph/blog.png"
+>
+  <link slot="head" rel="alternate" type="application/rss+xml" title="DMARC Analyzer blog" href="/blog/rss.xml" />
+    <section style="background:radial-gradient(800px 360px at 20% -20%, rgba(20,184,166,0.13), transparent 65%);">
+      <div style="max-width:960px; margin:0 auto; padding:72px 32px 32px;">
+        <Breadcrumbs items={[
+          { label: 'Home', href: '/' },
+          { label: 'Blog', href: '/blog/' },
+        ]} />
+        <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin:20px 0 14px;">Blog</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1.06; letter-spacing:-0.03em; font-weight:600; margin:0 0 18px; max-width:720px;">What we found, what we built, and what changed.</h1>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:600px;">{description}</p>
+      </div>
+    </section>
+    <section style="max-width:720px; margin:0 auto; padding:8px 32px 0;">
+      <div class="prose">
+        <p>
+          The rest of this site is reference material. The
+          <a href="/guides/">guides</a> explain how to get a domain from no
+          protection to enforcement, the <a href="/glossary/">glossary</a> defines
+          the terms, and the <a href="/docs/">docs</a> cover running the
+          application. Those pages are kept current and corrected in place.
+        </p>
+        <p>
+          Posts here are different: they are dated, signed, and written from our
+          own point of view. Research posts report aggregate findings from the
+          DNS survey described on the <a href="/research/">research page</a>,
+          with the population, date and method stated for every figure, so a
+          number can be checked rather than taken on trust. Engineering posts
+          explain how a part of the analyzer was built and why, including the
+          mistakes. Release roundups summarise a month's changes for people who
+          run an instance; per-release detail stays in the
+          <a href="https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/releases">GitHub releases</a>.
+          A post that turns out to be wrong gets a dated correction rather than
+          a silent rewrite.
+        </p>
+        <p>
+          The blog deliberately does not chase search terms. If a question
+          starts with "how do I" or "what does this mean", the answer belongs in
+          a guide or the glossary, where it can be kept correct. What appears
+          here is the material those pages cannot hold: a measurement taken on a
+          particular date, a design decision and the reasoning behind it, or a
+          bug and what it taught us. Figures from the survey are aggregates
+          only; no post names an individual domain's configuration.
+        </p>
+        <p>
+          Written by {AUTHOR.name}. Subscribe with the
+          <a href="/blog/rss.xml">RSS feed</a>.
+        </p>
+      </div>
+    </section>
+    <section style="max-width:960px; margin:0 auto; padding:24px 32px 72px;">
+      <ul style="list-style:none; margin:0; padding:0; display:grid; gap:16px;">
+        {posts.map((p) => (
+          <li>
+            <a class="lift" href={`/blog/${p.id}/`} style="display:block; border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:24px 26px; color:var(--text-body) !important;">
+              <div style="font-size:var(--text-sm); color:var(--text-faint); margin:0 0 8px;">
+                <span style="font-weight:600; color:var(--brand);">{TYPE_LABELS[p.data.type]}</span> · {fmt(p.data.publishDate)}
+              </div>
+              <h2 style="font-size:20px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                {p.data.title}
+                <Icon name="arrow-right" style="font-size:var(--text-lg); color:var(--brand);" />
+              </h2>
+              <p style="font-size:14.5px; line-height:1.55; color:var(--gray-700); margin:0;">{p.data.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+</BaseLayout>

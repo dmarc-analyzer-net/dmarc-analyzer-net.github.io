@@ -141,6 +141,13 @@ proxy, but it is there.
   PostgreSQL advisory lock at startup and a second worker exits rather than
   starting. This prevents duplicated work and duplicate alert email — see
   [choosing a deployment](/docs/choose-your-deployment/#topology-one-container-or-two).
+- **Report decompression is bounded.** A `rua=` address is published in DNS, so
+  anyone can mail it an attachment. Each attachment may expand to at most 64 MB
+  per entry, 128 MB in total and 512 archive entries
+  (`Worker__MaxReportEntryBytes`, `Worker__MaxReportAttachmentBytes`,
+  `Worker__MaxReportArchiveEntries`), and a refusal counts as a parse failure.
+  Why it matters with a single worker is in
+  [your rua= address is a published attack surface](/blog/rua-address-is-attack-surface/).
 - **An unrecognised `APP_MODE` fails startup** instead of falling back, so a typo
   cannot leave you with a console that serves fine and silently ingests nothing.
 - **Retention is deletion, not archival.** Purged reports are gone; take a
