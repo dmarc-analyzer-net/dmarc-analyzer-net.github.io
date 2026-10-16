@@ -7,28 +7,29 @@ publishDate: 2026-10-15
 ---
 
 The question that started this was a boring one. It was an evening session (most
-of my sessions are). I was in Claude Code, working through the ingestion code, 
-and I asked what flow a report attachment have from the mailbox, to the parser
-and into the db.
+of my sessions are). I was in Claude Code, working through the ingestion code,
+and I asked what path a report attachment takes from the mailbox, through the
+parser and into the database.
 
-The answer came back more or less as espected. The attachment is read into 
-memory. Every entry is decompressed into a `MemoryStream`, if it is compressed, 
+The answer came back more or less as expected. The attachment is read into
+memory. If it's compressed, every entry is decompressed into a `MemoryStream`,
 and then it goes to the parser.
 
-I then got the thinking of decompression and security, and asked: *how big is 
-it allowed to get? What limits are there?* This can go 2 ways - noboddy thought
-about security or somebody did and now we have no limits or too little limits.
+Then I started thinking about decompression and security, and asked: *how big
+is it allowed to get? What limits are there?* That can go two ways: either
+nobody thought about security, or somebody did, and you find out whether the
+limits are missing or just too generous.
 
-There was none. There was no byte cap, no entry cap and no ratio check. The only
+There were none: no byte cap, no entry cap and no ratio check. The only
 limit anywhere in that method was a timer on the loop, which does nothing to
 stop one attachment eating memory until the process falls over. And that code
 had been there, more or less unchanged, since the first ingestion pipeline in
-April. So the no limit saved me from problems early, but no limits also seemed
-a bit too optimistic.
+April. Having no limits had spared me problems early on, but it also seemed a
+bit too optimistic.
 
 ## Who can send me an attachment?
 
-The detail that could make this a problem. Look at any DMARC record with 
+Here's the detail that makes it a problem. Look at any DMARC record with
 reporting turned on:
 
 ```
@@ -36,12 +37,13 @@ v=DMARC1; p=quarantine; rua=mailto:dmarc-reports@yourdomain.com
 ```
 
 That `rua=` tag is a public instruction to the entire internet: *send your
-reports here.* That's the whole point of it. ESP's do exactly that once a day, 
-as compressed XML attached to an email. And then something like this dmarc 
-analyzer opens every one of those attachments automatically.
+reports here.* That's the whole point of it. Mailbox providers like Gmail and
+Outlook do exactly that, usually once a day, as compressed XML attached to an
+email. And then something like this DMARC analyzer opens every one of those
+attachments automatically.
 
 Most decompression bugs hide behind some friction. You have to find the upload
-form, or get an account, or guess an API. Here you just put the email out to 
+form, or get an account, or guess an API. Here you've published the address to
 everyone:
 
 - **The address is published in DNS.** Nobody has to discover it. One lookup
@@ -51,13 +53,13 @@ everyone:
   mailbox. That's correct. It also means that if one attachment exhausts that
   worker, report ingestion stops for every client on the instance. For an
   agency monitoring forty client domains on one install, that's all forty, gone
-  quiet, from one message. Some try catch could help here, but not much if the
-  process crashes...
+  quiet, from one message. A try/catch could help here, but not much if the
+  process crashes.
 
-I asked Claude to test a bit - to see how bad it could get. 64 MB of zeroes gzips
-to 65,150 bytes, roughly 1,000 to 1. So an email of a megabyte or two could ask 
-my worker for more than a gigabyte, and my code would happily have tried to read 
-it all.
+I asked Claude to test a bit, to see how bad it could get. 64 MB of zeroes
+gzips to 65,150 bytes, roughly 1,000 to 1. So an email of a megabyte or two
+could ask my worker for more than a gigabyte, and my code would happily have
+tried to read it all.
 
 ## Three limits, and one I refused
 
@@ -70,10 +72,10 @@ The fix itself was not complicated. We settled on three absolute limits:
 | `Worker__MaxReportArchiveEntries` | 512 | An archive of millions of tiny members |
 
 All three sit far above any real aggregate report. They exist to stop an
-attack (or just bad code from the ESP), not to police size.
+attack (or just a buggy reporter), not to police size.
 
 The one I refused was a compression ratio, the "refuse anything that expands
-more than 100×" rule. Claude suggested it, and it could seem elegant. 
+more than 100×" rule. Claude suggested it, and it could seem elegant.
 But a ratio needs to know the compressed size of each entry, and the
 formats I receive don't reliably say. The archive can simply lie about itself.
 A ratio check that quietly doesn't apply on some code paths is worse than no
