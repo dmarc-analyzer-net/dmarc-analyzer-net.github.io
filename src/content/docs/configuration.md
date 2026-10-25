@@ -77,6 +77,24 @@ Heroku, Railway, …) that hand you a managed database as a URI rather than an
 ADO.NET string. Takes priority when both are set. A `sslmode` query parameter is
 honored (`disable`, `allow`, `prefer`, `require`, `verify-ca`, `verify-full`).
 
+### `Database__IamAuth`
+Default `false`. Log in to Amazon RDS, Aurora or RDS Proxy with a short-lived IAM
+authentication token instead of a password, generated per connection from the AWS
+credential chain (ECS task role, EC2 instance profile, EKS with IRSA). Leave the
+password out of the connection string.
+
+TLS is required and the server is verified: `sslmode=disable` fails startup, and
+`allow`, `prefer` or `require` are raised to `verify-full`. Which CA to verify
+against is yours to supply. An RDS or Aurora endpoint needs the
+[Amazon RDS bundle](https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem),
+named with `Root Certificate=` in the connection string (or `?sslrootcert=` on a
+`DATABASE_URL`, or `PGSSLROOTCERT`). An RDS Proxy endpoint is already trusted by
+the image's system store. The token is signed for the region the AWS SDK resolves
+(`AWS_REGION` and friends), not the one in the hostname.
+
+The full recipe, including the IAM policy and the Compose and Helm wiring, is
+[Postgres on AWS without a password](https://github.com/dmarc-analyzer-net/DmarcAnalyzerApp/blob/main/docs/ops/aws-rds-iam.md).
+
 ### `Database__MigrateOnStartup`
 `true` in the shipped compose files. When true, the API applies pending EF Core
 migrations as it boots.
@@ -247,8 +265,8 @@ curl -s -b /tmp/cj 'https://dmarc.example.com/api/v1/admin/digest/preview?client
 curl -s -b /tmp/cj 'https://dmarc.example.com/api/v1/admin/digest/preview?recipientId=<id>'
 ```
 
-Both return `{ "mails": [...] }`, each with its subject, text and HTML. Before
-0.14.0 this endpoint returned `{ summary, body }`. The Notifications page shows the
+Both return `{ "mails": [...] }`, each with its subject, text and HTML.
+In 0.13.2 and earlier this endpoint returned `{ summary, body }`. The Notifications page shows the
 same preview, rendered.
 
 `POST /api/v1/admin/digest/send` sends anything due immediately. Recipients need
@@ -256,14 +274,16 @@ same preview, rendered.
 
 ### Branding
 
-The agency's identity on digest mail — the digest is the agency speaking to its
-clients. One brand for the whole instance.
+The agency's identity on digest mail and in the console — the sign-in page, the
+header and the browser tab title. Both are the agency speaking to its clients, so
+a client who signs in sees your brand, not ours. One brand for the whole instance.
 
 | Variable | Default | What it does |
 |---|---|---|
-| `Branding__Name` | `DMARC Analyzer` | Name shown at the top and bottom of every digest. |
-| `Branding__LogoUrl` | *(empty)* | Absolute `https://` URL of a logo, shown in place of the name at the top. The footer still names the agency in text, because many mail clients hold images back. Anything that is not an http(s) URL is ignored. |
-| `Branding__AccentColor` | `#0c7568` | Six-digit hex colour for the top rule, links and the button. Anything else falls back to the default. |
+| `Branding__Name` | `DMARC Analyzer` | Name shown at the top and bottom of every digest, in the console header when no logo is set, and in the tab title (`Domains · <name>`). |
+| `Branding__LogoUrl` | *(empty)* | Absolute `https://` URL of a logo. In a digest it replaces the name at the top, and the footer still names the agency in text, because many mail clients hold images back. In the console it replaces the product's logo and name, so it should carry your name itself; it sits on a light background. Anything that is not an http(s) URL is ignored. |
+| `Branding__AccentColor` | `#0c7568` | Six-digit hex colour. In a digest: the top rule, links and the button. In the console: primary buttons, links, focus rings and the active navigation item. Text on a button turns dark when white would not be legible, and brand-coloured text is darkened until it is. Anything else falls back to the default. |
+| `Branding__HidePoweredBy` | `false` | Once any of the three above is changed, the console shows a small "Powered by DMARC Analyzer" line on the sign-in page and at the foot of the navigation. `true` hides it. An unbranded instance never shows it. |
 
 ## Retention
 
