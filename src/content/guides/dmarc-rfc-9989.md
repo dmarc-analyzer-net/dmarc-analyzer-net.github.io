@@ -55,7 +55,10 @@ the default and means "apply the policy as published". It is the direct successo
 
 The honest position on timing: **receivers honour `pct` today and will for a while**, so
 a percentage ramp still works, and it is what most guidance on the internet still
-describes. `t` is where the standard has gone. Treat a `pct` ramp as a transitional
+describes. `t` is where the standard has gone, but `pct` is still being added: of the
+DMARC records first published across the top million domains between August and
+October 2026, one in eight included it
+([three months of measurements](/blog/dmarc-t-tag-three-months/)). Treat a `pct` ramp as a transitional
 technique with an end date rather than part of a record you intend to keep, and if
 you want a gradual move to enforcement without either tag, ramp by *scope* instead —
 one subdomain at a time with `sp`. The
