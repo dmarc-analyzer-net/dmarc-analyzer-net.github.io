@@ -20,7 +20,7 @@ installs are a single host.
 
 ```bash
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.14.0 \
+  --version 0.15.0 \
   --namespace dmarc --create-namespace \
   --set auth.encryptionKey="$(openssl rand -base64 32)"
 ```
@@ -57,7 +57,7 @@ kubectl -n dmarc create secret generic dmarc-creds \
   --from-literal=db-password='…'
 
 helm install dmarc oci://ghcr.io/dmarc-analyzer-net/charts/dmarc-analyzer \
-  --version 0.14.0 --namespace dmarc \
+  --version 0.15.0 --namespace dmarc \
   --set auth.existingSecret=dmarc-creds \
   --set postgres.enabled=false \
   --set externalDatabase.host=db.internal \
@@ -194,6 +194,13 @@ or mailbox syncs will fail to decrypt their credentials.
   starts at once — so without it the app comes up before PostgreSQL is reachable,
   fails, and restarts until it is. It converges either way, but the restarts look
   like a crash-loop and the backoff can turn a 20-second wait into minutes.
+- **Every container has a memory and CPU request, and none has a limit.** The app
+  and worker ask for 384Mi and 100m, bundled PostgreSQL for 256Mi, the migration Job
+  for 128Mi and the database wait for 64Mi. A pod with no request is the first one
+  evicted when a node runs short, and the scheduler will put it on a node with no
+  room. There is no memory limit because a large backfill would hit it partway
+  through. Raise `app.resources` for many mailboxes. To drop a request, set
+  `requests: null`; `resources: {}` changes nothing because Helm merges maps.
 - **The Secret and ServiceAccount are pre-install hooks**, because hooks run before
   ordinary resources and the migration Job needs both to exist. One consequence:
   `helm uninstall` leaves them behind.
