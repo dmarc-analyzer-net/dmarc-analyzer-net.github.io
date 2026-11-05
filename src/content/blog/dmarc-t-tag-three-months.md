@@ -3,7 +3,7 @@ title: Three months after RFC 9989, new DMARC records still reach for pct
 seoTitle: New DMARC records still use pct
 description: I followed a million domains for three months after DMARC retired pct. Brand-new records include it 293 times as often as its replacement.
 type: research
-publishDate: 2026-10-30
+publishDate: 2026-11-05
 method: "Population: the Tranco top 1,000,000 list GQP4K, as surveyed on 2026-08-10, followed as the same 1,000,000 domains in the 2026-09-10 and 2026-10-10 snapshots. Each monthly run surveys the current list plus every domain seen before, so the figures here filter to domains first seen on 2026-08-10; domains that joined Tranco later are left out. A _dmarc lookup was conclusive for 988,653 domains in August, 987,925 in September and 987,282 in October; timeouts and SERVFAILs are excluded rather than counted as having no record, while NXDOMAIN counts as an answer (no policy). Tag counts use domains publishing a DMARC record as the base: 464,476, 468,157 and 471,395. 'Added' and 'new' compare each domain's August and October records: a new record is a domain with no DMARC record in August and one in October (9,770 domains). t counts as published whatever its value, which is stored as written; pct counts when it holds a whole number from 0 to 100. Aggregates only; no domain is named."
 ---
 
