@@ -1,0 +1,274 @@
+# Scheduled availability and latency check against production.
+#
+# `seo-audit.yml` next door says a site that changes a few times a week does not
+# need a cron job producing mail nobody reads, and that is still true of a crawl.
+# This is the exception that proves it: the mail *is* the product here. A red run
+# means either the live site failed an assertion or this workflow failed to record
+# what it measured, and GitHub mails the repository admins when a scheduled
+# workflow fails. Which of them it was is what the Report step prints, on
+# labelled lines, because a monitor whose alerts are ambiguous gets filtered to
+# a folder — and "the site is down" and "the monitor is broken" need different
+# people to do different things.
+#
+# Why it exists: we are proposing to move hosting from GitHub Pages to Bunny.net,
+# and after the cutover somebody will ask whether the move made the site slower or
+# less reliable. Nothing can answer that today, in either direction. A baseline
+# taken after the move is not a baseline, so this needs to run for at least a week
+# before the cutover — and it keeps running through it, unchanged, so that the
+# before and after are measured by the same instrument from the same place.
+#
+# This was scoped as a Dash0 synthetic check. There is no Dash0 credential and no
+# connector to request one through, and Dash0 meters synthetic runs at $0.20 per
+# thousand against a migration budgeted at $1/month, so this is the approved free
+# substitute. It is honestly worse: one vantage point instead of several, a
+# best-effort schedule, and no alerting at all when GitHub itself is down. What it
+# does give is the same two assertions, recorded continuously, for nothing.
+#
+# The log: every run appends a CSV row per target to `uptime.csv` on the orphan
+# branch `uptime-log`. A branch rather than an artifact because artifacts expire
+# in 90 days and are per-run — the whole point is one file covering both sides of
+# the cutover. Pushes there trigger nothing: `ci.yml` and `deploy.yml` both filter
+# to `main`. Once the cutover comparison is written up, archive the CSV to
+# s3://dmarc-analyzer-net and delete the branch; it is a measurement, not history
+# the repository needs to carry forever.
+#
+# Cadence is a dial, not a constraint — Actions minutes are free on a public repo.
+# Every 15 minutes is ~96 samples a day, enough to characterise availability and a
+# latency distribution without 288 daily commits. The offset keeps it off the top
+# of the hour, where GitHub's scheduler is most loaded and most likely to drop a
+# run. Scheduled runs are best-effort and will occasionally be late or skipped;
+# that is a property of the free instrument and a reason to compare distributions
+# rather than count missed samples as downtime.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+# The job commits to the uptime-log branch.
+permissions:
+  contents: write
+
+# One writer to uptime-log at a time. A delayed run queues behind the one in
+# flight rather than racing it to the same file.
+concurrency:
+  group: uptime-log
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      # The rows are written to the runner's temp directory before anything
+      # touches git, because recording the log branch involves switching the
+      # working tree out from under the script.
+      - name: Check production
+        id: check
+        run: |
+          mkdir -p "$RUNNER_TEMP/uptime"
+          ./scripts/uptime-check.sh --header > "$RUNNER_TEMP/uptime/header.csv"
+          # `||` rather than a bare call: Actions runs this under `bash -e`, so
+          # the non-zero exit that a failed target produces would otherwise end
+          # the step here, before anything had been recorded or classified.
+          script_status=0
+          ./scripts/uptime-check.sh > "$RUNNER_TEMP/uptime/rows.csv" || script_status=$?
+          cat "$RUNNER_TEMP/uptime/rows.csv"
+
+          # A row that is not ok is only a *site* failure if the checker was
+          # able to reach a verdict. The same distinction the CSV draws has to
+          # be drawn here, or the summary and the alert undo it one layer up.
+          site_failed=0
+          checker_row=0
+          rows=0
+          while IFS= read -r row; do
+            [ -n "$row" ] || continue
+            rows=$((rows + 1))
+            ok=$(printf '%s' "$row" | cut -d, -f3)
+            note=${row##*,}
+            case "$note" in
+              check_error_*) checker_row=1 ;;
+              *) [ "$ok" = "1" ] || site_failed=1 ;;
+            esac
+          done < "$RUNNER_TEMP/uptime/rows.csv"
+
+          # Empty rather than a boolean, because the three ways the checker can
+          # fail want three different sentences: one of them points at a row in
+          # the log, and the other two mean there is no row to point at.
+          checker_reason=""
+          if [ "$rows" -eq 0 ]; then
+            checker_reason="no_rows"
+          elif [ "$checker_row" -eq 1 ]; then
+            checker_reason="row"
+          elif [ "$script_status" -ne 0 ] && [ "$site_failed" -eq 0 ]; then
+            checker_reason="unexplained_exit"
+          fi
+
+          echo "site_failed=$site_failed" >> "$GITHUB_OUTPUT"
+          echo "checker_reason=$checker_reason" >> "$GITHUB_OUTPUT"
+
+      # Recorded before the job is allowed to fail, so a failing run still
+      # leaves the row that explains what failed.
+      #
+      # Each attempt rebuilds the branch state from the remote rather than
+      # patching up whatever the last one left behind, so attempt 2 behaves
+      # exactly like attempt 1 — including the case where uptime-log does not
+      # exist yet and has to be created as an orphan.
+      #
+      # This step does not fail the job. Whether the log was written is an
+      # output, judged at the end alongside the site result, because "the
+      # recorder broke" and "the site is down" are different alerts and a run
+      # that conflates them teaches you to ignore it.
+      - name: Append to the uptime-log branch
+        id: record
+        run: |
+          set -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          append_once() (
+            set -e
+            git checkout -q --detach
+            git branch -qD uptime-log 2>/dev/null || true
+
+            if git fetch -q --depth 1 origin uptime-log 2>/dev/null; then
+              git checkout -q -B uptime-log FETCH_HEAD
+            else
+              git checkout -q --orphan uptime-log
+              git rm -rqf .
+              cp "$RUNNER_TEMP/uptime/header.csv" uptime.csv
+            fi
+
+            cat "$RUNNER_TEMP/uptime/rows.csv" >> uptime.csv
+            git add uptime.csv
+            git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push -q origin uptime-log
+          )
+
+          recorded=0
+          for attempt in 1 2 3; do
+            if append_once; then
+              recorded=1
+              break
+            fi
+            echo "append attempt ${attempt} failed" >&2
+            sleep $((attempt * 5))
+          done
+
+          echo "recorded=$recorded" >> "$GITHUB_OUTPUT"
+
+      # The summary and the exit status are two renderings of one judgement, so
+      # they are made in one place. Splitting them meant stating the judgement
+      # twice and getting it subtly different each time.
+      #
+      # The rows go in the summary whether or not the branch took them, so a run
+      # that could not write the log has still not lost its measurement.
+      - name: Report
+        if: always()
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          RECORD_OUTCOME: ${{ steps.record.outcome }}
+          SITE_FAILED: ${{ steps.check.outputs.site_failed }}
+          CHECKER_REASON: ${{ steps.check.outputs.checker_reason }}
+          RECORDED: ${{ steps.record.outputs.recorded }}
+        run: |
+          site="$SITE_FAILED"
+          reason="$CHECKER_REASON"
+
+          # The check step can die before it writes any output — a bad
+          # checkout, a cancelled job, a runner that went away. Its outputs are
+          # then empty, and empty has to mean "unknown" rather than "fine".
+          if [ "$CHECK_OUTCOME" != "success" ] || [ -z "$site" ]; then
+            site="unknown"
+            reason="step_failed"
+          elif [ "$reason" = "no_rows" ]; then
+            # Nothing was measured, so "no target failed" would be true in the
+            # way a silence is true, and read as reassurance.
+            site="unknown"
+          fi
+
+          # Only one of these failures has a row in the log to point at. Saying
+          # "see the check_error_ row" when the checker never produced a row
+          # sends the reader looking for something that is not there.
+          case "$reason" in
+            row)
+              checker_line="could not reach a verdict on a target (a \`check_error_\` row below)."
+              checker_hint="Exclude \`check_error_\` rows when computing availability: counting them as downtime would make this log understate the site it exists to measure." ;;
+            no_rows)
+              checker_line="produced no rows at all, so this run measured nothing."
+              checker_hint="There is no row to exclude and none to count — treat the run as a gap in the history." ;;
+            unexplained_exit)
+              checker_line="exited non-zero with no row accounting for it."
+              checker_hint="Treat the run as a gap rather than as a measurement, and read the check step log." ;;
+            step_failed)
+              checker_line="did not complete, so the state of the site this run is unknown — not good, not bad."
+              checker_hint="Read the check step log above; no measurement was produced." ;;
+            *)
+              checker_line=""
+              checker_hint="" ;;
+          esac
+
+          {
+            if [ "$site" = "1" ]; then
+              echo "## The site failed a check"
+            elif [ "$reason" = "step_failed" ]; then
+              echo "## The checker failed before it could report — the site result is unknown"
+            elif [ -n "$reason" ]; then
+              echo "## The checker failed — this is not a site outage"
+            else
+              echo "## The site passed"
+            fi
+
+            if [ -n "$checker_line" ]; then
+              printf '\nThe checker %s %s\n' "$checker_line" "$checker_hint"
+            fi
+
+            if [ "$RECORD_OUTCOME" = "skipped" ]; then
+              printf '\n**The log was not written**, because the check never got far enough to have anything to write.\n'
+            elif [ "$RECORDED" != "1" ]; then
+              printf '\n**The log was not written.** This is the recorder failing, not the site — the rows below are the measurement, and `uptime.csv` is missing them.\n'
+            fi
+
+            if [ -s "$RUNNER_TEMP/uptime/rows.csv" ]; then
+              echo
+              echo '```'
+              cat "$RUNNER_TEMP/uptime/header.csv" "$RUNNER_TEMP/uptime/rows.csv"
+              echo '```'
+            fi
+
+            echo
+            echo "Full history: [\`uptime.csv\` on \`uptime-log\`](${{ github.server_url }}/${{ github.repository }}/blob/uptime-log/uptime.csv)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # One red run can mean four quite different things and the
+          # notification mail carries only the job name. Say which, on labelled
+          # lines, with the site line first because it is the one being asked.
+          status=0
+          case "$site" in
+            1)       echo "SITE: a target failed its assertions — see the row in the summary." >&2; status=1 ;;
+            unknown) echo "SITE: unknown — nothing was measured this run." >&2 ;;
+            *)       echo "SITE: no target failed an assertion." ;;
+          esac
+
+          if [ -n "$reason" ]; then
+            echo "CHECKER: $checker_line" >&2
+            echo "         $checker_hint" >&2
+            status=1
+          fi
+
+          if [ "$RECORD_OUTCOME" = "skipped" ]; then
+            echo "LOG: not attempted — the check step did not complete." >&2
+            status=1
+          elif [ "$RECORDED" = "1" ]; then
+            echo "LOG: recorded to uptime-log."
+          else
+            echo "LOG: could not write to uptime-log after three attempts. This is a" >&2
+            echo "     gap in the history, not an outage, and the rows are in the" >&2
+            echo "     job summary." >&2
+            status=1
+          fi
+
+          exit "$status"

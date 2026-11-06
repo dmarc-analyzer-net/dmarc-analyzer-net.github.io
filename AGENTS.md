@@ -58,13 +58,20 @@ Python or shell scripts — they take arguments, and `npm run x -- --flag` is a 
   `motion.ts` (`revealResults`), `blog.ts` (the byline and post-type labels).
 - `src/styles/global.css` — design tokens as CSS custom properties. **Never
   hard-code a hex**; use `var(--teal-600)` and friends.
-- `scripts/` — `crawl.py`, `check-doc-versions.sh`, `verify-docs-snippets.sh`.
+- `scripts/` — `crawl.py`, `check-doc-versions.sh`, `verify-docs-snippets.sh`,
+  `uptime-check.sh`.
 
 ## CI, and what actually gates a change
 
 `.github/workflows/ci.yml` on every push and PR: version check → `astro check` →
 build → serve the preview → **`scripts/crawl.py`**. `deploy.yml` publishes on push
 to `main`, so **merging deploys to production**.
+
+`uptime.yml` gates nothing — it is the one scheduled workflow, checking production
+every fifteen minutes via `scripts/uptime-check.sh` and appending to `uptime.csv`
+on the orphan branch `uptime-log`. A red run means the live site failed, not that
+your change did. Nothing builds or deploys from that branch; `ci.yml` and
+`deploy.yml` both filter to `main`.
 
 `scripts/crawl.py` is the substantive gate — the checks a Screaming Frog audit would
 report, in standard-library Python. Broken links, redirect chains, title and
