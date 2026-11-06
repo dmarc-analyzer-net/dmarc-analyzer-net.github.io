@@ -124,9 +124,9 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
 
       <h2>How often, and which domains</h2>
       <p>
-        Every survey runs <strong>once a month</strong>, so a given domain sees
-        roughly one pass of the queries above every thirty days. Each population
-        has its own day, so no two of them compete for the same query budget:
+        Every survey runs <strong>once a month</strong>, and each population has
+        its own day of the month so that no two of them compete for the same
+        query budget:
       </p>
       <ul>
         <li>
@@ -151,9 +151,11 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
       <p>
         A national census is the usual reason a domain that appears in no
         popularity ranking still shows up in a nameserver's logs. Each
-        population is counted and reported on its own: a figure about Sweden
-        describes the whole <code>.se</code> zone, not the Swedish domains that
-        happen to rank.
+        population is surveyed, counted and reported on its own, so a domain in
+        two of them is queried in each: a <code>.se</code> domain inside the top
+        million sees one pass on the 10th and another on the 14th. That is what
+        keeps a figure about Sweden a figure about the whole <code>.se</code>
+        zone, rather than about the Swedish domains that happen to rank.
       </p>
       <p>
         Runs normally start at 08:10 UTC — working hours in the countries whose

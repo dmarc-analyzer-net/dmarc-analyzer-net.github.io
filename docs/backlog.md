@@ -139,6 +139,17 @@ Keep claims truthful to the intended end state.
       an operator reading October logs can still identify us. They are not
       described as no longer ours — the old host is still rented as the rollback.
 
+      **Describing the censuses broke a sentence that was true when there was
+      one survey.** The page promised "roughly one pass of the queries above
+      every thirty days", which held while the broad tier was all it described.
+      Ledgers are per tier and nothing deduplicates across them, so a
+      <code>.se</code> domain inside the top million is queried on the 10th
+      *and* the 14th. CodeRabbit caught it on review and proposed deleting the
+      clause; the page instead says the true thing, because an operator seeing
+      us twice in a month is the person most likely to be reading. The general
+      trap: adding a population silently re-scopes every existing frequency
+      claim on the page.
+
 - [ ] (todo) **Move hosting to Bunny.net, and pull its raw access logs into a
       self-hosted Matomo.** Two goals in one change: server-side visitor
       statistics, which the site has none of today, and getting off a host with no
