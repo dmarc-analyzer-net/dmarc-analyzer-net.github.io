@@ -163,11 +163,16 @@ Full guidance in `docs/content-and-seo.md` and the private `seo` repo's
 
 ## Verifying UI work
 
-There **is** a browser here: headless Chrome driven by the `chrome-devtools` MCP.
-Use it — load the page, drive the form, read the console, screenshot at a set
-viewport. The tool pages are pure client-side JS and cannot be verified any other
-way; stubbing `window.fetch` via an init script is how to feed a checker synthetic
-DNS answers.
+**Check whether you have a browser before promising one.** Some sessions have
+headless Chrome through the `chrome-devtools` MCP; others have no browser at all —
+no binary, no Playwright or Puppeteer cache, no MCP server. This file used to say
+flatly that a browser "is here"; on 2026-11-06 two separate agent environments were
+checked and neither had one. If the tool is there, use it — load the page, drive the
+form, read the console, screenshot at a set viewport. The tool pages are pure
+client-side JS and cannot be verified any other way; stubbing `window.fetch` via an
+init script is how to feed a checker synthetic DNS answers. If it is not there, say
+so and say what you checked instead; do not reassign the work and assume the next
+environment differs.
 
-What it does not give you is judgement. A screenshot proves a page doesn't overflow
-at 390px; it does not prove the page reads well. Say which you did.
+What a browser does not give you is judgement. A screenshot proves a page doesn't
+overflow at 390px; it does not prove the page reads well. Say which you did.
