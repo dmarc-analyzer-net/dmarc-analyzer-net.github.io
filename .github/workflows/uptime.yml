@@ -5,8 +5,10 @@
 # This is the exception that proves it: the mail *is* the product here. A red run
 # means either the live site failed an assertion or this workflow failed to record
 # what it measured, and GitHub mails the repository admins when a scheduled
-# workflow fails. Which of the two it was is the first thing the Verdict step
-# prints, because a monitor whose alerts are ambiguous gets filtered to a folder.
+# workflow fails. Which of them it was is what the Report step prints, on
+# labelled lines, because a monitor whose alerts are ambiguous gets filtered to
+# a folder — and "the site is down" and "the monitor is broken" need different
+# people to do different things.
 #
 # Why it exists: we are proposing to move hosting from GitHub Pages to Bunny.net,
 # and after the cutover somebody will ask whether the move made the site slower or
@@ -80,7 +82,7 @@ jobs:
           # able to reach a verdict. The same distinction the CSV draws has to
           # be drawn here, or the summary and the alert undo it one layer up.
           site_failed=0
-          checker_failed=0
+          checker_row=0
           rows=0
           while IFS= read -r row; do
             [ -n "$row" ] || continue
@@ -88,21 +90,25 @@ jobs:
             ok=$(printf '%s' "$row" | cut -d, -f3)
             note=${row##*,}
             case "$note" in
-              check_error_*) checker_failed=1 ;;
+              check_error_*) checker_row=1 ;;
               *) [ "$ok" = "1" ] || site_failed=1 ;;
             esac
           done < "$RUNNER_TEMP/uptime/rows.csv"
 
-          # No rows at all, or a non-zero exit nothing in the CSV accounts for,
-          # means the checker itself came apart. Never silently green.
+          # Empty rather than a boolean, because the three ways the checker can
+          # fail want three different sentences: one of them points at a row in
+          # the log, and the other two mean there is no row to point at.
+          checker_reason=""
           if [ "$rows" -eq 0 ]; then
-            checker_failed=1
-          elif [ "$script_status" -ne 0 ] && [ "$site_failed" -eq 0 ] && [ "$checker_failed" -eq 0 ]; then
-            checker_failed=1
+            checker_reason="no_rows"
+          elif [ "$checker_row" -eq 1 ]; then
+            checker_reason="row"
+          elif [ "$script_status" -ne 0 ] && [ "$site_failed" -eq 0 ]; then
+            checker_reason="unexplained_exit"
           fi
 
           echo "site_failed=$site_failed" >> "$GITHUB_OUTPUT"
-          echo "checker_failed=$checker_failed" >> "$GITHUB_OUTPUT"
+          echo "checker_reason=$checker_reason" >> "$GITHUB_OUTPUT"
 
       # Recorded before the job is allowed to fail, so a failing run still
       # leaves the row that explains what failed.
@@ -154,64 +160,115 @@ jobs:
 
           echo "recorded=$recorded" >> "$GITHUB_OUTPUT"
 
-      # The rows go in the summary whether or not the branch took them, so a
-      # run that could not write the log has still not lost its measurement.
-      - name: Summary
+      # The summary and the exit status are two renderings of one judgement, so
+      # they are made in one place. Splitting them meant stating the judgement
+      # twice and getting it subtly different each time.
+      #
+      # The rows go in the summary whether or not the branch took them, so a run
+      # that could not write the log has still not lost its measurement.
+      - name: Report
         if: always()
+        env:
+          CHECK_OUTCOME: ${{ steps.check.outcome }}
+          RECORD_OUTCOME: ${{ steps.record.outcome }}
+          SITE_FAILED: ${{ steps.check.outputs.site_failed }}
+          CHECKER_REASON: ${{ steps.check.outputs.checker_reason }}
+          RECORDED: ${{ steps.record.outputs.recorded }}
         run: |
+          site="$SITE_FAILED"
+          reason="$CHECKER_REASON"
+
+          # The check step can die before it writes any output — a bad
+          # checkout, a cancelled job, a runner that went away. Its outputs are
+          # then empty, and empty has to mean "unknown" rather than "fine".
+          if [ "$CHECK_OUTCOME" != "success" ] || [ -z "$site" ]; then
+            site="unknown"
+            reason="step_failed"
+          elif [ "$reason" = "no_rows" ]; then
+            # Nothing was measured, so "no target failed" would be true in the
+            # way a silence is true, and read as reassurance.
+            site="unknown"
+          fi
+
+          # Only one of these failures has a row in the log to point at. Saying
+          # "see the check_error_ row" when the checker never produced a row
+          # sends the reader looking for something that is not there.
+          case "$reason" in
+            row)
+              checker_line="could not reach a verdict on a target (a \`check_error_\` row below)."
+              checker_hint="Exclude \`check_error_\` rows when computing availability: counting them as downtime would make this log understate the site it exists to measure." ;;
+            no_rows)
+              checker_line="produced no rows at all, so this run measured nothing."
+              checker_hint="There is no row to exclude and none to count — treat the run as a gap in the history." ;;
+            unexplained_exit)
+              checker_line="exited non-zero with no row accounting for it."
+              checker_hint="Treat the run as a gap rather than as a measurement, and read the check step log." ;;
+            step_failed)
+              checker_line="did not complete, so the state of the site this run is unknown — not good, not bad."
+              checker_hint="Read the check step log above; no measurement was produced." ;;
+            *)
+              checker_line=""
+              checker_hint="" ;;
+          esac
+
           {
-            if [ "${{ steps.check.outputs.site_failed }}" = "1" ]; then
+            if [ "$site" = "1" ]; then
               echo "## The site failed a check"
-            elif [ "${{ steps.check.outputs.checker_failed }}" = "1" ]; then
+            elif [ "$reason" = "step_failed" ]; then
+              echo "## The checker failed before it could report — the site result is unknown"
+            elif [ -n "$reason" ]; then
               echo "## The checker failed — this is not a site outage"
             else
               echo "## The site passed"
             fi
-            if [ "${{ steps.check.outputs.checker_failed }}" = "1" ]; then
-              echo
-              echo "A row below carries a \`check_error_\` note, meaning the checker"
-              echo "could not reach a verdict on that target. **Exclude \`check_error_\`"
-              echo "rows when computing availability** — counting them as downtime"
-              echo "would make this log understate the site it exists to measure."
+
+            if [ -n "$checker_line" ]; then
+              printf '\nThe checker %s %s\n' "$checker_line" "$checker_hint"
             fi
-            if [ "${{ steps.record.outputs.recorded }}" != "1" ]; then
-              echo
-              echo "**The log was not written.** This is the recorder failing,"
-              echo "not the site — the rows below are the measurement, and"
-              echo "\`uptime.csv\` is missing them."
+
+            if [ "$RECORD_OUTCOME" = "skipped" ]; then
+              printf '\n**The log was not written**, because the check never got far enough to have anything to write.\n'
+            elif [ "$RECORDED" != "1" ]; then
+              printf '\n**The log was not written.** This is the recorder failing, not the site — the rows below are the measurement, and `uptime.csv` is missing them.\n'
             fi
-            echo
-            echo '```'
-            cat "$RUNNER_TEMP/uptime/header.csv" "$RUNNER_TEMP/uptime/rows.csv"
-            echo '```'
+
+            if [ -s "$RUNNER_TEMP/uptime/rows.csv" ]; then
+              echo
+              echo '```'
+              cat "$RUNNER_TEMP/uptime/header.csv" "$RUNNER_TEMP/uptime/rows.csv"
+              echo '```'
+            fi
+
             echo
             echo "Full history: [\`uptime.csv\` on \`uptime-log\`](${{ github.server_url }}/${{ github.repository }}/blob/uptime-log/uptime.csv)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # One red run can mean three quite different things, and the notification
-      # mail carries only the job name. Say which, on labelled lines.
-      - name: Verdict
-        if: always()
-        run: |
+          # One red run can mean four quite different things and the
+          # notification mail carries only the job name. Say which, on labelled
+          # lines, with the site line first because it is the one being asked.
           status=0
-          if [ "${{ steps.check.outputs.site_failed }}" = "1" ]; then
-            echo "SITE: a target failed its assertions — see the row in the summary." >&2
+          case "$site" in
+            1)       echo "SITE: a target failed its assertions — see the row in the summary." >&2; status=1 ;;
+            unknown) echo "SITE: unknown — nothing was measured this run." >&2 ;;
+            *)       echo "SITE: no target failed an assertion." ;;
+          esac
+
+          if [ -n "$reason" ]; then
+            echo "CHECKER: $checker_line" >&2
+            echo "         $checker_hint" >&2
             status=1
-          else
-            echo "SITE: no target failed an assertion."
           fi
-          if [ "${{ steps.check.outputs.checker_failed }}" = "1" ]; then
-            echo "CHECKER: could not reach a verdict on a target (check_error_ row)." >&2
-            echo "         This is the instrument failing, not the site. Exclude" >&2
-            echo "         check_error_ rows when computing availability." >&2
+
+          if [ "$RECORD_OUTCOME" = "skipped" ]; then
+            echo "LOG: not attempted — the check step did not complete." >&2
             status=1
-          fi
-          if [ "${{ steps.record.outputs.recorded }}" = "1" ]; then
+          elif [ "$RECORDED" = "1" ]; then
             echo "LOG: recorded to uptime-log."
           else
-            echo "LOG: could not write to uptime-log after three attempts. The site" >&2
-            echo "     result above stands on its own; this is a gap in the history," >&2
-            echo "     not an outage, and the rows are in the job summary." >&2
+            echo "LOG: could not write to uptime-log after three attempts. This is a" >&2
+            echo "     gap in the history, not an outage, and the rows are in the" >&2
+            echo "     job summary." >&2
             status=1
           fi
+
           exit "$status"
