@@ -105,9 +105,18 @@ python3 scripts/crawl.py https://dmarc-analyzer.net
 Full guidance in `docs/content-and-seo.md` and the private `seo` repo's style guide.
 The rules most often got wrong:
 
-- **Verify against the RFC; don't cite it in body prose.** Guides and glossary
-  entries carry no RFC numbers — that is the house style. Tool pages and `docs/` do
-  cite them. As of **RFC 9989** (May 2026) the DMARC specification is
+- **Verify against the RFC; cite it once, where the thing is defined.** A guide or
+  glossary entry may carry an RFC number at most once per concept, at the moment
+  that concept is introduced, always as a link to the local page:
+  `**SPF** (Sender Policy Framework, [RFC 7208](/rfc/7208/))`. After that, write the
+  behaviour and not the citation — no section numbers, no bare numbers threaded
+  through the prose, no second mention of a number the reader has already been
+  given. Two cites on one page is fine when they define two different things
+  (`/guides/spf-record-syntax/` cites 7208 for SPF and 5322 for the `From:` header);
+  two cites of the *same* RFC is the thing this rule forbids. A guide whose subject
+  *is* a specification (`/guides/dmarc-rfc-9989/`) is the standing exception and
+  cites freely. Tool pages and `docs/` cite as needed.
+- **The current specification.** As of **RFC 9989** (May 2026) DMARC is
   RFC 9989/9990/9991; RFC 7489 and RFC 9091 are obsolete, and `pct`, `ri` and `rf`
   are removed from the spec while still honoured by receivers.
 - **Name the product once per educational page**, at the natural "at scale" moment.
