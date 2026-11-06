@@ -96,7 +96,10 @@ const schema = {
           resolved. For <code>a</code> and <code>exists</code> that is exact; for
           <code>mx</code> and <code>ptr</code> it is a floor, because every
           record <em>they</em> return counts too, so a domain with many MX hosts
-          costs more than the one shown here. Terms containing
+          costs more than the one shown here. A domain reached twice is expanded
+          once and the second term marked <em>already expanded above</em> — that
+          term is counted, but the lookups inside it are not, so including the
+          same provider twice also costs more than the count shown. Terms containing
           <a href="https://www.rfc-editor.org/rfc/rfc7208#section-7" rel="nofollow">macros</a>
           such as <code>%&#123;i&#125;</code> cannot be expanded without a specific sending
           IP, so they are counted and flagged rather than followed.
@@ -281,8 +284,9 @@ const schema = {
    * accumulating the lookup count in `state`.
    *
    * The count increments *before* the decision to recurse, so a term that is
-   * skipped (a macro, a repeat, the depth cap) still costs what it costs at a
-   * real receiver.
+   * skipped (a macro, a repeat, the depth cap) is still counted itself. What is
+   * lost is the subtree: a receiver re-evaluates a repeated include and pays for
+   * its contents again, so the total here is a floor, not the exact cost.
    */
   async function expand(domain: string, state: State, depth: number): Promise<Node> {
     const node: Node = { domain, record: null, terms: [], children: [], depth };
