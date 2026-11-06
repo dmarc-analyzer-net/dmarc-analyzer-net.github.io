@@ -4,10 +4,10 @@ seoTitle: New DMARC records still use pct
 description: I followed a million domains for three months after DMARC retired pct. Brand-new records include it 293 times as often as its replacement.
 type: research
 publishDate: 2026-11-05
-method: "Population: the Tranco top 1,000,000 list GQP4K, as surveyed on 2026-08-10, followed as the same 1,000,000 domains in the 2026-09-10 and 2026-10-10 snapshots. Each monthly run surveys the current list plus every domain seen before, so the figures here filter to domains first seen on 2026-08-10; domains that joined Tranco later are left out. A _dmarc lookup was conclusive for 988,653 domains in August, 987,925 in September and 987,282 in October; timeouts and SERVFAILs are excluded rather than counted as having no record, while NXDOMAIN counts as an answer (no policy). Tag counts use domains publishing a DMARC record as the base: 464,476, 468,157 and 471,395. 'Added' and 'new' compare each domain's August and October records: a new record is a domain with no DMARC record in August and one in October (9,770 domains). t counts as published whatever its value, which is stored as written; pct counts when it holds a whole number from 0 to 100. Aggregates only; no domain is named."
+method: "Population: the Tranco top 1,000,000 list GQP4K, as surveyed on 2026-08-10, followed as the same 1,000,000 domains in the 2026-09-10 and 2026-10-10 snapshots. Each monthly run surveys the current list plus every domain seen before, so the figures here filter to domains first seen on 2026-08-10; domains that joined Tranco later are left out. A _dmarc lookup was conclusive for 988,653 domains in August, 987,925 in September and 987,282 in October; timeouts and SERVFAILs are excluded rather than counted as having no record, while NXDOMAIN counts as an answer (no policy). Tag counts use domains publishing a DMARC record as the base: 464,476, 468,157 and 471,395. 'Added' and 'new' compare each domain's August and October records: a new record is a domain with no DMARC record in August and one in October (9,770 domains). t counts as published whatever its value, which is stored as written; pct counts when it holds a whole number from 0 to 100. The breakdown of t by value (y against n) was run for the August and October snapshots only, so September has a total for t but no figure for t=y. Aggregates only; no domain is named."
 ---
 
-In May, RFC 9989 replaced the old DMARC specification. One of the smaller
+In May, [RFC 9989](/rfc/9989/) replaced the old DMARC specification. One of the smaller
 changes: the `pct` tag became historic, and a new tag called `t` took over the
 one job `pct` was reliably good at, which is test mode. Small change, easy to
 miss, and a good test of how fast the email world moves when a standard says so.
@@ -29,7 +29,10 @@ Same million domains, three snapshots:
 | Domains with a DMARC record | 464,476 | 468,157 | 471,395 |
 | …publishing `pct` (historic) | 122,751 | 122,713 | 123,290 |
 | …publishing `t` | 686 | 685 | 672 |
-| …publishing `t=y` (test mode) | 106 | | 106 |
+| …publishing `t=y` (test mode) | 106 | — | 106 |
+
+The dash is not a zero. I split `t` by value for the August and October
+snapshots only, so there is no September figure to put there.
 
 On the face of it, `t` dropped from 686 to 672. But `t` has two values, and
 `t=n` is the default. Writing `t=n` in a record means exactly the same as not
@@ -111,7 +114,9 @@ things.
 policy, and `p=none` has nothing to scale. 2,304 of the 12,147 domains with a
 ramp value, and 655 of the `pct=0` domains, publish `p=none`. Half of "none" is
 still none. The ramps that can actually do something are the 8,162 on
-`quarantine` and 1,672 on `reject`.
+`quarantine` and 1,672 on `reject`. That is 12,138 of the 12,147; the other nine
+publish no `p` I could read as a policy, which is a ramp tag scaling a policy
+that isn't there.
 
 **Second, the ramps aren't moving.** 12,070 domains had a value between 1 and 99
 in August and still had a DMARC record in October. Two months later, **11,383 of
