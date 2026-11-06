@@ -270,17 +270,20 @@ not a control, and most operators never set one.
 
 ## Counting your lookups
 
-The count is recursive, and that's what catches people. `include:_spf.google.com`
-is one lookup, but the record it fetches contains its own `include:`s, and each
-of those counts too. A record that looks like three includes can easily be nine
-lookups.
+The count is recursive, and that's what catches people. An `include:` is one
+lookup, but the record it fetches may carry its own `include:`s, and each of
+those counts too — `include:mailgun.org` is a single term that fetches a record
+with two more includes inside it.
 
 ```
-v=spf1 include:_spf.google.com include:sendgrid.net include:servers.mcsv.net -all
+v=spf1 include:_spf.google.com include:mailgun.org include:servers.mcsv.net -all
 ```
 
-Three includes, but the true cost is whatever those three records expand to —
-you have to resolve them to know. The [SPF record checker](/tools/spf-checker/)
+Three terms, but the true cost is whatever those three records expand to — you
+have to resolve them to know. Several large senders have flattened their own
+records, `_spf.google.com` and `servers.mcsv.net` among them: both are plain
+address lists today, one lookup each. That is the reason you can't judge a
+term's cost by reading it. The [SPF record checker](/tools/spf-checker/)
 does that expansion and shows the running count term by term, which is faster
 than chasing it by hand. When a record `permerror`s and you can't see why,
 over-limit expansion is the usual answer.

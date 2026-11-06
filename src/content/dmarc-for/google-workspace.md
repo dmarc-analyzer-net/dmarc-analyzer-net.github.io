@@ -33,10 +33,12 @@ v=spf1 include:_spf.google.com include:servers.mcsv.net -all
 ```
 
 Two SPF records is a `permerror`, which counts as a failure. Also watch the
-**10-lookup limit** — `_spf.google.com` alone costs several lookups because it
-nests further includes, so a domain with three or four services can quietly
-exceed the cap. [SPF record syntax](/guides/spf-record-syntax/) covers counting
-and flattening.
+**10-lookup limit**. `_spf.google.com` is a flat list of `ip4:` and `ip6:`
+ranges, so it costs one lookup of your ten — but a term you add beside it may
+fetch a record carrying includes of its own, and those count too. [SPF record
+syntax](/guides/spf-record-syntax/) covers counting and flattening, and the
+[SPF record checker](/tools/spf-checker/) expands a record term by term if you
+want the running total.
 
 > **Using the Gmail SMTP relay or a routing service?** Mail relayed through a
 > third party leaves that provider's IPs, not Google's. Its `include:` has to be
