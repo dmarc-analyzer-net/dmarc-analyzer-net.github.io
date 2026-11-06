@@ -5,7 +5,9 @@ programmatic SEO pages — without losing maintainability or tripping Google's
 thin-content filters.
 
 Read this alongside the [README](../README.md), which covers the project
-structure and deploy flow.
+structure and deploy flow, and the private `seo` repo's
+`docs/content-style-guide.md`, which covers how the prose reads once you have
+decided what to publish.
 
 ---
 
@@ -28,6 +30,10 @@ Where this site has a real advantage to lean on (this is your E-E-A-T):
 - It's **self-hosted / no per-domain pricing** — a genuinely different angle
   from the hosted incumbents.
 - It's built by people who clearly understand DMARC — write like it.
+
+How to write like it is the style guide's §2a. The short version: the reader's
+problem, then one sentence of mechanism, then proof — a command, a record, a
+number. And keep the page's own editorial decisions off the page.
 
 ---
 
@@ -360,6 +366,12 @@ Most of this is already handled; the rest is a few small additions.
       sitemap submitted.
 
 **Rules for every new page**
+- **No internal notes in the markup.** HTML comments are served to visitors, and
+  Astro's rule for which ones survive is undocumented — see *Conventions that
+  will bite you* in [`AGENTS.md`](../AGENTS.md). Put reasoning in the `---`
+  frontmatter block, a `{/* … */}` expression, or `backlog.md`. `crawl.py` fails
+  CI on a shipped comment over 40 characters — a sentence, not a
+  `<!-- TODO -->`.
 - **Internal links** — link out to 2–4 related pages, and make sure at least one
   *existing* page links in. Write them **with a trailing slash**
   (`/glossary/spf/`, not `/glossary/spf`) — see *Trailing slashes* below. The
@@ -385,9 +397,10 @@ Most of this is already handled; the rest is a few small additions.
 
 **The crawl:** `scripts/crawl.py` runs the checks a Screaming Frog audit would
 report — broken links, redirect chains, title/description/H1 problems, canonical
-mismatches, thin pages, image alt text and weight, sitemap coverage, orphans, and
-the cross-collection prose-link matrix. CI runs it on every pull request against
-the local preview, which is what catches a regression before it ships:
+mismatches, thin pages, image alt text and weight, sitemap coverage, orphans,
+internal notes left in the published HTML, and the cross-collection prose-link
+matrix. CI runs it on every pull request against the local preview, which is
+what catches a regression before it ships:
 
 ```bash
 npm run build && npm run preview -- --port 4321 &

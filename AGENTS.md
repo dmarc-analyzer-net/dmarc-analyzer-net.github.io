@@ -19,7 +19,13 @@ where it is versioned with the code it describes and travels with a clone.
   page-authoring patterns, the cluster content plan, the components, and the
   technical SEO checklist. **Read before adding any page.**
 - The private `seo` repo holds the keyword data and competitive research behind
-  those plans. Volumes and priorities come from there, not from intuition.
+  those plans — volumes and priorities come from there, not from intuition — and
+  `docs/content-style-guide.md`, the **binding editorial standard**. Its **§2a**
+  is the voice section: the register, and the line between the candour the
+  compare pages promise and narrating our own editorial decisions in front of
+  the reader. **Read before writing prose.** It is private because it quotes
+  positioning and the keyword policy; the half of it that this repo's CI
+  enforces is restated below, under *Writing content*.
 
 ## Commands
 
@@ -63,10 +69,11 @@ to `main`, so **merging deploys to production**.
 `scripts/crawl.py` is the substantive gate — the checks a Screaming Frog audit would
 report, in standard-library Python. Broken links, redirect chains, title and
 description problems, missing/duplicate H1s, canonical mismatches, thin content,
-image weight, sitemap coverage both ways, orphans, and the cross-collection
-**editorial link matrix**. It crawls the *local preview* deliberately, so a
-regression fails the PR. It fails CI on a missing trailing slash, because
-`trailingSlash: 'always'` means the slash-less form 404s on the preview.
+image weight, sitemap coverage both ways, orphans, internal notes left in the
+published HTML, and the cross-collection **editorial link matrix**. It crawls
+the *local preview* deliberately, so a regression fails the PR. It fails CI on a
+missing trailing slash, because `trailingSlash: 'always'` means the slash-less
+form 404s on the preview.
 
 Outbound links are skipped in CI. Check them by hand, or run the manual
 `SEO audit (manual)` workflow:
@@ -91,6 +98,14 @@ python3 scripts/crawl.py https://dmarc-analyzer.net
   children from its tags with blank lines or the body is treated as inline JSX and
   code spans silently don't render. `npm run check` does **not** type-check MDX
   bodies — only `npm run build` does.
+- **Astro ships some HTML comments and silently drops others.** A comment at the
+  top level of a component's slot is removed by the compiler; one nested inside
+  an element is emitted verbatim. That is why `src/pages/index.astro` published
+  none of its comments while `src/pages/compare/index.astro` published the one
+  inside its `<section>` — undocumented, invisible in review, and the reason the
+  build was carrying five editorial notes in view-source (one on all 108 pages)
+  until 2026-11-06. Don't learn the distinction; use `{/* … */}`, which never
+  ships. `crawl.py` fails on any comment over `COMMENT_MAX_LABEL` (40) chars.
 - **`src/lib/llms.ts` is the one place a new collection can be forgotten.** New
   *entries* are automatic; a new *collection* needs adding to `buildSections()`.
 - **Scrolling in a tool page** goes through `revealResults()` from `src/lib/motion.ts`.
@@ -102,8 +117,18 @@ python3 scripts/crawl.py https://dmarc-analyzer.net
 
 ## Writing content
 
-Full guidance in `docs/content-and-seo.md` and the private `seo` repo's style guide.
-The rules most often got wrong:
+Full guidance in `docs/content-and-seo.md` and the private `seo` repo's
+`docs/content-style-guide.md`. The rules most often got wrong:
+
+- **Write about the product, never about the page.** "Two things this table
+  deliberately does not show, because we would lose them" is a sentence about
+  our own editorial decisions, and the reader did not come for those. Keep every
+  fact, change who the sentence is about — style guide §2a, which has the
+  before-and-afters. Internal reasoning goes in the `---` frontmatter block, a
+  `{/* … */}` expression or `docs/backlog.md`; **never in `<!-- -->`**, which
+  reaches production. `crawl.py` fails CI on a shipped comment over 40
+  characters — long enough to catch a sentence, not a `<!-- TODO -->`, so a
+  short one is still yours to spot.
 
 - **Verify against the RFC; cite it once, where the thing is defined.** A guide or
   glossary entry may carry an RFC number at most once per concept, at the moment

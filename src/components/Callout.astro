@@ -69,8 +69,8 @@ const v = VARIANTS[variant];
   class="callout"
   style={`--callout-bg:${v.bg}; --callout-border:${v.border}; --callout-fg:${v.fg};`}
 >
-  <!-- The variant carries meaning, so it gets an accessible name rather than
-       being conveyed by colour alone. -->
+  {/* The variant carries meaning, so it gets an accessible name rather than
+      being conveyed by colour alone. */}
   <Icon name={v.icon} title={v.label} style="font-size:17px; color:var(--callout-fg); margin-top:3px;" />
   <div class="callout-body">
     {title && <p class="callout-title">{title}</p>}

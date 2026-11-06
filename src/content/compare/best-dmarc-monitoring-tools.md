@@ -43,10 +43,12 @@ often — check each vendor before deciding.*
 | DMARCeye | Vendor cloud | No | Yes, limited history | Per domain, per month |
 | parsedmarc | Self-hosted | Yes | Everything | Free |
 
-Two things this table deliberately does not show, because we would lose them:
-every hosted platform here offers vendor support with an SLA, and most manage
-BIMI alongside DMARC. We do neither — though we do handle
-[MTA-STS](/glossary/mta-sts/) and [TLS-RPT](/glossary/tls-rpt/) ourselves.
+Two things no pricing column captures. Every hosted platform here comes with
+vendor support — someone to escalate to when reports stop arriving — and most
+manage [BIMI](/glossary/bimi/) alongside DMARC. DMARC Analyzer does neither. It
+covers [MTA-STS](/glossary/mta-sts/) and [TLS-RPT](/glossary/tls-rpt/) in the
+same console instead, so transport security sits beside the DMARC data rather
+than in a second tool.
 
 ## Hosted platforms
 

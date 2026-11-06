@@ -14,6 +14,73 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [x] (done) **Write down the voice, and stop publishing our own editorial
+      notes.** Raised 2026-11-06 against the roundup's "Two things this table
+      deliberately does not show, because we would lose them" — read as an
+      internal comment that escaped onto a marketing page, which is what it was.
+      Written up as **§2a of the `seo` repo's `content-style-guide.md`**, which
+      was already the binding editorial standard.
+
+      **It landed in this repo first, and that was the wrong home.** A first
+      pass added `docs/voice.md` here, on the reasoning that the rule should
+      travel with the code an agent is editing. Review killed it: this repo is
+      public, and the doc quoted our positioning, our competitor handling and
+      the §6a keyword policy — the same reasons `content-style-guide.md` says it
+      lives in the private repo. Mirroring the section into both was considered
+      and rejected as two sources of truth for one rule. So it moved whole, and
+      the split is by *kind*: the editorial judgement is private, while the
+      mechanics CI enforces — Astro's comment-emission behaviour,
+      `COMMENT_MAX_LABEL`, where internal notes go instead — stayed in AGENTS.md
+      next to the build they describe, and are public.
+
+      **The distinction the doc turns on, because getting it wrong in the other
+      direction would be worse.** The site's candour is an asset and the compare
+      pages promise it explicitly — "we've kept this list factual and included
+      where each alternative genuinely wins". The flagged sentence was not too
+      honest; it was *about us writing the page* rather than about the product.
+      Every fact in it survived the rewrite. What changed is the subject: a
+      criterion a buyer should weigh, landing on MTA-STS and TLS-RPT in the same
+      console, instead of a confession about what a table would cost us. Same
+      treatment for two others — `/self-hosted-dmarc-monitoring/` announcing
+      what "the rest of this page" would be, and `/blog/` telling readers it
+      "deliberately does not chase search terms", which is our keyword policy
+      stated in our own vocabulary. The SLA half of the roundup sentence was
+      also softened to "vendor support": an SLA across all six named vendors,
+      two of them small, was never verified anywhere.
+
+      **The literal version of the complaint was true too, and bigger.** HTML
+      comments reach production: `dist/` carried five distinct editorial notes,
+      one of them — a note about CSS custom properties in `BaseLayout` — in
+      view-source on all 108 pages. Astro's behaviour here is a trap. A comment
+      at the top level of a component's slot is dropped; one nested inside an
+      element is emitted verbatim. Confirmed by building with a probe comment in
+      each position in `index.astro`: the top-level one was absent from
+      `dist/index.html`, the nested one present. That is the whole explanation
+      for why `index.astro` looked clean while `compare/index.astro` did not,
+      and it is not a rule anyone should have to hold. All five are now
+      `{/* … */}`, which never ships.
+
+      **`COMMENT_MAX_LABEL = 40` in `crawl.py`, as an error.** The separation is
+      clean: the five notes measured 69–176 characters, every structural label
+      on the site (`HERO`, `Results`, `Open Graph`) measured 4–10. Keyed on the
+      comment rather than the page, or the `BaseLayout` one alone would have
+      been 108 identical lines.
+
+      **No phrase check, deliberately.** A regex for the prose half would fire
+      on `glossary/bimi.md`'s "a deliberately restricted profile" — a correct
+      sentence about SVG — and stay silent on fluent English narrating our
+      conversion strategy. It cannot separate the set it is for, which is the
+      bar the `PROSE_MIN` and `TITLE_MIN` entries below set for adding a check
+      at all. Review is the gate for tone.
+
+      Three things review caught on the PR, all kept. The length floor means a
+      short note (`<!-- TODO -->`) still passes, so the docs say where the gate
+      stops rather than implying it is total. The per-comment map keys on a set
+      of URLs, because a component used twice on one page emitted its comment
+      twice and the report would have said "2 pages" while naming neither. And
+      the five leaked notes are described in the past tense — they were fixed in
+      the same change, so one in `dist/` now is a regression.
+
 - [x] (done) **Sitemap `<lastmod>` from git, and homepage prose links to the P0
       pages.** Search Console's URL Inspection API (run 2026-09-13 across 54
       content pages) showed 24 had not been crawled since late July — every page
@@ -268,6 +335,24 @@ inferred. What follows is what that found and what it left.
       the pointer with generated reference rather than hand-maintaining one here.
 
 ## Medium Priority
+
+- [ ] (todo) **Decide what else in `docs/` should not be in a public repo.**
+      Raised 2026-11-06 by the voice item above: the objection that settled it —
+      internal strategy sitting in a repo anyone can read — is not unique to the
+      file that was moved. This repo is public, and two others carry the same
+      kind of material. `content-and-seo.md` opens with "the goal **you** stated
+      is ~100 pages for SEO", names the thin-content filters it is steering
+      around, and sets out the cluster plan. This file is 1,100 lines of
+      decision record, including competitor-positioning reasoning and what a
+      third-party audit found.
+
+      Not obviously wrong to publish — an open-source project showing its
+      working is on-brand, both are addressed to contributors rather than to
+      buyers, and both are genuinely about *this repo*, which is the argument
+      for them travelling with the code. But nobody has ever made that call
+      deliberately; they were public by default. The decision wanted is one
+      sentence of policy — which of *strategy*, *reasoning* and *mechanics* may
+      be public — applied to both files, not a reflexive move of either.
 
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
 - [x] (done) Build `Cta.astro` — closing call-to-action band, wired into the guide, provider, and comparison templates (glossary intentionally omits it).
