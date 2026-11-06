@@ -2,13 +2,14 @@
 title: SPF record syntax and examples
 description: A field reference for SPF record syntax — every mechanism and qualifier, the 10-lookup limit, and copy-paste examples for common email providers.
 publishDate: 2026-07-23
-updatedDate: 2026-08-08
+updatedDate: 2026-11-06
 ---
 
 An [SPF](/glossary/spf/) record is a single line of DNS that lists who may send
-email for your domain. The syntax — specified by [RFC 7208](/rfc/7208/) — is
-small but unforgiving: one wrong qualifier or one record too many and it
-silently fails. This is the field reference.
+email for your domain. SPF record syntax — specified by [RFC 7208](/rfc/7208/) —
+is small but unforgiving: one wrong qualifier or one record too many and it
+silently fails. This is the field reference: every mechanism, every qualifier,
+the ten-lookup limit, and records you can copy.
 
 ## Anatomy of a record
 
@@ -45,13 +46,15 @@ Eight mechanisms exist. In practice you will write four of them.
 | `ip4` | [An IPv4 address or range](#the-ip4-mechanism) | 0 | `ip4:198.51.100.0/24` |
 | `ip6` | [An IPv6 address or range](#the-ip6-mechanism) | 0 | `ip6:2001:db8::/32` |
 | `a` | [The domain's own A/AAAA records](#the-a-mechanism) | 1 | `a` or `a:mail.yourdomain.com` |
-| `mx` | [The domain's MX hosts](#the-mx-mechanism) | 1 | `mx` |
+| `mx` | [The domain's MX hosts](#the-mx-mechanism) | 1+ | `mx` |
 | `include` | [Another domain's SPF (e.g. a provider)](#the-include-mechanism) | 1 | `include:_spf.google.com` |
 | `exists` | [Whether a name resolves, after macro expansion](#the-exists-mechanism) | 1 | `exists:%{ir}.spf.yourdomain.com` |
-| `ptr` | [Reverse DNS of the connecting IP](#the-ptr-mechanism) | 1 | `ptr` — **deprecated, don't** |
+| `ptr` | [Reverse DNS of the connecting IP](#the-ptr-mechanism) | 1+ | `ptr` — **do not use** |
 
-The lookup column is the one to watch: only `ip4` and `ip6` are free, and the
-total across a record must stay at or below ten. That budget is what
+The lookup column is the one to watch: only `all`, `ip4` and `ip6` cost nothing,
+and the total across a record must stay at or below ten. `mx` and `ptr` are
+marked `1+` because every record *they* return counts against the same ten —
+one term, many lookups. That budget is what
 [counting your lookups](#counting-your-lookups) is about.
 
 ### The `all` mechanism
@@ -116,10 +119,14 @@ your inbound and outbound mail share hosts, and pointless when they don't:
 v=spf1 mx -all
 ```
 
-`mx` costs one lookup, but it carries a **second, separate limit**: resolving it
-must not require more than ten address lookups. A domain with a dozen MX hosts
-therefore `permerror`s on a single `mx` term, with a term count of one. This is
-the most confusing way an SPF record can fail.
+`mx` is **one term that can cost many lookups**. Every MX record returned counts
+against the budget of ten, so a domain with a dozen MX hosts `permerror`s on a
+single `mx` term — while a checker that counts terms reports one. This is the
+most confusing way an SPF record can fail.
+
+A second, separate limit sits underneath it: resolving any one MX host must not
+require more than ten address records. Exceeding that fails the `mx` mechanism
+on its own.
 
 ### The `include` mechanism
 
@@ -157,10 +164,12 @@ inherit one, it is deliberate. It costs one lookup.
 
 ### The `ptr` mechanism
 
-Matches on the reverse DNS of the connecting IP.
-[RFC 7208](https://www.rfc-editor.org/rfc/rfc7208#section-5.5) deprecates it in
-as many words: it is slow, it loads the receiver, and the result depends on
-reverse DNS you do not control. Some receivers skip it entirely.
+Matches on the reverse DNS of the connecting IP. The section of the spec that
+defines it is titled "do not use", and says so in as many words: it is slow, it
+is the least reliable mechanism when DNS errors occur, it puts a heavy load on
+the `.arpa` name servers, and the result turns on reverse DNS you do not
+control. Receivers are still required to support it — that is not a reason to
+publish it.
 
 Do not add it. If you find it in a record you inherited, removing it is usually
 safe and always frees a lookup.
@@ -232,8 +241,9 @@ v=spf1 include:_spf.google.com exp=why.yourdomain.com -all
 ```
 
 The explanation string is macro-expanded, and only used for `fail` — never for
-softfail or neutral. It is a diagnostic nicety, not a control, and most operators
-never set one.
+softfail or neutral. It costs nothing against the ten-lookup limit, because the
+lookup happens after evaluation has already finished. It is a diagnostic nicety,
+not a control, and most operators never set one.
 
 ## The rules that trip people up
 
@@ -242,11 +252,13 @@ never set one.
 - **Ten DNS-lookup limit.** Six terms cost a lookup — `include`, `a`, `mx`,
   `ptr`, `exists` and `redirect` — and the total must stay **≤ 10**. Ten is
   allowed; eleven `permerror`s. Chained providers blow past this fast.
-- **The [`mx` mechanism](#the-mx-mechanism) and the [`ptr` mechanism](#the-ptr-mechanism)
-  have their own sub-limits**, which is how a record with a term count of 1 still fails: each is
-  capped at **10 address lookups** of its own. Over the cap, `mx` is fatal while
-  `ptr` merely ignores the extras — the difference being that you control your MX
-  records and not the reverse DNS of whoever is connecting.
+- **[`mx`](#the-mx-mechanism) and [`ptr`](#the-ptr-mechanism) count more than
+  once.** Every MX or PTR record they return counts against that same ten, which
+  is how a record showing a term count of 1 still `permerror`s. Underneath that,
+  resolving any single MX or PTR host is capped at **10 address records** of its
+  own — over the cap, `mx` is fatal while `ptr` merely ignores the extras. The
+  spec draws that distinction because you control your MX records and not the
+  reverse DNS of whoever is connecting.
 - **Two void lookups.** Separately from the limit above, no more than two
   lookups may return an empty answer. A stale `include:` for a service you
   cancelled can `permerror` a record that's otherwise fine.
@@ -267,8 +279,10 @@ v=spf1 include:_spf.google.com include:sendgrid.net include:servers.mcsv.net -al
 ```
 
 Three includes, but the true cost is whatever those three records expand to —
-you have to resolve them to know. When a record `permerror`s and you can't see
-why, over-limit expansion is the usual answer.
+you have to resolve them to know. The [SPF record checker](/tools/spf-checker/)
+does that expansion and shows the running count term by term, which is faster
+than chasing it by hand. When a record `permerror`s and you can't see why,
+over-limit expansion is the usual answer.
 
 ### When you exceed 10
 
@@ -323,6 +337,10 @@ You want exactly one string beginning `v=spf1`. Two is a `permerror` regardless
 of how correct each one looks individually — and DNS providers make this easy to
 do by accident, because adding a second TXT record is a perfectly ordinary
 operation.
+
+`dig` shows you the record; it cannot tell you what the record *costs*. For that,
+the [SPF record checker](/tools/spf-checker/) resolves every `include:` and
+reports the lookup count against the limit of ten.
 
 ## Common mistakes
 

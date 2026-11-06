@@ -93,8 +93,10 @@ const schema = {
           <code>include:</code> and <code>redirect=</code> are expanded and their
           contents counted. <code>a</code>, <code>mx</code>, <code>ptr</code> and
           <code>exists</code> are counted at one lookup each without being
-          resolved — the count is what matters, and resolving them would not
-          change it. Terms containing
+          resolved. For <code>a</code> and <code>exists</code> that is exact; for
+          <code>mx</code> and <code>ptr</code> it is a floor, because every
+          record <em>they</em> return counts too, so a domain with many MX hosts
+          costs more than the one shown here. Terms containing
           <a href="https://www.rfc-editor.org/rfc/rfc7208#section-7" rel="nofollow">macros</a>
           such as <code>%&#123;i&#125;</code> cannot be expanded without a specific sending
           IP, so they are counted and flagged rather than followed.
