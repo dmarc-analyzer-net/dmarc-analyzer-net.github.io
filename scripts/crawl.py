@@ -101,6 +101,23 @@ PROSE_MIN = 120
 IMAGE_MAX_BYTES = 100 * 1024   # Screaming Frog's own "large images" threshold
 MAX_IMAGES = 100
 
+# HTML comments reach production, and nothing else here looks at them. Astro
+# drops a comment sitting at the top level of a component's slot and emits one
+# nested inside an element verbatim — undocumented, invisible in review, and the
+# reason src/pages/index.astro shipped none of its comments while
+# src/pages/compare/index.astro shipped the one inside its <section>. Before
+# this check the site published five distinct notes to anyone reading the
+# source, one of them on all 108 pages.
+#
+# The split is length, because the two kinds of comment are different lengths.
+# A structural label — HERO, Results, Open Graph, Twitter — is a word or two and
+# tells a reader nothing; an editorial note is a sentence. The five that were
+# shipping measured 69 to 176 characters and every label on the site measured 4
+# to 10, so the gap is an order of magnitude wide and 40 sits in it. An error,
+# not a warning: a note nobody meant to publish is not a judgement call, and
+# this is the only gate on docs/voice.md §6.
+COMMENT_MAX_LABEL = 40
+
 # A link sitting in a <nav> on this share of pages is site chrome by definition —
 # a declared hub, not an orphan. Keyed on <nav> alone: the footer carries a
 # handful of links on every page too, and treating that as an endorsement would
@@ -134,6 +151,10 @@ class Page(HTMLParser):
         self.images_without_dimensions = 0
         self.images = 0
         self.image_srcs: list[str] = []
+        # Comments are the one part of a page the reader only sees on purpose,
+        # which is exactly why notes meant for us end up here. See
+        # COMMENT_MAX_LABEL.
+        self.comments: list[str] = []
         self._in_title = False
         self._in_h1 = False
         self._h1_buf: list[str] = []
@@ -213,6 +234,9 @@ class Page(HTMLParser):
                 self._chrome = max(self._chrome - 1, 0)
             elif tag in ("footer", "aside"):
                 self._chrome = max(self._chrome - 1, 0)
+
+    def handle_comment(self, data):
+        self.comments.append(" ".join(data.split()))
 
     def handle_data(self, data):
         if self._in_title:
@@ -484,6 +508,10 @@ def main() -> int:
 
     by_title: dict[str, list[str]] = defaultdict(list)
     by_desc: dict[str, list[str]] = defaultdict(list)
+    # Keyed on the comment, not the page: the one that mattered most sat in
+    # BaseLayout and so appeared on every page of the site. Reported per page it
+    # would be 108 identical lines hiding everything else in the run.
+    notes_in_source: dict[str, list[str]] = defaultdict(list)
 
     for url, p in sorted(pages.items()):
         title = " ".join(p.title.split())
@@ -546,6 +574,15 @@ def main() -> int:
         if p.images_without_dimensions:
             warnings.append(f"{p.images_without_dimensions}/{p.images} images without "
                             f"width/height (layout shift): {url}")
+
+        for c in p.comments:
+            if len(c) > COMMENT_MAX_LABEL:
+                notes_in_source[c].append(url)
+
+    for comment, urls in sorted(notes_in_source.items()):
+        where = f"{len(urls)} pages" if len(urls) > 1 else urls[0]
+        errors.append(f"internal note in the published HTML ({where}): "
+                      f"<!-- {comment[:120]}{'…' if len(comment) > 120 else ''} -->")
 
     for title, urls in by_title.items():
         if len(urls) > 1:

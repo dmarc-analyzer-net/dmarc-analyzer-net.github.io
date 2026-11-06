@@ -60,9 +60,9 @@ const ogImage = new URL(image, Astro.site).href;
     <meta name="description" content={description} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="generator" content={Astro.generator} />
-    <!-- Literal hex, not var(--teal-600): meta content is not CSS, so a custom
-         property never resolves here and the tag is silently ignored. Keep in
-         sync with --teal-600 in global.css. -->
+    {/* Literal hex, not var(--teal-600): meta content is not CSS, so a custom
+        property never resolves here and the tag is silently ignored. Keep in
+        sync with --teal-600 in global.css. */}
     <meta name="theme-color" content="#0e9481" />
 
     <!-- Open Graph -->

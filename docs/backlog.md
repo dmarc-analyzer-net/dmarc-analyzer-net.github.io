@@ -14,6 +14,54 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [x] (done) **Write down the voice, and stop publishing our own editorial
+      notes.** Raised 2026-11-06 against the roundup's "Two things this table
+      deliberately does not show, because we would lose them" — read as an
+      internal comment that escaped onto a marketing page, which is what it was.
+      Now [`docs/voice.md`](voice.md), linked from AGENTS.md's *Read these
+      first*. The `seo` repo's `content-style-guide.md` stays binding where the
+      two overlap; this one travels with the code.
+
+      **The distinction the doc turns on, because getting it wrong in the other
+      direction would be worse.** The site's candour is an asset and the compare
+      pages promise it explicitly — "we've kept this list factual and included
+      where each alternative genuinely wins". The flagged sentence was not too
+      honest; it was *about us writing the page* rather than about the product.
+      Every fact in it survived the rewrite. What changed is the subject: a
+      criterion a buyer should weigh, landing on MTA-STS and TLS-RPT in the same
+      console, instead of a confession about what a table would cost us. Same
+      treatment for two others — `/self-hosted-dmarc-monitoring/` announcing
+      what "the rest of this page" would be, and `/blog/` telling readers it
+      "deliberately does not chase search terms", which is our keyword policy
+      stated in our own vocabulary. The SLA half of the roundup sentence was
+      also softened to "vendor support": an SLA across all six named vendors,
+      two of them small, was never verified anywhere.
+
+      **The literal version of the complaint was true too, and bigger.** HTML
+      comments reach production: `dist/` carried five distinct editorial notes,
+      one of them — a note about CSS custom properties in `BaseLayout` — in
+      view-source on all 108 pages. Astro's behaviour here is a trap. A comment
+      at the top level of a component's slot is dropped; one nested inside an
+      element is emitted verbatim. Confirmed by building with a probe comment in
+      each position in `index.astro`: the top-level one was absent from
+      `dist/index.html`, the nested one present. That is the whole explanation
+      for why `index.astro` looked clean while `compare/index.astro` did not,
+      and it is not a rule anyone should have to hold. All five are now
+      `{/* … */}`, which never ships.
+
+      **`COMMENT_MAX_LABEL = 40` in `crawl.py`, as an error.** The separation is
+      clean: the five notes measured 69–176 characters, every structural label
+      on the site (`HERO`, `Results`, `Open Graph`) measured 4–10. Keyed on the
+      comment rather than the page, or the `BaseLayout` one alone would have
+      been 108 identical lines.
+
+      **No phrase check, deliberately.** A regex for the prose half would fire
+      on `glossary/bimi.md`'s "a deliberately restricted profile" — a correct
+      sentence about SVG — and stay silent on fluent English narrating our
+      conversion strategy. It cannot separate the set it is for, which is the
+      bar the `PROSE_MIN` and `TITLE_MIN` entries below set for adding a check
+      at all. Review is the gate for tone.
+
 - [x] (done) **Sitemap `<lastmod>` from git, and homepage prose links to the P0
       pages.** Search Console's URL Inspection API (run 2026-09-13 across 54
       content pages) showed 24 had not been crawled since late July — every page

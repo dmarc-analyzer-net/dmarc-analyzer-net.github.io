@@ -18,6 +18,9 @@ where it is versioned with the code it describes and travels with a clone.
 - **[`docs/content-and-seo.md`](docs/content-and-seo.md)** — how to grow the site:
   page-authoring patterns, the cluster content plan, the components, and the
   technical SEO checklist. **Read before adding any page.**
+- **[`docs/voice.md`](docs/voice.md)** — how the site reads: the register, the
+  line between candour and talking about our own editorial decisions in front of
+  the reader, and where internal notes go instead. **Read before writing prose.**
 - The private `seo` repo holds the keyword data and competitive research behind
   those plans. Volumes and priorities come from there, not from intuition.
 
@@ -63,8 +66,8 @@ to `main`, so **merging deploys to production**.
 `scripts/crawl.py` is the substantive gate — the checks a Screaming Frog audit would
 report, in standard-library Python. Broken links, redirect chains, title and
 description problems, missing/duplicate H1s, canonical mismatches, thin content,
-image weight, sitemap coverage both ways, orphans, and the cross-collection
-**editorial link matrix**. It crawls the *local preview* deliberately, so a
+image weight, sitemap coverage both ways, orphans, internal notes left in the
+published HTML, and the cross-collection **editorial link matrix**. It crawls the *local preview* deliberately, so a
 regression fails the PR. It fails CI on a missing trailing slash, because
 `trailingSlash: 'always'` means the slash-less form 404s on the preview.
 
@@ -102,8 +105,16 @@ python3 scripts/crawl.py https://dmarc-analyzer.net
 
 ## Writing content
 
-Full guidance in `docs/content-and-seo.md` and the private `seo` repo's style guide.
-The rules most often got wrong:
+Full guidance in `docs/voice.md`, `docs/content-and-seo.md` and the private `seo`
+repo's style guide. The rules most often got wrong:
+
+- **Write about the product, never about the page.** "Two things this table
+  deliberately does not show, because we would lose them" is a sentence about
+  our own editorial decisions, and the reader did not come for those. Keep every
+  fact, change who the sentence is about — `docs/voice.md` §3. Internal reasoning
+  goes in the `---` frontmatter block, a `{/* … */}` expression or
+  `docs/backlog.md`; **never in `<!-- -->`**, which reaches production and now
+  fails CI.
 
 - **Verify against the RFC; cite it once, where the thing is defined.** A guide or
   glossary entry may carry an RFC number at most once per concept, at the moment
