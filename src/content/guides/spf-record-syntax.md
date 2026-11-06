@@ -125,8 +125,9 @@ single `mx` term — while a checker that counts terms reports one. This is the
 most confusing way an SPF record can fail.
 
 A second, separate limit sits underneath it: resolving any one MX host must not
-require more than ten address records. Exceeding that fails the `mx` mechanism
-on its own.
+require more than ten address records. That cap is independent of the budget of
+ten, and breaching it returns `permerror` for the whole record — evaluation
+stops at `mx`, and nothing after it can authorize the sender.
 
 ### The `include` mechanism
 
