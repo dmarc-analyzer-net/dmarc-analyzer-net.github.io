@@ -1,0 +1,66 @@
+name: Deploy to Bunny staging (manual)
+
+# Manual only. This publishes to the Bunny *staging* zone and nothing else:
+# GitHub Pages remains the production publisher, and `deploy.yml` is untouched.
+# Switching production over to Bunny belongs to the cutover window, not here --
+# merging to main deploys to production, so a push trigger on this workflow
+# would make the cutover happen by accident.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report the three passes without changing anything"
+        type: boolean
+        default: false
+      skip_unchanged:
+        description: "Upload only files whose sha256 differs from storage"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# The deploy is not atomic -- two overlapping runs would interleave their
+# upload and delete passes and could leave the zone holding a mix of two trees.
+concurrency:
+  group: bunny-staging
+  cancel-in-progress: false
+
+env:
+  BUNNY_STORAGE_ZONE: dma-staging-test
+  BUNNY_PULL_ZONE: "6940443"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history: astro.config.mjs dates every sitemap <lastmod> from
+          # the last commit that touched the page's source. The same reasoning
+          # as deploy.yml -- on a shallow clone every page claims to have
+          # changed on every deploy.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Upload, delete, purge
+        env:
+          # The repository secret is BUNNYNET_APIKEY. The `bunny` CLI reads
+          # BUNNYNET_API_KEY and reports "Not logged in" when it is missing,
+          # which reads like a revoked key rather than a naming mismatch --
+          # this script takes BUNNY_API_KEY and says what is wrong.
+          BUNNY_API_KEY: ${{ secrets.BUNNYNET_APIKEY }}
+        run: |
+          python3 scripts/bunny-deploy.py \
+            --storage-zone "$BUNNY_STORAGE_ZONE" \
+            --pull-zone "$BUNNY_PULL_ZONE" \
+            ${{ inputs.skip_unchanged && '--skip-unchanged' || '' }} \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
