@@ -147,8 +147,10 @@ Keep claims truthful to the intended end state.
       cost, and what each option buys. It is private because it inventories
       infrastructure next to the bill and the cutover window; it was written here
       first, which is the incident that produced the placement rule in
-      `AGENTS.md`. Awaiting approval on the spend. Nothing bought, no account
-      created, no DNS touched.
+      `AGENTS.md`. The spend was approved on 2026-11-06 and staging has since
+      been validated; the results and the remaining decisions are recorded
+      there, not here. **No DNS record has been touched and this site is still
+      served by GitHub Pages.**
 
       Two findings belong here, because without them this entry keeps asserting
       things measurement has disproved. **The apex is four A records** to GitHub's
