@@ -115,7 +115,7 @@ MAX_IMAGES = 100
 # shipping measured 69 to 176 characters and every label on the site measured 4
 # to 10, so the gap is an order of magnitude wide and 40 sits in it. An error,
 # not a warning: a note nobody meant to publish is not a judgement call, and
-# this is the only gate on docs/voice.md §6.
+# this is the only mechanical gate on the rule in AGENTS.md.
 COMMENT_MAX_LABEL = 40
 
 # A link sitting in a <nav> on this share of pages is site chrome by definition —

@@ -5,8 +5,9 @@ programmatic SEO pages — without losing maintainability or tripping Google's
 thin-content filters.
 
 Read this alongside the [README](../README.md), which covers the project
-structure and deploy flow, and [`voice.md`](voice.md), which covers how the
-prose reads once you have decided what to publish.
+structure and deploy flow, and the private `seo` repo's
+`docs/content-style-guide.md`, which covers how the prose reads once you have
+decided what to publish.
 
 ---
 
@@ -30,7 +31,7 @@ Where this site has a real advantage to lean on (this is your E-E-A-T):
   from the hosted incumbents.
 - It's built by people who clearly understand DMARC — write like it.
 
-How to write like it is [`voice.md`](voice.md). The short version: the reader's
+How to write like it is the style guide's §2a. The short version: the reader's
 problem, then one sentence of mechanism, then proof — a command, a record, a
 number. And keep the page's own editorial decisions off the page.
 
@@ -366,10 +367,11 @@ Most of this is already handled; the rest is a few small additions.
 
 **Rules for every new page**
 - **No internal notes in the markup.** HTML comments are served to visitors, and
-  Astro's rule for which ones survive is undocumented — see
-  [`voice.md`](voice.md) §6. Put reasoning in the `---` frontmatter block, a
-  `{/* … */}` expression, or `backlog.md`. `crawl.py` fails CI on a shipped
-  comment over 40 characters — a sentence, not a `<!-- TODO -->`.
+  Astro's rule for which ones survive is undocumented — see *Conventions that
+  will bite you* in [`AGENTS.md`](../AGENTS.md). Put reasoning in the `---`
+  frontmatter block, a `{/* … */}` expression, or `backlog.md`. `crawl.py` fails
+  CI on a shipped comment over 40 characters — a sentence, not a
+  `<!-- TODO -->`.
 - **Internal links** — link out to 2–4 related pages, and make sure at least one
   *existing* page links in. Write them **with a trailing slash**
   (`/glossary/spf/`, not `/glossary/spf`) — see *Trailing slashes* below. The
