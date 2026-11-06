@@ -399,8 +399,8 @@ Most of this is already handled; the rest is a few small additions.
 report — broken links, redirect chains, title/description/H1 problems, canonical
 mismatches, thin pages, image alt text and weight, sitemap coverage, orphans,
 internal notes left in the published HTML, and the cross-collection prose-link
-matrix. CI runs it on every pull request against
-the local preview, which is what catches a regression before it ships:
+matrix. CI runs it on every pull request against the local preview, which is
+what catches a regression before it ships:
 
 ```bash
 npm run build && npm run preview -- --port 4321 &

@@ -70,9 +70,10 @@ to `main`, so **merging deploys to production**.
 report, in standard-library Python. Broken links, redirect chains, title and
 description problems, missing/duplicate H1s, canonical mismatches, thin content,
 image weight, sitemap coverage both ways, orphans, internal notes left in the
-published HTML, and the cross-collection **editorial link matrix**. It crawls the *local preview* deliberately, so a
-regression fails the PR. It fails CI on a missing trailing slash, because
-`trailingSlash: 'always'` means the slash-less form 404s on the preview.
+published HTML, and the cross-collection **editorial link matrix**. It crawls
+the *local preview* deliberately, so a regression fails the PR. It fails CI on a
+missing trailing slash, because `trailingSlash: 'always'` means the slash-less
+form 404s on the preview.
 
 Outbound links are skipped in CI. Check them by hand, or run the manual
 `SEO audit (manual)` workflow:
