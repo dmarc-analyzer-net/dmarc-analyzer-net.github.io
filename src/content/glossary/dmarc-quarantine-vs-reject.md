@@ -5,20 +5,21 @@ aliases: ["quarantine vs reject", "p=quarantine vs p=reject"]
 related: ["dmarc-policy", "dmarc", "dmarc-alignment", "arc"]
 ---
 
-`quarantine` and `reject` are the two **enforcing** [DMARC
-policies](/glossary/dmarc-policy/) — the difference is what a receiver does with
-mail that fails authentication.
+DMARC `quarantine` and `reject` are the two **enforcing** [DMARC
+policies](/glossary/dmarc-policy/). The difference is what a receiver does with
+mail that fails authentication:
 
 - **`p=quarantine`** — deliver failing mail, but to the **spam/junk** folder. The
   recipient can still find it.
-- **`p=reject`** — refuse failing mail outright. It's **never delivered**; the
-  sending server gets a bounce.
+- **`p=reject`** — refuse failing mail outright, at SMTP time. It's **never
+  delivered**, and the refusal goes back to the server that sent it.
 
 (The third policy, `p=none`, enforces nothing — it only monitors.)
 
-Both apply only to mail that **fails** DMARC, meaning it failed
-[alignment](/glossary/dmarc-alignment/) on both SPF and DKIM. Mail that passes is
-untouched either way, which is why a correct setup is safe to enforce.
+Both apply only to mail that **fails** DMARC, meaning neither SPF nor DKIM
+produced a pass that [aligns](/glossary/dmarc-alignment/) with the `From:`
+domain. One aligned pass is enough, and mail that passes is untouched either
+way — which is why a correct setup is safe to enforce.
 
 ## When to use each
 
@@ -55,7 +56,7 @@ mail is rejected and the rest is **quarantined**, not delivered normally. So
 `pct` on `reject` is a quarantine-with-a-bit-of-reject setting, and `pct` on
 `quarantine` is the one that actually leaves most failures alone.
 
-That inconsistency is why the tag is going away. The current DMARC specification
+That inconsistency is why the tag is gone. The current DMARC specification
 removes `pct=` — receivers applied values between 0 and 100 too differently for it to
 mean anything reliable — and replaces the two values that did work with `t=y` (test:
 apply one level weaker) and `t=n` (the default). Receivers still honour `pct` today,
@@ -76,6 +77,13 @@ unmapped sender. A subdomain with no DMARC record of its own inherits the
 parent's `sp=`, or the parent's `p=` if `sp=` is absent — so enforcing the root
 silently enforces everywhere unless you say otherwise.
 
+A subdomain that doesn't resolve at all is a separate case, and the one safest to
+enforce hardest: `np=` sets the policy for those names, takes precedence over
+`sp=` for them, and falls back to `sp=` — then `p=` — when it isn't published.
+Nobody sends legitimate mail from a name that doesn't exist, so `np=reject` costs
+nothing even while the domain itself is still at `quarantine`. The [tag
+reference](/guides/dmarc-record-tags/) has both.
+
 ## What breaks at enforcement
 
 Two legitimate patterns fail DMARC through no fault of your DNS:
@@ -91,9 +99,15 @@ Two legitimate patterns fail DMARC through no fault of your DNS:
 Neither is a reason to stay at `p=none` — but both are reasons to read your
 [aggregate reports](/glossary/dmarc-aggregate-report/) before tightening, so you
 know which failures are attacks and which are your own mail taking an odd route.
+Telling those two apart across a month of reports is what a self-hosted analyzer
+like [DMARC Analyzer](/) is for.
 
 ## Moving between them safely
 
 Don't jump straight to `reject`. Confirm reports are clean, then ramp
 `quarantine` upward, then switch. The full progression is in [from monitoring to
 enforcement](/guides/from-monitoring-to-enforcement/).
+
+Before you change anything, read back what you publish today — the [DMARC record
+checker](/tools/dmarc-checker/) shows the policy a receiver actually sees,
+including a forgotten `pct=` or `sp=none` still undercutting it.
