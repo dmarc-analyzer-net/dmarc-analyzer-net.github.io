@@ -213,12 +213,32 @@ Keep claims truthful to the intended end state.
       the crawler that matters for rankings, and it crawls far more politely — and
       check whether the reported 5xx all cluster inside one crawl window.
 
-      **Worth doing first, regardless of which host wins:** there is no uptime
-      monitoring of this site at all — the Dash0 org has zero synthetic checks
-      configured — so "is the site up?" has no answer today except a third-party
-      crawler's say-so. Add a synthetic check on the home page before the
-      migration, so the move can be judged against a baseline instead of an
-      impression.
+      **Worth doing first, regardless of which host wins — done, 2026-11-06.**
+      There was no uptime monitoring of this site at all, so "is the site up?"
+      had no answer except a third-party crawler's say-so. `uptime.yml` now
+      checks the apex and one deep page every fifteen minutes and appends a row
+      per target to `uptime.csv` on the orphan branch `uptime-log`, so the move
+      can be judged against a baseline rather than an impression. It needs a
+      week of history before the cutover, and it keeps running through it
+      unchanged, so both sides are measured by the same instrument.
+
+      Three things turned out not to be true. **The Dash0 synthetic check this
+      was scoped as is not free** — Dash0 meters synthetic runs at $0.20 per
+      thousand, so two checks at five minutes is $3.51/month against a migration
+      budgeted at $1/month — and **there is no Dash0 credential, nor a connector
+      to request one through**, so it could not have been created as written at
+      any price. The decision was to drop Dash0 and take the Actions substitute,
+      which is honestly worse: one vantage point instead of several, a
+      best-effort schedule, and no alerting at all when GitHub itself is down.
+
+      **And the obvious body assertion would have failed in the dangerous
+      direction.** The apex H1 is split by a `<span>`, so the sentence as read
+      never appears in the markup; the substring that does match, `agencies
+      running many`, occurs four times in `<head>` and zero times in the body.
+      A check grepping the whole document for it would have passed on a page
+      whose body had vanished — which is exactly the CDN misconfiguration a body
+      assertion exists to catch. `uptime-check.sh` matches only the markup after
+      `</head>` for that reason.
 
 - [x] (done) **Make the site responsive.** Breakpoints 480/768/1024/1280 per the
       design system's `guidelines/responsive.md`; header collapses to a

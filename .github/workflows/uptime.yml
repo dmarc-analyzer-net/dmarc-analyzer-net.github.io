@@ -1,0 +1,130 @@
+# Scheduled availability and latency check against production.
+#
+# `seo-audit.yml` next door says a site that changes a few times a week does not
+# need a cron job producing mail nobody reads, and that is still true of a crawl.
+# This is the exception that proves it: the mail *is* the product here. A red run
+# means the live site failed an assertion, which is the one notification worth
+# sending, and GitHub mails the repository admins when a scheduled workflow fails.
+#
+# Why it exists: we are proposing to move hosting from GitHub Pages to Bunny.net,
+# and after the cutover somebody will ask whether the move made the site slower or
+# less reliable. Nothing can answer that today, in either direction. A baseline
+# taken after the move is not a baseline, so this needs to run for at least a week
+# before the cutover — and it keeps running through it, unchanged, so that the
+# before and after are measured by the same instrument from the same place.
+#
+# This was scoped as a Dash0 synthetic check. There is no Dash0 credential and no
+# connector to request one through, and Dash0 meters synthetic runs at $0.20 per
+# thousand against a migration budgeted at $1/month, so this is the approved free
+# substitute. It is honestly worse: one vantage point instead of several, a
+# best-effort schedule, and no alerting at all when GitHub itself is down. What it
+# does give is the same two assertions, recorded continuously, for nothing.
+#
+# The log: every run appends a CSV row per target to `uptime.csv` on the orphan
+# branch `uptime-log`. A branch rather than an artifact because artifacts expire
+# in 90 days and are per-run — the whole point is one file covering both sides of
+# the cutover. Pushes there trigger nothing: `ci.yml` and `deploy.yml` both filter
+# to `main`. Once the cutover comparison is written up, archive the CSV to
+# s3://dmarc-analyzer-net and delete the branch; it is a measurement, not history
+# the repository needs to carry forever.
+#
+# Cadence is a dial, not a constraint — Actions minutes are free on a public repo.
+# Every 15 minutes is ~96 samples a day, enough to characterise availability and a
+# latency distribution without 288 daily commits. The offset keeps it off the top
+# of the hour, where GitHub's scheduler is most loaded and most likely to drop a
+# run. Scheduled runs are best-effort and will occasionally be late or skipped;
+# that is a property of the free instrument and a reason to compare distributions
+# rather than count missed samples as downtime.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+# The job commits to the uptime-log branch.
+permissions:
+  contents: write
+
+# One writer to uptime-log at a time. A delayed run queues behind the one in
+# flight rather than racing it to the same file.
+concurrency:
+  group: uptime-log
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+
+      # The rows are written to the runner's temp directory before anything
+      # touches git, because recording the log branch involves switching the
+      # working tree out from under the script.
+      - name: Check production
+        id: check
+        run: |
+          mkdir -p "$RUNNER_TEMP/uptime"
+          ./scripts/uptime-check.sh --header > "$RUNNER_TEMP/uptime/header.csv"
+          if ./scripts/uptime-check.sh > "$RUNNER_TEMP/uptime/rows.csv"; then
+            echo "failed=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "failed=1" >> "$GITHUB_OUTPUT"
+          fi
+          cat "$RUNNER_TEMP/uptime/rows.csv"
+
+      # Recorded before the job is allowed to fail, so a failing run still
+      # leaves the row that explains what failed.
+      - name: Append to the uptime-log branch
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads origin uptime-log >/dev/null 2>&1; then
+            git fetch --depth 1 origin uptime-log
+            git checkout -B uptime-log origin/uptime-log
+          else
+            git checkout --orphan uptime-log
+            git rm -rqf .
+            cp "$RUNNER_TEMP/uptime/header.csv" uptime.csv
+          fi
+
+          cat "$RUNNER_TEMP/uptime/rows.csv" >> uptime.csv
+          git add uptime.csv
+          git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ)"
+
+          # The concurrency group should make a rejected push impossible; retry
+          # once anyway rather than lose the sample to a surprise.
+          if ! git push -q origin uptime-log; then
+            git fetch --depth 1 origin uptime-log
+            git reset --hard origin/uptime-log
+            cat "$RUNNER_TEMP/uptime/rows.csv" >> uptime.csv
+            git add uptime.csv
+            git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ) (retry)"
+            git push -q origin uptime-log
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            if [ "${{ steps.check.outputs.failed }}" = "1" ]; then
+              echo "## Production check failed"
+            else
+              echo "## Production check passed"
+            fi
+            echo
+            echo '```'
+            cat "$RUNNER_TEMP/uptime/header.csv" "$RUNNER_TEMP/uptime/rows.csv"
+            echo '```'
+            echo
+            echo "Full history: [\`uptime.csv\` on \`uptime-log\`](${{ github.server_url }}/${{ github.repository }}/blob/uptime-log/uptime.csv)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail if an assertion failed
+        if: steps.check.outputs.failed == '1'
+        run: |
+          echo "One or more targets failed. See the row above for which, and why." >&2
+          exit 1
