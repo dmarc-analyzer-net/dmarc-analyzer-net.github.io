@@ -458,7 +458,7 @@ const schema = {
       out.push({
         level: 'warn',
         title: `ptr is used ${ptr.length === 1 ? 'once' : `${ptr.length} times`} and should not be`,
-        detail: 'RFC 7208 §5.5 advises against ptr: it is slow, it puts load on other people’s DNS, and some receivers skip it entirely. Replace it with a, mx or ip4 ranges.',
+        detail: 'RFC 7208 §5.5 advises against ptr: it is slow and it puts load on other people’s DNS. Receivers are still required to evaluate it, so it costs you a lookup and buys you very little. Replace it with a, mx or ip4 ranges.',
       });
     }
 
