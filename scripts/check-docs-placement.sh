@@ -23,9 +23,12 @@
 #
 #   ./scripts/check-docs-placement.sh
 #
-# Requires: nothing beyond a POSIX shell.
+# Requires: bash. `pipefail` and `dotglob` are bash, not POSIX, so run it as
+# `./scripts/check-docs-placement.sh` or `bash scripts/check-docs-placement.sh`
+# — `sh scripts/check-docs-placement.sh` fails before it checks anything.
 
 set -uo pipefail
+shopt -s dotglob nullglob
 
 cd "$(dirname "$0")/.."
 
@@ -42,7 +45,9 @@ content-and-seo.md
 
 fail=0
 for path in docs/*; do
-  [ -e "$path" ] || continue
+  # A dangling symlink fails -e. Skipping it would let a file through whose
+  # name and target are both public and neither was on the list.
+  [ -e "$path" ] || [ -L "$path" ] || continue
   name="${path#docs/}"
 
   if [ -d "$path" ]; then

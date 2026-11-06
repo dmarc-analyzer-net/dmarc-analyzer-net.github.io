@@ -65,6 +65,13 @@ a note to your future self — goes in `docs/backlog.md`, a `{/* … */}` expres
 or the task tracker. Never in `<!-- -->`, which reaches production; see
 *Conventions that will bite you*.
 
+**`docs/backlog.md` is allowlisted, not private.** It is the right home for
+"why this heading and not that one"; it is the wrong home for a cost, a vendor,
+a hostname or a cutover date, and the placement check cannot tell the
+difference because the file is already on the list. The routing table above
+still applies inside an allowlisted file. Reasoning of that kind goes to the
+private repo, and the backlog gets the pointer.
+
 ## Commands
 
 ```bash
@@ -165,7 +172,8 @@ Full guidance in `docs/content-and-seo.md` and the private `seo` repo's
   our own editorial decisions, and the reader did not come for those. Keep every
   fact, change who the sentence is about — style guide §2a, which has the
   before-and-afters. Internal reasoning goes in the `---` frontmatter block, a
-  `{/* … */}` expression or `docs/backlog.md`; **never in `<!-- -->`**, which
+  `{/* … */}` expression or `docs/backlog.md` — which is public, so route it by
+  the table in *This repo is public* first; **never in `<!-- -->`**, which
   reaches production. `crawl.py` fails CI on a shipped comment over 40
   characters — long enough to catch a sentence, not a `<!-- TODO -->`, so a
   short one is still yours to spot.

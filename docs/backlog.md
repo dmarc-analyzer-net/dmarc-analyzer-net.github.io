@@ -147,23 +147,23 @@ Keep claims truthful to the intended end state.
       cost, and what each option buys. It is private because it inventories
       infrastructure next to the bill and the cutover window; it was written here
       first, which is the incident that produced the placement rule in
-      `AGENTS.md`. The spend was approved on 2026-11-06 and staging has since
-      been validated; the results and the remaining decisions are recorded
-      there, not here. **No DNS record has been touched and this site is still
-      served by GitHub Pages.**
+      `AGENTS.md`. Approvals, costs, staging results, the sequence and the open
+      decisions all live there and are deliberately not restated here — a status
+      line in a public file is both a disclosure and a thing that goes stale.
+      **No DNS record has been touched and this site is still served by GitHub
+      Pages.**
 
-      Two findings belong here, because without them this entry keeps asserting
-      things measurement has disproved. **The apex is four A records** to GitHub's
-      anycast IPs, not the ALIAS described below; it is `www` that is the CNAME.
-      The conclusion survives — DNS is a record edit — but the record type decides
-      whether apex ALIAS support is a prerequisite. And **the Cloudflare Workers
+      Two corrections belong here, because without them this entry keeps
+      asserting things measurement has disproved. **The apex is four A records**
+      to GitHub's anycast IPs, not the ALIAS described below; it is `www` that is
+      the CNAME. What that implies for a move is in the scope document, and it is
+      not the simple record edit this entry assumes. And **the Cloudflare Workers
       option fails upstream of the question flagged below as unverified**: trace
       events do carry referer and user-agent, but under Workers Static Assets a
-      request matching an asset never invokes the Worker, so no trace event exists
-      to log. The scope also argues for staging the measurement — logs from day
-      one, Matomo later — because `import_logs.py` back-fills an archive, so
-      deferring Matomo forfeits nothing while deferring the logs forfeits history
-      permanently.
+      request matching an asset does not invoke the Worker by default, so there is
+      no trace event to log. `run_worker_first` can force the invocation, at the
+      cost of rebuilding static serving by hand — so it is a different project,
+      not a setting.
 
       **The analytics requirement is what decides the host.** Statistics must be
       server-side only — the audience is email and security administrators, who
