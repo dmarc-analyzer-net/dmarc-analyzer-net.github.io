@@ -36,10 +36,10 @@ Six terms count toward the limit, not just `include:`:
 |---|---|
 | `include:`, `a`, `mx`, `ptr`, `exists:`, `redirect=` | `ip4:`, `ip6:`, `all`, `exp=` |
 
-Two sub-limits sit underneath it and catch people out, because a term count of 1
-looks safe: evaluating `mx` must not require more than 10 address lookups, and the
-same applies to `ptr`. A domain with a dozen MX hosts therefore `permerror`s on a
-single `mx` term.
+Two things catch people out here, because a term count of 1 looks safe. Every MX
+or PTR record returned counts against that same ten, so a domain with a dozen MX
+hosts `permerror`s on a single `mx` term. Underneath that sits a separate cap:
+resolving any one of those hosts must not require more than 10 address records.
 
 The practical consequence is that `ip4:`/`ip6:` ranges are free while every
 `include:` you add is not, so the fix for a record at the limit is to replace
