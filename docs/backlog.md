@@ -96,6 +96,49 @@ Keep claims truthful to the intended end state.
       action and stays with Michael. Analysis and the daily crawl-date feed live in
       the private `seo` repo (`gsc_crawl.csv`, `gsc-daily-review.md` trap 6).
 
+- [x] (done) **`/research/` — new scanner addresses, and four claims that were
+      not true.** The collector moved to Scaleway on 2026-11-06, so the page named
+      two addresses that no longer answer. Deadline was the `broad` timer firing
+      on the 10th at 08:10 UTC, because the page is the only thing tying a source
+      IP to an explanation — DNS queries carry no User-Agent. Addresses re-checked
+      over DoH before shipping: A, AAAA and both PTRs agree.
+
+      **The other three were worse than stale, and one was the opposite of a
+      promise.** "Most queries arrive over IPv6" was never true: `unbound` issues
+      every survey query and ran in a compose network with `enable_ipv6` unset, so
+      every snapshot through 2026-10 is IPv4-only. "A much smaller curated list is
+      checked daily" described a `watchlist` tier that exists in the code and the
+      schemas but has no timer — the page was publishing the design, not the
+      deployment. And the population was given as "a public ranking of the
+      most-visited domains" when the broad tier is Tranco top 1M *union every
+      domain already seen*, and two national censuses run beside it. An operator
+      outside any top-1M list was reading a page saying they should not have been
+      queried.
+
+      **Cadence is not a detail here — it is part of what the registries
+      permitted.** IIS granted `.se` on a specific monthly shape and EIF granted
+      `.ee` on the same; rounding "monthly, on its own day" off to something
+      vaguer would describe a survey they did not agree to. So the days are
+      published as the timers have them.
+
+      **`.sk` is deliberately absent.** `deploy/systemd/` ships a
+      `research-zone@sk.timer`, so a grep suggests three censuses. Permission is
+      still `asked` — sk-nic.sk contacted 2026-08-11, no reply — the unit ships
+      disabled, and `zones.fetch()` refuses the tier outright. Naming it would
+      claim access we do not have.
+
+      **Numbers came from `collectors/zones.py`, not the schedule table.** That
+      table says `.ee` is ~204k; the measured note on the source says 199,171
+      delegated domains on 2026-08-10, and the research repo's own AGENTS.md warns
+      the table has been stale before. `.se` is 1,425,375 from the same date — not
+      the 1.46M elsewhere in that file, which counts a TCP transfer rather than
+      the zone. Both are published rounded, because a precise count drifts monthly
+      and this page has to stay literally checkable.
+
+      Also added: the previous addresses, in the past tense and date-bounded, so
+      an operator reading October logs can still identify us. They are not
+      described as no longer ours — the old host is still rented as the rollback.
+
 - [ ] (todo) **Move hosting to Bunny.net, and pull its raw access logs into a
       self-hosted Matomo.** Two goals in one change: server-side visitor
       statistics, which the site has none of today, and getting off a host with no
