@@ -113,8 +113,9 @@ repo's style guide. The rules most often got wrong:
   our own editorial decisions, and the reader did not come for those. Keep every
   fact, change who the sentence is about — `docs/voice.md` §3. Internal reasoning
   goes in the `---` frontmatter block, a `{/* … */}` expression or
-  `docs/backlog.md`; **never in `<!-- -->`**, which reaches production and now
-  fails CI.
+  `docs/backlog.md`; **never in `<!-- -->`**, which reaches production. `crawl.py`
+  fails CI on a shipped comment over 40 characters — long enough to catch a
+  sentence, not a `<!-- TODO -->`, so a short one is still yours to spot.
 
 - **Verify against the RFC; cite it once, where the thing is defined.** A guide or
   glossary entry may carry an RFC number at most once per concept, at the moment

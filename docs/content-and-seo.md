@@ -369,7 +369,7 @@ Most of this is already handled; the rest is a few small additions.
   Astro's rule for which ones survive is undocumented — see
   [`voice.md`](voice.md) §6. Put reasoning in the `---` frontmatter block, a
   `{/* … */}` expression, or `backlog.md`. `crawl.py` fails CI on a shipped
-  comment longer than a structural label.
+  comment over 40 characters — a sentence, not a `<!-- TODO -->`.
 - **Internal links** — link out to 2–4 related pages, and make sure at least one
   *existing* page links in. Write them **with a trailing slash**
   (`/glossary/spf/`, not `/glossary/spf`) — see *Trailing slashes* below. The

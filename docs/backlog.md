@@ -62,6 +62,14 @@ Keep claims truthful to the intended end state.
       bar the `PROSE_MIN` and `TITLE_MIN` entries below set for adding a check
       at all. Review is the gate for tone.
 
+      Three things review caught on the PR, all kept. The length floor means a
+      short note (`<!-- TODO -->`) still passes, so the docs say where the gate
+      stops rather than implying it is total. The per-comment map keys on a set
+      of URLs, because a component used twice on one page emitted its comment
+      twice and the report would have said "2 pages" while naming neither. And
+      `voice.md` describes the five leaked notes in the past tense — they were
+      fixed in the same change, so one in `dist/` now is a regression.
+
 - [x] (done) **Sitemap `<lastmod>` from git, and homepage prose links to the P0
       pages.** Search Console's URL Inspection API (run 2026-09-13 across 54
       content pages) showed 24 had not been crawled since late July — every page

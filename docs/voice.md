@@ -143,12 +143,14 @@ natural "at scale" moment; glossary entries get an inline link and no CTA band.
 HTML comments reach production. Verified on 2026-11-06 by building the site and
 reading `dist/`:
 
-- A comment **nested inside an element** is emitted verbatim. Today the site
-  ships five distinct ones, including a note about CSS custom properties in
-  `BaseLayout` that appears in view-source on **all 108 pages**.
+- A comment **nested inside an element** is emitted verbatim. The build then
+  carried five distinct editorial notes, including one about CSS custom
+  properties in `BaseLayout` that sat in view-source on **all 108 pages**. All
+  five were converted to `{/* … */}` in the same change that added this file, so
+  a note appearing in `dist/` now is a regression, not the status quo.
 - A comment at the **top level of a component's slot** is dropped by the Astro
-  compiler. This is why `src/pages/index.astro` ships none of its comments while
-  `src/pages/compare/index.astro` ships the one inside its `<section>`.
+  compiler. This is why `src/pages/index.astro` shipped none of its comments
+  while `src/pages/compare/index.astro` shipped the one inside its `<section>`.
 
 That distinction is undocumented, invisible in review, and not worth
 remembering. The rule is the simple one:
@@ -170,9 +172,11 @@ content collection, if it is worth writing down it goes in the backlog.
 
 ## 7. What is gated, and what is not
 
-`scripts/crawl.py` fails CI on an HTML comment longer than a short label, so a
-leaked note cannot reach production twice. That is the whole of the mechanical
-gate, on purpose.
+`scripts/crawl.py` fails CI on an HTML comment longer than 40 characters
+(`COMMENT_MAX_LABEL`). That is the whole of the mechanical gate, on purpose, and
+it is worth knowing exactly where it stops: it catches the sentence-length note,
+which is every one the site had actually leaked, and it does **not** catch
+`<!-- TODO: rewrite this -->`. A short note still only fails in review.
 
 Tone is not regex-checkable. A phrase list would fire on
 `glossary/bimi.md`'s "a deliberately restricted profile" — a correct sentence

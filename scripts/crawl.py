@@ -510,8 +510,10 @@ def main() -> int:
     by_desc: dict[str, list[str]] = defaultdict(list)
     # Keyed on the comment, not the page: the one that mattered most sat in
     # BaseLayout and so appeared on every page of the site. Reported per page it
-    # would be 108 identical lines hiding everything else in the run.
-    notes_in_source: dict[str, list[str]] = defaultdict(list)
+    # would be 108 identical lines hiding everything else in the run. A set
+    # because a component used twice on one page emits its comment twice, and
+    # "2 pages" naming neither of them is the least useful thing this could say.
+    notes_in_source: dict[str, set[str]] = defaultdict(set)
 
     for url, p in sorted(pages.items()):
         title = " ".join(p.title.split())
@@ -577,10 +579,10 @@ def main() -> int:
 
         for c in p.comments:
             if len(c) > COMMENT_MAX_LABEL:
-                notes_in_source[c].append(url)
+                notes_in_source[c].add(url)
 
     for comment, urls in sorted(notes_in_source.items()):
-        where = f"{len(urls)} pages" if len(urls) > 1 else urls[0]
+        where = f"{len(urls)} pages" if len(urls) > 1 else next(iter(urls))
         errors.append(f"internal note in the published HTML ({where}): "
                       f"<!-- {comment[:120]}{'…' if len(comment) > 120 else ''} -->")
 
