@@ -31,6 +31,10 @@
 # down, because one timeout from one runner is noise rather than an outage. The
 # attempt count is recorded either way.
 #
+# A row with a `check_error_` note is the *checker* having failed, not the site.
+# Filter those out before computing availability: counting a broken monitor as
+# downtime is the one way this file can lie about the thing it exists to measure.
+#
 # On the latency columns: these are measured from a GitHub-hosted runner on
 # shared Azure network, not from a fixed monitoring vantage point. Treat them as
 # a before/after comparison of the same noisy instrument, never as absolute
@@ -58,6 +62,11 @@ fi
 # Does $2 appear in the part of file $1 that follows </head>? Shelling out to
 # Python because the document may be a single long line, which rules out the
 # line-oriented tools; python3 is already a CI dependency for the crawler.
+#
+# 0 found, 1 genuinely absent, anything else the checker could not answer —
+# unreadable file, no python3. The third case must not be reported as the
+# second: a monitor that files its own breakage as a site outage corrupts the
+# baseline in the direction nobody checks.
 body_contains() {
   python3 - "$1" "$2" <<'PY'
 import sys
@@ -65,7 +74,7 @@ path, needle = sys.argv[1], sys.argv[2]
 try:
     html = open(path, encoding="utf-8", errors="replace").read()
 except OSError:
-    sys.exit(1)
+    sys.exit(2)
 cut = html.find("</head>")
 body = html[cut:] if cut != -1 else html
 sys.exit(0 if needle in body else 1)
@@ -105,11 +114,13 @@ for entry in "${TARGETS[@]}"; do
       code=${metrics%%,*}
       if [ "$code" != "200" ]; then
         note="http_${code}"
-      elif ! body_contains "$bodyfile" "$needle"; then
-        note="body_assertion_failed"
       else
-        ok=1
-        break
+        body_contains "$bodyfile" "$needle"
+        case $? in
+          0) ok=1; break ;;
+          1) note="body_assertion_failed" ;;
+          *) note="check_error_body_unreadable" ;;
+        esac
       fi
     fi
 

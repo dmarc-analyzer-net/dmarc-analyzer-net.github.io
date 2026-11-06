@@ -3,8 +3,10 @@
 # `seo-audit.yml` next door says a site that changes a few times a week does not
 # need a cron job producing mail nobody reads, and that is still true of a crawl.
 # This is the exception that proves it: the mail *is* the product here. A red run
-# means the live site failed an assertion, which is the one notification worth
-# sending, and GitHub mails the repository admins when a scheduled workflow fails.
+# means either the live site failed an assertion or this workflow failed to record
+# what it measured, and GitHub mails the repository admins when a scheduled
+# workflow fails. Which of the two it was is the first thing the Verdict step
+# prints, because a monitor whose alerts are ambiguous gets filtered to a folder.
 #
 # Why it exists: we are proposing to move hosting from GitHub Pages to Bunny.net,
 # and after the cutover somebody will ask whether the move made the site slower or
@@ -76,55 +78,99 @@ jobs:
 
       # Recorded before the job is allowed to fail, so a failing run still
       # leaves the row that explains what failed.
+      #
+      # Each attempt rebuilds the branch state from the remote rather than
+      # patching up whatever the last one left behind, so attempt 2 behaves
+      # exactly like attempt 1 — including the case where uptime-log does not
+      # exist yet and has to be created as an orphan.
+      #
+      # This step does not fail the job. Whether the log was written is an
+      # output, judged at the end alongside the site result, because "the
+      # recorder broke" and "the site is down" are different alerts and a run
+      # that conflates them teaches you to ignore it.
       - name: Append to the uptime-log branch
+        id: record
         run: |
-          set -eu
+          set -u
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git ls-remote --exit-code --heads origin uptime-log >/dev/null 2>&1; then
-            git fetch --depth 1 origin uptime-log
-            git checkout -B uptime-log origin/uptime-log
-          else
-            git checkout --orphan uptime-log
-            git rm -rqf .
-            cp "$RUNNER_TEMP/uptime/header.csv" uptime.csv
-          fi
+          append_once() (
+            set -e
+            git checkout -q --detach
+            git branch -qD uptime-log 2>/dev/null || true
 
-          cat "$RUNNER_TEMP/uptime/rows.csv" >> uptime.csv
-          git add uptime.csv
-          git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ)"
+            if git fetch -q --depth 1 origin uptime-log 2>/dev/null; then
+              git checkout -q -B uptime-log FETCH_HEAD
+            else
+              git checkout -q --orphan uptime-log
+              git rm -rqf .
+              cp "$RUNNER_TEMP/uptime/header.csv" uptime.csv
+            fi
 
-          # The concurrency group should make a rejected push impossible; retry
-          # once anyway rather than lose the sample to a surprise.
-          if ! git push -q origin uptime-log; then
-            git fetch --depth 1 origin uptime-log
-            git reset --hard origin/uptime-log
             cat "$RUNNER_TEMP/uptime/rows.csv" >> uptime.csv
             git add uptime.csv
-            git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ) (retry)"
+            git commit -q -m "uptime: $(date -u +%Y-%m-%dT%H:%MZ)"
             git push -q origin uptime-log
-          fi
+          )
 
+          recorded=0
+          for attempt in 1 2 3; do
+            if append_once; then
+              recorded=1
+              break
+            fi
+            echo "append attempt ${attempt} failed" >&2
+            sleep $((attempt * 5))
+          done
+
+          echo "recorded=$recorded" >> "$GITHUB_OUTPUT"
+
+      # The rows go in the summary whether or not the branch took them, so a
+      # run that could not write the log has still not lost its measurement.
       - name: Summary
         if: always()
         run: |
           {
             if [ "${{ steps.check.outputs.failed }}" = "1" ]; then
-              echo "## Production check failed"
+              echo "## The site failed a check"
             else
-              echo "## Production check passed"
+              echo "## The site passed"
+            fi
+            if [ "${{ steps.record.outputs.recorded }}" != "1" ]; then
+              echo
+              echo "**The log was not written.** This is the recorder failing,"
+              echo "not the site — the rows below are the measurement, and"
+              echo "\`uptime.csv\` is missing them."
             fi
             echo
             echo '```'
             cat "$RUNNER_TEMP/uptime/header.csv" "$RUNNER_TEMP/uptime/rows.csv"
             echo '```'
             echo
+            echo "A \`check_error_\` note is the checker failing rather than the site."
+            echo
             echo "Full history: [\`uptime.csv\` on \`uptime-log\`](${{ github.server_url }}/${{ github.repository }}/blob/uptime-log/uptime.csv)"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Fail if an assertion failed
-        if: steps.check.outputs.failed == '1'
+      # One red run can mean either of two quite different things, and the
+      # notification mail carries only the job name. Say which in the log.
+      - name: Verdict
+        if: always()
         run: |
-          echo "One or more targets failed. See the row above for which, and why." >&2
-          exit 1
+          status=0
+          if [ "${{ steps.check.outputs.failed }}" = "1" ]; then
+            echo "SITE: a target failed its assertions — see the row in the summary." >&2
+            status=1
+          else
+            echo "SITE: all targets passed."
+          fi
+          if [ "${{ steps.record.outputs.recorded }}" = "1" ]; then
+            echo "LOG: recorded to uptime-log."
+          else
+            echo "LOG: could not write to uptime-log after three attempts. The site" >&2
+            echo "     result above stands on its own; this is a gap in the history," >&2
+            echo "     not an outage, and the rows are in the job summary." >&2
+            status=1
+          fi
+          exit "$status"
