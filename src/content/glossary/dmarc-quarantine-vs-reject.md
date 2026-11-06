@@ -77,12 +77,17 @@ unmapped sender. A subdomain with no DMARC record of its own inherits the
 parent's `sp=`, or the parent's `p=` if `sp=` is absent — so enforcing the root
 silently enforces everywhere unless you say otherwise.
 
-A subdomain that doesn't resolve at all is a separate case, and the one safest to
-enforce hardest: `np=` sets the policy for those names, takes precedence over
-`sp=` for them, and falls back to `sp=` — then `p=` — when it isn't published.
-Nobody sends legitimate mail from a name that doesn't exist, so `np=reject` costs
-nothing even while the domain itself is still at `quarantine`. The [tag
-reference](/guides/dmarc-record-tags/) has both.
+A subdomain that doesn't resolve at all is a separate case: `np=` sets the policy
+for those names, takes precedence over `sp=` for them, and falls back to `sp=` —
+then `p=` — when it isn't published. "Doesn't resolve" means NXDOMAIN, so a name
+with any record at or beneath it — a DKIM key counts — is an ordinary subdomain,
+and `sp=` governs it.
+
+Nobody *means* to send mail from a name that doesn't exist, which makes
+`np=reject` the cheapest enforcement a domain still at `quarantine` can publish.
+Read your reports for it first all the same: what it catches is usually a sending
+platform still pointed at a subdomain nobody ever created, and that mail is
+yours. The [tag reference](/guides/dmarc-record-tags/) has both.
 
 ## What breaks at enforcement
 
