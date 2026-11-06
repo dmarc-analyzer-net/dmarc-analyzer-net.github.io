@@ -18,9 +18,18 @@ export const description =
 const path = '/research/';
 const image = '/open-graph/research.png';
 
+/*
+ * The addresses are the page's whole contract: a logged IP has to resolve to
+ * the hostname above it, and the hostname back to the IP. They moved on
+ * 2026-11-06 when the collector migrated to Scaleway; keep them in step with
+ * the A/AAAA records and both PTRs, and change them here *before* the next
+ * run, not after. The research repo's AGENTS.md is the authority.
+ */
 const HOSTNAME = 'research-scanner.dmarc-analyzer.net';
-const IPV4 = '178.105.202.3';
-const IPV6 = '2a01:4f8:c014:da0e::1';
+const IPV4 = '62.210.143.119';
+const IPV6 = '2001:bc8:702:19e6::';
+const PREV_IPV4 = '178.105.202.3';
+const PREV_IPV6 = '2a01:4f8:c014:da0e::1';
 const USER_AGENT = 'DmarcAnalyzerResearch/1.0 (+https://dmarc-analyzer.net/research/)';
 const CONTACT = 'research@dmarc-analyzer.net';
 
@@ -76,8 +85,13 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
         </tbody>
       </table>
       <p>
-        Most queries arrive over IPv6, since that is what the host prefers when
-        a nameserver publishes both.
+        Queries may arrive over either family, so a nameserver that answers on
+        both may see us on both. Until 6 November 2026 the survey ran from
+        <code style={mono}>{PREV_IPV4}</code> and
+        <code style={mono}>{PREV_IPV6}</code>, and every query it made left over
+        IPv4; if you are reading older logs, those are the addresses to look
+        for. The survey issues no query from them now, and the hostname above no
+        longer resolves to either.
       </p>
 
       <h2>What it requests</h2>
@@ -108,15 +122,47 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
         <li><strong>Public records only.</strong> Everything read is already served to anyone who asks.</li>
       </ul>
 
-      <h2>How often</h2>
+      <h2>How often, and which domains</h2>
       <p>
-        The broad survey runs <strong>once a month</strong> across a public
-        ranking of the most-visited domains, so a given domain sees roughly one
-        pass of the queries above every thirty days. A much smaller curated list
-        is checked <strong>daily</strong> to catch policy changes quickly. We
-        rate-limit per nameserver and back off on failures rather than retrying
-        hard — if our traffic is ever noticeable, something is wrong on our side
-        and we want to hear about it.
+        Every survey runs <strong>once a month</strong>, and each population has
+        its own day of the month so that no two of them compete for the same
+        query budget:
+      </p>
+      <ul>
+        <li>
+          <strong>10th of the month</strong> — the broad survey: the current
+          <a href="https://tranco-list.eu/">Tranco</a> top million,
+          <em>plus every domain the survey has already seen</em>. A popularity
+          ranking churns, so a domain that has dropped out of the list keeps
+          being measured — otherwise a change in the numbers cannot be told
+          apart from a change in which domains were measured.
+        </li>
+        <li>
+          <strong>14th</strong> — every delegated <code>.se</code> domain, about
+          1.4 million, under zone access granted by The Swedish Internet
+          Foundation.
+        </li>
+        <li>
+          <strong>19th</strong> — every delegated <code>.ee</code> domain, about
+          200,000, under zone access granted by the Estonian Internet
+          Foundation.
+        </li>
+      </ul>
+      <p>
+        A national census is the usual reason a domain that appears in no
+        popularity ranking still shows up in a nameserver's logs. Each
+        population is surveyed, counted and reported on its own, so a domain in
+        two of them is queried in each: a <code>.se</code> domain inside the top
+        million sees one pass on the 10th and another on the 14th. That is what
+        keeps a figure about Sweden a figure about the whole <code>.se</code>
+        zone, rather than about the Swedish domains that happen to rank.
+      </p>
+      <p>
+        Runs normally start at 08:10 UTC — working hours in the countries whose
+        registries granted the zone access, so that someone is awake on both
+        sides if our traffic causes a problem. We rate-limit per nameserver and
+        back off on failures rather than retrying hard. If our traffic is ever
+        noticeable, something is wrong on our side and we want to hear about it.
       </p>
 
       <h2>Excluding a domain</h2>
@@ -134,7 +180,9 @@ const mono = "font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size
         percentages across a population — never as a list naming individual
         organisations as misconfigured. Every published figure states the
         population, the date, how many domains resolved, and what counted as
-        what, so the result can be checked or reproduced.
+        what, so the result can be checked or reproduced. A figure drawn from a
+        national zone also carries the registry's credit, as the terms of that
+        zone access require.
       </p>
       <p>
         The survey is run by the team behind <a href="/">DMARC Analyzer</a>, an
