@@ -1,6 +1,6 @@
 ---
 term: DMARC aggregate report
-description: A DMARC aggregate report (RUA) is a daily XML summary from a mailbox provider showing every source that sent mail as your domain and how it authenticated.
+description: A DMARC aggregate report (RUA) is a daily XML summary of the mail one provider saw claiming to be from your domain, and how each sending source authenticated.
 aliases: ["RUA", "aggregate report"]
 related: ["dmarc", "dmarc-policy", "dmarc-alignment"]
 ---
@@ -60,8 +60,27 @@ reports what the receiver did with them alongside the
       <spf>fail</spf>
     </policy_evaluated>
   </row>
+  <identifiers>
+    <header_from>yourdomain.com</header_from>
+  </identifiers>
+  <auth_results>
+    <dkim>
+      <domain>yourdomain.com</domain>
+      <selector>s1</selector>
+      <result>pass</result>
+    </dkim>
+    <spf>
+      <domain>yourdomain.com</domain>
+      <result>fail</result>
+    </spf>
+  </auth_results>
 </record>
 ```
+
+All three children are required, and the two outside `<row>` are the ones
+tooling most often forgets: `<identifiers>` carries the `From:` domain the
+policy was looked up on, and `<auth_results>` carries what SPF and DKIM actually
+returned, before DMARC asked whether either one aligned.
 
 Reading these by hand across many domains does not scale — which is what a
 self-hosted analyzer like [DMARC Analyzer](/) is for. See
@@ -71,10 +90,11 @@ self-hosted analyzer like [DMARC Analyzer](/) is for. See
 
 The schema leaves a lot optional. `<policy_published>` has to carry only the
 domain and `p`; `sp`, `np`, `adkim` and `aspf` turn up only when the receiver
-echoes them. A `<record>` can arrive with no `<envelope_from>` and no DKIM block
-at all. And the superseded schema made the DKIM `<selector>` optional, so an
-older reporter can tell you a signature failed without telling you which key —
-the current one requires it.
+echoes them. A `<record>` can arrive with no `<envelope_from>`, and with
+`<auth_results>` carrying no `<dkim>` child at all — the element is required but
+its DKIM results are not. And the superseded schema made the DKIM `<selector>`
+optional, so an older reporter can tell you a signature failed without telling
+you which key — the current one requires it.
 
 File names are the other trap: the unique id is optional and not every receiver
 builds the name exactly as specified, so tooling that reads the filename instead
