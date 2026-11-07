@@ -40,16 +40,20 @@ accounted for yet. Move in stages:
    ```
    v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
    ```
-   Receivers still honour `pct=`, so the ramp works, but the
-   [current specification has removed it](/guides/dmarc-rfc-9989/): values between
-   0 and 100 were applied too differently from one implementation to the next to
-   mean anything reliable. Treat a sub-100 `pct=` as a setting with a date on it —
-   a checker may read it as "not enabled" too.
+   Receivers still honour `pct=`, so a ramp still happens — though not in the
+   proportion you asked for. The [current specification has removed
+   it](/guides/dmarc-rfc-9989/): values between 0 and 100 were applied too
+   differently from one implementation to the next to mean anything reliable.
+   Treat a sub-100 `pct=` as a setting with a date on it — a checker may read it
+   as "not enabled" too.
 
    `t=y` is **not** the modern spelling of that ramp. It is the successor to
    `pct=0`, and it asks receivers to apply one level *below* what you published —
    so `p=quarantine; t=y` is treated as `p=none`, which is the warning you came
-   here to clear.
+   here to clear. Receivers that haven't implemented `t` ignore it, as the
+   specification requires of any tag they don't recognise, and quarantine as
+   published. Either way it is not a ramp: it is no enforcement at some receivers
+   and the full policy at the rest.
 
    `p=quarantine` on its own **already clears the warning** — read its name again:
    *Quarantine/Reject* policy not enabled. Either value satisfies it, so if the
@@ -99,9 +103,11 @@ and shows the record it actually found:
 - **Two DMARC records exist.** Duplicates are treated as no policy at all, so an
   old `p=none` alongside your new `p=reject` leaves you unenforced.
 - **A subdomain has its own weaker policy** — or none, in which case it follows the
-  root's `sp=` if the subdomain exists, the root's `np=` if it doesn't, and the
-  root's `p=` when the applicable tag isn't published. A root at
-  `p=reject; sp=none` is still flagged for subdomains. Note that `sp=` in a
+  root's `sp=` if the subdomain exists and the root's `np=` if it doesn't. Watch
+  the order when the tag that applies isn't published: an existing subdomain falls
+  back to `p=`, but a name that doesn't exist falls back to `sp=` first and only
+  then to `p=`. So a root at `p=reject; sp=none` leaves both kinds of subdomain
+  unenforced, which is why it is still flagged. Note that `sp=` in a
   subdomain's *own* record does nothing; it only has meaning on the organizational
   domain. See the [tag reference](/guides/dmarc-record-tags/) for the full
   inheritance rules.
@@ -112,9 +118,10 @@ and shows the record it actually found:
   does](/glossary/dmarc-quarantine-vs-reject/#what-pct-actually-does).
 - **You're reading a cached answer.** You already had a record, so what resolvers
   are holding is the *old* one until its TTL expires — check the TTL you published
-  it with rather than guessing at an hour. Query
-  [Google's resolver](https://dns.google/resolve?name=_dmarc.yourdomain.com&type=TXT)
-  directly for the least-cached answer available.
+  it with rather than guessing at an hour. Asking a public resolver directly tells
+  you how much of that wait is left: put your own domain into
+  `https://dns.google/resolve?name=_dmarc.yourdomain.com&type=TXT` and the answer
+  carries both the record it is serving and the seconds still to run on it.
 
 Editing on Google Workspace, Microsoft 365 or GoDaddy? The per-provider steps are
 under [DMARC setup](/dmarc-for/). On anything else — cPanel, Plesk, a registrar's

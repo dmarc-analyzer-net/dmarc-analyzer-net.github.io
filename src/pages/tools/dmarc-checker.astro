@@ -648,7 +648,7 @@ const schema = {
       findings.push({
         level: 'warn',
         title: `Check the parent domain too — ${parent}`,
-        detail: `Subdomains without their own record inherit the organizational domain's policy — its sp tag if the subdomain exists, its np tag if it doesn't, and p when the applicable tag is absent. ${domain} may already be covered by ${parent}.`,
+        detail: `Subdomains without their own record inherit the organizational domain's policy — its sp tag if the subdomain exists, its np tag if it doesn't. When the tag that applies is absent, an existing subdomain falls back to p, while a name that does not exist falls back to sp first and only then to p. ${domain} may already be covered by ${parent}.`,
         link: { href: `?domain=${encodeURIComponent(parent)}`, label: `Check ${parent}` },
       });
     }

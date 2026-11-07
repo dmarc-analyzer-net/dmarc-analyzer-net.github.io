@@ -102,8 +102,9 @@ looking for one. The practical consequences:
   it is what large organisations devolving DNS to departments or customers were
   asking for.
 - The `sp` and `np` rules are unchanged in spirit: a record found above the author
-  domain applies `sp` to existing subdomains and `np` to non-existent ones, falling
-  back to `p`.
+  domain applies `sp` to existing subdomains and `np` to non-existent ones. An
+  existing subdomain falls back to `p` when `sp` isn't published; a non-existent one
+  falls back to `sp` first, and only then to `p`.
 
 ## `p` is no longer strictly required
 
