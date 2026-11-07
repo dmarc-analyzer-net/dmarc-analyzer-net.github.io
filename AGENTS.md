@@ -68,10 +68,11 @@ build → serve the preview → **`scripts/crawl.py`**. `deploy.yml` publishes o
 to `main`, so **merging deploys to production**.
 
 `uptime.yml` gates nothing — it is the one scheduled workflow, checking production
-every fifteen minutes via `scripts/uptime-check.sh` and appending to `uptime.csv`
-on the orphan branch `uptime-log`. A red run means the live site failed, not that
-your change did. Nothing builds or deploys from that branch; `ci.yml` and
-`deploy.yml` both filter to `main`.
+via `scripts/uptime-check.sh` and appending to `uptime.csv` on the orphan branch
+`uptime-log`. A red run means the live site failed, not that your change did.
+Nothing builds or deploys from that branch; `ci.yml` and `deploy.yml` both filter
+to `main`. The cron asks for every fifteen minutes and GitHub delivers a small
+fraction of that — see the header comment before drawing anything from the log.
 
 `scripts/crawl.py` is the substantive gate — the checks a Screaming Frog audit would
 report, in standard-library Python. Broken links, redirect chains, title and
