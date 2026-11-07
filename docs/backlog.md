@@ -191,6 +191,23 @@ Keep claims truthful to the intended end state.
         step in `deploy.yml` swaps to a Bunny upload; `public/CNAME` and the
         Pages-specific steps go away. `site` in `astro.config.mjs` is unaffected
         because the domain does not change.
+      - **The deploy credential has to be scoped by GitHub, because Bunny cannot
+        scope it.** `workflow_dispatch` runs the workflow as it exists on the
+        chosen branch, so a repository-level secret is readable by any branch
+        anyone with write access can push — and a Bunny account key reaches every
+        pull zone, storage zone, DNS zone and the billing pages. Checked on the
+        account rather than assumed: it holds exactly one key, role `User`, and
+        Bunny offers no scoped or purge-only key. The coarsest grant it does offer
+        is a team member's "Manage zones", which still covers every zone, and the
+        storage password is rejected by `purgeCache` (401 against the account
+        key's 204). Nor can the purge be dropped: the staging pull zone overrides
+        cache at 30 days, and a storage write does **not** invalidate the edge —
+        a changed file still served the old bytes 60s later, `cdn-cache: HIT`.
+        So the account key must reach the runner, and the gate goes outside the
+        workflow file: the `bunny-staging` and `bunny-production` environments
+        hold it behind a required reviewer and a branch policy, with admin bypass
+        off. Splitting the purge into its own job buys nothing — whoever controls
+        the branch controls the job layout too.
       - DNS is at ClouDNS rather than tied to GitHub, so the cutover is repointing
         records — the apex ALIAS currently pointing at
         `dmarc-analyzer-net.github.io`.
