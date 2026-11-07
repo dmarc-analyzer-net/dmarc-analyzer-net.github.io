@@ -1,14 +1,15 @@
 ---
 term: DMARC aggregate report
-description: An aggregate (RUA) report is a daily XML summary from a mailbox provider showing every source that sent mail as your domain and how it authenticated.
+description: A DMARC aggregate report (RUA) is a daily XML summary from a mailbox provider showing every source that sent mail as your domain and how it authenticated.
 aliases: ["RUA", "aggregate report"]
 related: ["dmarc", "dmarc-policy", "dmarc-alignment"]
 ---
 
 A **DMARC aggregate report** (RUA) is an XML file a mailbox provider sends —
 typically once a day — summarising all the mail it saw claiming to be from your
-domain. It does **not** contain message content; it is a statistical roll-up:
-sending IP, message count, SPF/DKIM results, and the disposition applied.
+domain. The format is specified by [RFC 9990](/rfc/9990/). It does **not**
+contain message content; it is a statistical roll-up: sending IP, message count,
+SPF/DKIM results, and the disposition applied.
 
 ## Requesting reports
 
@@ -21,24 +22,31 @@ v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 Three practical details that the tag alone doesn't tell you:
 
 - **They arrive gzipped.** The XML should be GZIP-compressed and attached as
-  `application/gzip`, with a filename built from the reporting receiver, your
-  domain, and the start and end timestamps — `receiver!yourdomain.com!1013662812!1013749130.xml.gz`.
-  Uncompressed reports are allowed but discouraged, because a large one can exceed
-  the receiving server's size limit and simply never be delivered.
-- **Daily is what you get**, not what you asked for. There used to be a tag for
-  requesting an interval, `ri=`; providers sent daily reports regardless, and the
-  current specification has [removed it](/guides/dmarc-rfc-9989/).
-- **If the mailbox is on another domain**, that domain has to authorise it with a
-  `_report._dmarc` record, or conforming receivers discard the request silently —
-  no bounce, no error, no reports. This is the single most common reason a
-  perfect-looking record produces nothing; see
+  `application/gzip`; a receiver that sends it uncompressed uses `text/xml`,
+  which is allowed but discouraged, because a large report can exceed the
+  receiving server's size limit and simply never be delivered. The filename
+  carries the reporting receiver, your domain, the start and end timestamps, and
+  sometimes a unique id —
+  `mail.receiver.example!yourdomain.com!1013662812!1013749130.xml.gz`.
+- **Daily is what you get**, not what you asked for. A reporting period normally
+  covers a single UTC day starting at 0000 UTC, which is why the timestamps
+  rarely line up with your own midnight. There used to be a tag for requesting an
+  interval, `ri=`; providers sent daily reports regardless, and the current
+  specification has [removed it](/guides/dmarc-rfc-9989/).
+- **A mailbox outside your organizational domain has to opt in.** An agency or
+  vendor address only works if that domain publishes a `_report._dmarc` record
+  authorising it; without one, conforming receivers discard the request silently —
+  no bounce, no error, no reports. An address under your own domain needs
+  nothing. This is the single most common reason a perfect-looking record
+  produces nothing; see
   [reports won't arrive if `rua=` is wrong](/guides/no-dmarc-record-found/), or
   the [agency treatment](/guides/dmarc-multiple-client-domains/) if you collect
   for domains you don't own.
 
 ## What's inside a record
 
-Each `<record>` in the XML groups messages by source and reports the
+Each `<record>` groups messages by sending source and `From:` domain, and
+reports what the receiver did with them alongside the
 [alignment](/glossary/dmarc-alignment/) outcome:
 
 ```xml
@@ -46,7 +54,11 @@ Each `<record>` in the XML groups messages by source and reports the
   <row>
     <source_ip>203.0.113.10</source_ip>
     <count>42</count>
-    <policy_evaluated><dkim>pass</dkim><spf>fail</spf></policy_evaluated>
+    <policy_evaluated>
+      <disposition>none</disposition>
+      <dkim>pass</dkim>
+      <spf>fail</spf>
+    </policy_evaluated>
   </row>
 </record>
 ```
@@ -57,8 +69,15 @@ self-hosted analyzer like [DMARC Analyzer](/) is for. See
 
 ## Providers don't all implement the schema identically
 
-Some omit optional tags like `<email>`; report file names aren't always built
-exactly as specified either, which occasionally breaks tooling that parses
-the filename instead of the XML inside it. None of that makes the report
-invalid — it just means a parser written for one provider's exact output can
-quietly drop rows from another's.
+The schema leaves a lot optional. `<policy_published>` has to carry only the
+domain and `p`; `sp`, `np`, `adkim` and `aspf` turn up only when the receiver
+echoes them. A `<record>` can arrive with no `<envelope_from>` and no DKIM block
+at all. And the superseded schema made the DKIM `<selector>` optional, so an
+older reporter can tell you a signature failed without telling you which key —
+the current one requires it.
+
+File names are the other trap: the unique id is optional and not every receiver
+builds the name exactly as specified, so tooling that reads the filename instead
+of the XML inside it breaks on the next provider. Parse the document, and treat
+every optional element as absent until the report proves otherwise — a parser
+written for one provider's exact output quietly drops rows from another's.
