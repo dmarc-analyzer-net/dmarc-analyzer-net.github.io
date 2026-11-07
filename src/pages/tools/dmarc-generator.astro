@@ -351,7 +351,7 @@ const help = 'margin:6px 2px 0; font-size:12.5px; line-height:1.5; color:var(--t
       for (const dest of new Set(external)) {
         out.push({
           level: 'warn',
-          text: `${dest} is not your domain, so it has to authorize your reports by publishing a TXT record at ${d || 'yourdomain.com'}._report._dmarc.${dest} containing v=DMARC1;. Without it, receivers will not send reports there — and nothing bounces to tell you.`,
+          text: `${dest} is outside the organizational domain of ${d || 'yourdomain.com'}, so it has to authorize your reports by publishing a TXT record at ${d || 'yourdomain.com'}._report._dmarc.${dest} containing v=DMARC1;. Owning both domains does not exempt you. Without it, receivers will not send reports there — and nothing bounces to tell you.`,
         });
       }
     }
