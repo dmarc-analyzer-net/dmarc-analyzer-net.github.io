@@ -53,8 +53,8 @@ rather than degrading it, and the reports are your only warning.
 
 ## No authorization record needed
 
-Pointing a DMARC `rua=` at a mailbox on another domain requires that domain to
-publish a `_report._dmarc` record authorising it — see
+Pointing a DMARC `rua=` at a mailbox outside your organizational domain requires
+that domain to publish a `_report._dmarc` record authorising it — see
 [reports won't arrive if `rua=` is wrong](/guides/no-dmarc-record-found/). TLS-RPT
 has no equivalent: you can send TLS reports to any destination without a second
 record. Convenient, and worth knowing, because the two look so similar that

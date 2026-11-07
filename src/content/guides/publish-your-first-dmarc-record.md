@@ -52,8 +52,9 @@ it, but it is not a setting to leave in place.
 ## Step 4 — Wait for reports
 
 Reports start arriving within about 24 hours, one per provider per day. Each one
-lists every source sending as your domain and whether it
-[aligned](/glossary/dmarc-alignment/). Resist the urge to tighten the policy yet.
+lists every source *that provider* saw sending as your domain and whether it
+[aligned](/glossary/dmarc-alignment/) — a sender no report has mentioned yet is
+not the same as one that doesn't exist. Resist the urge to tighten the policy yet.
 
 ## What next
 
