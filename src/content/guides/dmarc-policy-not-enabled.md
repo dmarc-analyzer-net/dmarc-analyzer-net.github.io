@@ -3,7 +3,7 @@ title: What "DMARC policy not enabled" means (and how to fix it)
 seoTitle: '"DMARC policy not enabled": how to fix'
 description: Seeing "DMARC quarantine/reject policy not enabled"? Here's what that warning means, why checkers flag it, and how to enable an enforcing policy safely.
 publishDate: 2026-07-23
-updatedDate: 2026-07-25
+updatedDate: 2026-11-07
 ---
 
 If a DMARC checker shows **"DMARC Quarantine/Reject policy not
@@ -40,11 +40,18 @@ accounted for yet. Move in stages:
    ```
    v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc@yourdomain.com
    ```
-   `pct=` still works at receivers, but the
-   [current specification has removed it](/guides/dmarc-rfc-9989/) in favour of
-   `t=y`, which asks receivers to apply the policy one level weaker while you watch.
-   Either way it is a temporary setting, and a checker may read it as "not enabled".
-   `p=quarantine` **already clears the warning** — read its name again:
+   Receivers still honour `pct=`, so the ramp works, but the
+   [current specification has removed it](/guides/dmarc-rfc-9989/): values between
+   0 and 100 were applied too differently from one implementation to the next to
+   mean anything reliable. Treat a sub-100 `pct=` as a setting with a date on it —
+   a checker may read it as "not enabled" too.
+
+   `t=y` is **not** the modern spelling of that ramp. It is the successor to
+   `pct=0`, and it asks receivers to apply one level *below* what you published —
+   so `p=quarantine; t=y` is treated as `p=none`, which is the warning you came
+   here to clear.
+
+   `p=quarantine` on its own **already clears the warning** — read its name again:
    *Quarantine/Reject* policy not enabled. Either value satisfies it, so if the
    warning is what brought you here, you are done at this step. Carry on to reject
    because it is the better end state, not because the checker is still complaining.
@@ -74,7 +81,9 @@ should show all of the following:
   in a single week of data.
 - **You know who to call** when a sender you'd forgotten breaks.
 
-A fortnight of clean reports across a full billing cycle is a reasonable bar.
+One full billing cycle of clean reports is a reasonable bar: for most domains that
+is a month, and a month is the shortest window that catches a monthly invoicing
+run.
 
 ## "Not enabled" but you meant to enable it
 
@@ -90,7 +99,8 @@ and shows the record it actually found:
 - **Two DMARC records exist.** Duplicates are treated as no policy at all, so an
   old `p=none` alongside your new `p=reject` leaves you unenforced.
 - **A subdomain has its own weaker policy** — or none, in which case it follows the
-  root's `sp=`, or the root's `p=` when no `sp=` is published. A root at
+  root's `sp=` if the subdomain exists, the root's `np=` if it doesn't, and the
+  root's `p=` when the applicable tag isn't published. A root at
   `p=reject; sp=none` is still flagged for subdomains. Note that `sp=` in a
   subdomain's *own* record does nothing; it only has meaning on the organizational
   domain. See the [tag reference](/guides/dmarc-record-tags/) for the full
@@ -100,8 +110,11 @@ and shows the record it actually found:
   exempted, it drops to the next weaker policy. At `p=reject; pct=25` the other
   three quarters are quarantined, not delivered — see [what `pct=` actually
   does](/glossary/dmarc-quarantine-vs-reject/#what-pct-actually-does).
-- **You're reading a cached answer.** Give DNS an hour before concluding the
-  change didn't take.
+- **You're reading a cached answer.** You already had a record, so what resolvers
+  are holding is the *old* one until its TTL expires — check the TTL you published
+  it with rather than guessing at an hour. Query
+  [Google's resolver](https://dns.google/resolve?name=_dmarc.yourdomain.com&type=TXT)
+  directly for the least-cached answer available.
 
 Editing on Google Workspace, Microsoft 365 or GoDaddy? The per-provider steps are
 under [DMARC setup](/dmarc-for/). On anything else — cPanel, Plesk, a registrar's
