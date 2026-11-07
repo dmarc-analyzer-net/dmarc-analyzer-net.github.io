@@ -51,13 +51,15 @@ export const description =
         <p>
           Whichever platform you use, publishing the record is only half the job:
           reports have to reach somewhere you can read them. If the mailbox in your
-          <code>rua=</code> is on a <em>different</em> domain from the one publishing
-          the record — an analyzer you run, or your agency's inbox — that domain has
+          <code>rua=</code> is outside the organizational domain publishing the
+          record — an analyzer you run, or your agency's inbox — that domain has
           to authorise it with a record of its own:
         </p>
         <pre><code>clientdomain.com._report._dmarc.agency.com   TXT   "v=DMARC1"</code></pre>
         <p>
-          Without it, conforming receivers silently discard the reporting request.
+          A mailbox on a subdomain covered by that same record needs nothing; a
+          second domain you also own is outside it and still does. Without the
+          record, conforming receivers silently discard the reporting request.
           Nothing bounces, the record still validates, and the reports simply never
           arrive — see <a href="/guides/no-dmarc-record-found/">reports won't arrive
           if <code>rua=</code> is wrong</a> for the full treatment, or check a live

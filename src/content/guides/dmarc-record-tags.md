@@ -124,8 +124,11 @@ regardless of alignment and `s` for SPF ones. `1` and `0` are mutually exclusive
 
 ### Reporting to a mailbox on another domain
 
-If the mailbox in `rua` is on a different domain from the record — an analyzer you
-run, or an agency inbox — the destination domain has to authorise it:
+If the mailbox in `rua` is outside the record's own organizational domain — an
+analyzer you run, or an agency inbox — the destination domain has to authorise
+it. `dmarc@mail.yourdomain.com` under a record at `yourdomain.com` is inside that
+organizational domain and needs nothing; a second domain you also own is outside
+it and still does:
 
 ```
 yourdomain.com._report._dmarc.analyzer.example.   TXT   "v=DMARC1"
