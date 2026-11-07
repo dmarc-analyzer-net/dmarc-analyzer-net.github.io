@@ -681,7 +681,7 @@ const schema = {
         renderSingle(`${records.length} DMARC records for ${domain}`, [{
           level: 'bad',
           title: 'More than one DMARC record is published',
-          detail: `A domain may publish exactly one. When receivers find several they treat the domain as having none at all, so the policy is not applied and no reports are sent. Delete all but one. Found: ${records.join('  |  ')}`,
+          detail: `A domain may publish exactly one. When receivers find several they discard them all, so nothing published at this name is applied: on an organizational domain that leaves no DMARC at all, and on a subdomain the receiver walks up and applies the parent's policy instead. Delete all but one. Found: ${records.join('  |  ')}`,
           link: { href: '/guides/no-dmarc-record-found/', label: 'Why this reads as "no record"' },
         }]);
       } else {

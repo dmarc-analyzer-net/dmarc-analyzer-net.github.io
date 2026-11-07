@@ -1,9 +1,9 @@
 ---
 title: What "No DMARC record found" means (and how to fix it)
 seoTitle: '"No DMARC record found": how to fix'
-description: Getting "No DMARC record found"? It means your domain has no DMARC policy at _dmarc — here is why it appears, including on subdomains, and how to fix it.
+description: Getting "No DMARC record found"? Nothing answered at _dmarc for the name you checked — why it happens, how to fix it, and why a subdomain can say it anyway.
 publishDate: 2026-07-23
-updatedDate: 2026-07-25
+updatedDate: 2026-11-07
 ---
 
 **"No DMARC record found"** means a checker looked up `_dmarc.yourdomain.com` and
@@ -53,8 +53,10 @@ You want exactly one string starting `v=DMARC1`. Three results worth
 recognising:
 
 - **Nothing at all** — the record isn't published, or hasn't propagated.
-- **Two `v=DMARC1` records** — this is treated as *no* policy at all, not as two
-  policies. Delete one.
+- **Two `v=DMARC1` records** — receivers discard both, so the name reads as having
+  no record rather than as two policies. On your root domain that leaves no DMARC
+  at all; on a subdomain the receiver walks up and applies what it finds above.
+  Delete one.
 - **A record at the wrong name** — see below.
 
 ## The doubled-domain mistake
@@ -88,20 +90,25 @@ A record that exists but is malformed reads as absent to most checkers:
 
 "Not found" on a subdomain usually means the tool and the receiver are looking in
 different places. A receiver starts at the exact name in the `From:` address and, if
-there is no record there, **walks up the DNS tree** until it finds one. Checkers
-report on the name you typed and stop.
+there is no record there, **walks up the DNS tree** to your organizational domain.
+Checkers report on the name you typed and stop.
 
 So if `news.yourdomain.com` has no `_dmarc` record, a checker aimed at that subdomain
 says "not found", while at delivery time the receiver finds your root record and
-applies its `sp=` — or its `p=`, when no `sp=` is published. There is a policy in
-force; the tool simply isn't looking where the receiver looks.
+applies its `sp=`. A subdomain that doesn't resolve at all gets `np=` instead, and
+whichever applies falls back to `p=` when that tag isn't published. There is a policy
+in force; the tool simply isn't looking where the receiver looks.
 
 That walk is newer than most of the advice written about it. The original DMARC
 specification worked out where your organizational domain began using a public suffix
 list, without mandating which one — so two receivers could disagree about it. The
-current specification replaced that with the tree walk, which also means a record on
-an *intermediate* name is now discoverable in a way it might not have been before:
-worth knowing if you have delegated subdomains to teams or customers. See
+current specification ([RFC 9989](/rfc/9989/)) replaced that with the tree walk. It
+queries every name on the way up, but the policy it applies is still the one at the
+`From:` name itself or at your organizational domain — a record on an intermediate
+name does not govern the names below it by sitting there. Making it govern them takes
+`psd=n`, which declares the name an organizational domain in its own right: the tag
+to reach for when a subdomain delegated to a team or a customer needs its own policy
+and its own reports. See
 [what changed in the new DMARC standard](/guides/dmarc-rfc-9989/).
 
 If a subdomain sends mail, give it its own record, and set `sp=` on the root only if
@@ -120,19 +127,22 @@ Publishing the record is only half of it — a policy with an unreachable `rua=`
 mailbox gives you enforcement guidance you can never act on, because no data ever
 arrives. Make sure the address exists and accepts mail from outside.
 
-One thing that surprises people: to collect reports **for a domain you don't
-own** — `rua=mailto:dmarc@agency.com` in a client's record — that third-party
-domain must authorise it with a record of its own:
+One thing that surprises people: if the `rua=` mailbox is outside the organizational
+domain publishing the record, that domain has to authorise the arrangement with a
+record of its own ([RFC 9990](/rfc/9990/)). `dmarc@mail.yourdomain.com` under a record
+at `yourdomain.com` is inside that organizational domain and needs nothing. A second
+domain you also own is outside it, and still does:
 
 ```
-yourdomain.com._report._dmarc.agency.com   TXT   v=DMARC1
+yourdomain.com._report._dmarc.analyzer.example.   TXT   "v=DMARC1"
 ```
 
-Without it, standards-compliant receivers won't send the reports. Agencies
-centralising many clients' reports into one mailbox hit this constantly — and
-because nothing bounces, the record looks perfect while the reports never come.
-(If that's you, [DMARC for many client domains](/guides/dmarc-multiple-client-domains/)
-covers the wildcard form and the trap that comes with it.)
+The check compares organizational domains, not owners, so owning both ends exempts
+you from nothing. Without the record, conforming receivers discard the reporting
+request silently — the policy still validates, nothing bounces, and the reports never
+come. Agencies centralising many clients' reports into one mailbox hit this
+constantly; [DMARC for many client domains](/guides/dmarc-multiple-client-domains/)
+covers the wildcard form and the trap that comes with it.
 The [record checker](/tools/dmarc-checker/) performs that second lookup for every
 external `rua=` address it finds, which is the fastest way to rule this out. Once
 they do arrive, something has to parse the XML and aggregate it across domains —
