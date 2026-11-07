@@ -102,8 +102,9 @@ Cloudflare appends your domain automatically, so the *Name* is `_dmarc`, not
 through it, and the [tag reference](/guides/dmarc-record-tags/) covers what every
 tag defaults to.
 
-If your reports go to a mailbox on a domain you don't control, that domain needs to
-authorise it with a `_report._dmarc` record — the single most common reason a
+If your reports go to a mailbox outside the record's own organizational domain,
+that domain needs to authorise it with a `_report._dmarc` record — owning both
+domains doesn't exempt you, and this is the single most common reason a
 correct-looking record produces no reports at all.
 
 ## Confirming it worked
