@@ -81,8 +81,10 @@ const schema = {
           at <code>yourdomain.com._report._dmarc.theirdomain.com</code>. Without
           it, conforming receivers simply will not send your reports there
           (<a href="https://www.rfc-editor.org/rfc/rfc9990#section-4" rel="nofollow">RFC 9990 §4</a>).
-          A mailbox on a subdomain of your own needs no such record; a second
-          domain you also own does.
+          <code>dmarc@mail.yourdomain.com</code> under a record at
+          <code>yourdomain.com</code> is inside that organizational domain and
+          needs no such record; a second domain you also own is outside it and
+          does.
         </p>
         <p>
           Nothing bounces and nothing warns you. The record looks perfect and the

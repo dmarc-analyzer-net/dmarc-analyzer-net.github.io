@@ -57,9 +57,9 @@ export const description =
         </p>
         <pre><code>clientdomain.com._report._dmarc.agency.com   TXT   "v=DMARC1"</code></pre>
         <p>
-          A mailbox on a subdomain of your own needs nothing; a second domain you
-          also own still does. Without the record, conforming receivers silently
-          discard the reporting request.
+          A mailbox on a subdomain covered by that same record needs nothing; a
+          second domain you also own is outside it and still does. Without the
+          record, conforming receivers silently discard the reporting request.
           Nothing bounces, the record still validates, and the reports simply never
           arrive — see <a href="/guides/no-dmarc-record-found/">reports won't arrive
           if <code>rua=</code> is wrong</a> for the full treatment, or check a live

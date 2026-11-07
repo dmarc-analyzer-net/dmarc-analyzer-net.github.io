@@ -126,8 +126,9 @@ regardless of alignment and `s` for SPF ones. `1` and `0` are mutually exclusive
 
 If the mailbox in `rua` is outside the record's own organizational domain — an
 analyzer you run, or an agency inbox — the destination domain has to authorise
-it. A mailbox on a subdomain of your own needs nothing; a second domain you also
-own still does:
+it. `dmarc@mail.yourdomain.com` under a record at `yourdomain.com` is inside that
+organizational domain and needs nothing; a second domain you also own is outside
+it and still does:
 
 ```
 yourdomain.com._report._dmarc.analyzer.example.   TXT   "v=DMARC1"
