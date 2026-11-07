@@ -41,6 +41,10 @@ jobs:
           # as deploy.yml -- on a shallow clone every page claims to have
           # changed on every deploy.
           fetch-depth: 0
+          # Nothing here pushes, and `npm ci` runs package code from the
+          # lockfile in the same job as a Bunny credential. No reason to leave
+          # a GITHUB_TOKEN sitting in .git/config for it to find.
+          persist-credentials: false
 
       - uses: actions/setup-node@v5
         with:

@@ -227,13 +227,23 @@ def delete_one(endpoint: str, zone: str, password: str, path: str) -> tuple[str,
     return path, status
 
 
-def run_pool(concurrency: int, work, items) -> list:
-    results = []
+def run_pool(concurrency: int, work, items, label) -> list[str]:
+    """Run every item, then report the failures -- rather than raising on the first.
+
+    Raising mid-pass would leave the zone holding whichever subset happened to
+    finish, and say only which file lost the race. Finishing the pass converges
+    the zone as far as it can, and names every file that failed so the re-run
+    is informed. The caller decides what a non-empty return means.
+    """
+    failures: list[str] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=concurrency) as pool:
-        futures = [pool.submit(work, item) for item in items]
+        futures = {pool.submit(work, item): item for item in items}
         for future in concurrent.futures.as_completed(futures):
-            results.append(future.result())
-    return results
+            try:
+                future.result()
+            except Exception as error:  # noqa: BLE001 -- reported, not swallowed
+                failures.append(f"{label(futures[future])}: {error}")
+    return sorted(failures)
 
 
 def lookup_storage_password(api_key: str, zone_name: str) -> str:
@@ -262,7 +272,15 @@ def main() -> int:
     parser.add_argument("--pull-zone", required=True, help="pull zone numeric id, for the purge")
     parser.add_argument("--endpoint", default=DEFAULT_STORAGE_ENDPOINT, help=f"storage endpoint (default: {DEFAULT_STORAGE_ENDPOINT})")
     parser.add_argument("--concurrency", type=int, default=DEFAULT_CONCURRENCY)
-    parser.add_argument("--exclude", action="append", default=[], help="glob excluded from the upload; repeatable. CNAME is always excluded.")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="glob kept out of the zone; repeatable. CNAME is always excluded. "
+        "Excluded means absent, not merely unpublished: a matching file already in "
+        "storage is deleted by pass 2, which is how the CNAME left behind by the "
+        "GitHub Pages era was removed. Use it to retire a path, not to protect one.",
+    )
     parser.add_argument("--skip-unchanged", action="store_true", help="upload only files whose sha256 differs from the storage listing")
     parser.add_argument("--dry-run", action="store_true", help="report the three passes without changing anything")
     parser.add_argument("--no-purge", action="store_true", help="run passes 1 and 2 but not the purge")
@@ -284,18 +302,35 @@ def main() -> int:
     excludes = DEFAULT_EXCLUDES + tuple(args.exclude)
     started = time.time()
 
-    if not storage_password:
-        storage_password = lookup_storage_password(api_key, args.storage_zone)
-
     log(f"dist     {args.dist}")
     log(f"storage  {args.storage_zone} via {args.endpoint}")
     log(f"pullzone {args.pull_zone}")
     log(f"excludes {', '.join(excludes)}")
     log("")
 
+    # Read the local tree before authenticating: the one input that can destroy
+    # the zone is checked here, and a bad --dist should fail without a network
+    # call to find out.
     local = collect_local(args.dist, excludes)
     total_bytes = sum(info["size"] for info in local.values())
     log(f"local:   {len(local)} files, {total_bytes / 1_048_576:.2f} MB")
+
+    # Pass 2 is a set difference, so an empty dist/ is not "nothing to deploy"
+    # -- it is "delete the entire site, then purge the zone so the deletion is
+    # visible immediately". A build that produced nothing, a --dist pointing at
+    # the wrong directory, or an --exclude that matched everything all arrive
+    # here looking identical. Refuse; an empty zone is not a state any input to
+    # this script should be able to ask for by accident.
+    if not local:
+        print(
+            f"error: {args.dist}/ contains no deployable files after excludes "
+            f"({', '.join(excludes)}) -- refusing to empty the storage zone",
+            file=sys.stderr,
+        )
+        return 2
+
+    if not storage_password:
+        storage_password = lookup_storage_password(api_key, args.storage_zone)
 
     listing_started = time.time()
     remote, remote_dirs = list_storage(args.endpoint, args.storage_zone, storage_password, args.concurrency)
@@ -329,28 +364,53 @@ def main() -> int:
         return 0
 
     upload_started = time.time()
+    upload_failures: list[str] = []
     if to_upload:
-        run_pool(
+        upload_failures = run_pool(
             args.concurrency,
             lambda item: upload_one(args.endpoint, args.storage_zone, storage_password, item[0], item[1]),
             sorted(to_upload.items()),
+            lambda item: item[0],
         )
     upload_seconds = time.time() - upload_started
     uploaded_bytes = sum(local[path]["size"] for path in to_upload)
-    log(f"pass 1 done: {len(to_upload)} uploaded in {upload_seconds:.1f}s" + (f" ({uploaded_bytes / 1_048_576 / max(upload_seconds, 0.001):.1f} MB/s)" if uploaded_bytes else ""))
+    log(f"pass 1 done: {len(to_upload) - len(upload_failures)} uploaded in {upload_seconds:.1f}s" + (f" ({uploaded_bytes / 1_048_576 / max(upload_seconds, 0.001):.1f} MB/s)" if uploaded_bytes else ""))
+
+    # An incomplete upload is the one failure where stopping is better than
+    # carrying on. Deleting now would prune files whose replacements never
+    # landed, and purging would make the gap visible; leaving both undone
+    # leaves the edge serving the previous tree, whole, until the re-run.
+    if upload_failures:
+        for failure in upload_failures:
+            log(f"  ! {failure}")
+        raise RuntimeError(
+            f"{len(upload_failures)} of {len(to_upload)} uploads failed -- passes 2 and 3 skipped, "
+            "the edge is still serving the previous tree"
+        )
 
     delete_started = time.time()
+    delete_failures: list[str] = []
     if to_delete:
-        run_pool(
+        delete_failures = run_pool(
             args.concurrency,
             lambda path: delete_one(args.endpoint, args.storage_zone, storage_password, path),
             to_delete,
+            lambda path: path,
         )
     # Serially and deepest-first: a parent is only removable once its children
     # are gone, which the ordering guarantees but a thread pool would not.
+    prune_failures: list[str] = []
     for path in to_prune:
-        delete_one(args.endpoint, args.storage_zone, storage_password, path)
-    log(f"pass 2 done: {len(to_delete)} files and {len(to_prune)} directories deleted in {time.time() - delete_started:.1f}s")
+        try:
+            delete_one(args.endpoint, args.storage_zone, storage_password, path)
+        except RuntimeError as error:
+            prune_failures.append(f"{path}: {error}")
+    log(
+        f"pass 2 done: {len(to_delete) - len(delete_failures)} files and "
+        f"{len(to_prune) - len(prune_failures)} directories deleted in {time.time() - delete_started:.1f}s"
+    )
+    for failure in delete_failures + prune_failures:
+        log(f"  ! {failure}")
 
     # Pass 3 -- purge, last, so the first two become visible.
     if args.no_purge:
@@ -370,6 +430,15 @@ def main() -> int:
         log(f"pass 3 done: pull zone {args.pull_zone} purged in {time.time() - purge_started:.1f}s (HTTP {status})")
 
     log("")
+    # Unlike a failed upload, a failed delete is survivable: everything in
+    # dist/ is live and correct, and the leftovers are stale paths nothing
+    # links to. The purge above was worth running for the uploads. Still a
+    # failed deploy, because the zone no longer matches dist/.
+    if delete_failures or prune_failures:
+        log(f"deploy FAILED in {time.time() - started:.1f}s -- "
+            f"{len(delete_failures) + len(prune_failures)} deletions did not succeed; storage holds stale paths")
+        return 1
+
     log(f"deploy complete in {time.time() - started:.1f}s")
     return 0
 
