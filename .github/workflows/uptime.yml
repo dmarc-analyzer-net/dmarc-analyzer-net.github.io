@@ -33,12 +33,24 @@
 # the repository needs to carry forever.
 #
 # Cadence is a dial, not a constraint — Actions minutes are free on a public repo.
-# Every 15 minutes is ~96 samples a day, enough to characterise availability and a
-# latency distribution without 288 daily commits. The offset keeps it off the top
-# of the hour, where GitHub's scheduler is most loaded and most likely to drop a
-# run. Scheduled runs are best-effort and will occasionally be late or skipped;
-# that is a property of the free instrument and a reason to compare distributions
-# rather than count missed samples as downtime.
+# Every 15 minutes asks for ~96 samples a day, without 288 daily commits. The
+# offset keeps it off the top of the hour, where GitHub's scheduler is most
+# loaded and most likely to drop a run.
+#
+# What GitHub actually delivers is a fraction of that, and it is the first thing
+# to know before reading the log. The first scheduled run landed 3h50m after this
+# file merged — a newly registered cron is picked up slowly — and in the eight
+# hours after it, 2 of the 31 requested slots fired. Call it six samples a day
+# against the ninety-six asked for. Neither run queued: `created_at` equals
+# `run_started_at` on both, so the events were dropped rather than delayed.
+#
+# So a week of this is tens of rows per target, not hundreds. That characterises
+# availability coarsely and supports a latency distribution; it will not see a
+# short outage, and it is not an SLO instrument. Raising the cadence does not
+# help, because the slots are being dropped rather than refused — and taking
+# several samples inside one run would not help either, since the dominant noise
+# is the runner itself and samples sharing a runner share it. A missing row is
+# not evidence of downtime; compare distributions rather than counting gaps.
 name: Uptime
 
 on:
