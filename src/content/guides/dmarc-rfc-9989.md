@@ -93,12 +93,14 @@ RFC 9989 replaces that with a **DNS tree walk**. A receiver queries `_dmarc` at 
 domain in the `From:` header; if there is no valid record there, it walks up the tree
 looking for one. The practical consequences:
 
-- **You can publish policy records at more than one level** and have them found, which
-  is what large organisations with delegated DNS wanted.
-- **A record on an intermediate name now matters** in a way it previously might not
-  have. If you have delegated subdomains to teams or customers, it is worth knowing
-  which of those names publish DMARC records, because they are now discoverable steps
-  in the walk.
+- **The walk queries every name on the way up**, so records published at more than one
+  level are all seen. The policy applied is still the one at the author domain or at
+  the organizational domain, so an intermediate record is passed over rather than
+  obeyed.
+- **A delegated subdomain can declare itself an organizational domain**, by publishing
+  `psd=n`. That is what makes its own `sp` and `np` govern the names beneath it, and
+  it is what large organisations devolving DNS to departments or customers were
+  asking for.
 - The `sp` and `np` rules are unchanged in spirit: a record found above the author
   domain applies `sp` to existing subdomains and `np` to non-existent ones, falling
   back to `p`.
