@@ -95,9 +95,10 @@ Checkers report on the name you typed and stop.
 
 So if `news.yourdomain.com` has no `_dmarc` record, a checker aimed at that subdomain
 says "not found", while at delivery time the receiver finds your root record and
-applies its `sp=`. A subdomain that doesn't resolve at all gets `np=` instead, and
-whichever applies falls back to `p=` when that tag isn't published. There is a policy
-in force; the tool simply isn't looking where the receiver looks.
+applies its `sp=`. A subdomain that doesn't resolve at all gets `np=` instead. When
+the tag that applies isn't published, an existing subdomain falls back to `p=`, while
+a name that doesn't exist falls back to `sp=` first and only then to `p=`. There is a
+policy in force; the tool simply isn't looking where the receiver looks.
 
 That walk is newer than most of the advice written about it. The original DMARC
 specification worked out where your organizational domain began using a public suffix
