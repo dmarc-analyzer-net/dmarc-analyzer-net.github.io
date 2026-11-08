@@ -233,13 +233,15 @@ Keep claims truthful to the intended end state.
       **Worth doing first, regardless of which host wins — done, 2026-11-06.**
       There was no uptime monitoring of this site at all, so "is the site up?"
       had no answer except a third-party crawler's say-so. `uptime.yml` now
-      checks the apex and one deep page every fifteen minutes and appends a row
-      per target to `uptime.csv` on the orphan branch `uptime-log`, so the move
-      can be judged against a baseline rather than an impression. It needs a
-      week of history before the cutover, and it keeps running through it
-      unchanged, so both sides are measured by the same instrument.
+      asks for the apex and one deep page every fifteen minutes and appends a
+      row per target to `uptime.csv` on the orphan branch `uptime-log`, so the
+      move can be judged against a baseline rather than an impression. It needs
+      a week of history before the cutover, and it keeps running through it
+      unchanged, so both sides are measured by the same instrument. **The
+      baseline window runs from the first scheduled run, 2026-11-07 00:50 UTC,
+      to 2026-11-14** — not from the merge the evening before.
 
-      Three things turned out not to be true. **The Dash0 synthetic check this
+      Four things turned out not to be true. **The Dash0 synthetic check this
       was scoped as is not free** — Dash0 meters synthetic runs at $0.20 per
       thousand, so two checks at five minutes is $3.51/month against a migration
       budgeted at $1/month — and **there is no Dash0 credential, nor a connector
@@ -256,6 +258,19 @@ Keep claims truthful to the intended end state.
       whose body had vanished — which is exactly the CDN misconfiguration a body
       assertion exists to catch. `uptime-check.sh` matches only the markup after
       `</head>` for that reason.
+
+      **And "every fifteen minutes" is what the cron asks for, not what GitHub
+      delivers.** The first scheduled run landed 3h50m after the merge, and in
+      the eight hours after that, 2 of 31 requested slots fired — about six
+      samples a day against ninety-six. `created_at` equals `run_started_at` on
+      both, so the events were dropped rather than queued. A week is therefore
+      tens of rows per target, not hundreds: enough for a coarse availability
+      picture and a latency distribution, not enough to see a short outage.
+      Raising the cadence would not help, because the slots are dropped rather
+      than refused. The fix, if the cutover comparison needs a denser or more
+      stable vantage point, is a second sampler on hardware we own — which is a
+      decision, not an edit, because the only such host is the research
+      collector and a missed monthly run there is permanent.
 
 - [x] (done) **Make the site responsive.** Breakpoints 480/768/1024/1280 per the
       design system's `guidelines/responsive.md`; header collapses to a
