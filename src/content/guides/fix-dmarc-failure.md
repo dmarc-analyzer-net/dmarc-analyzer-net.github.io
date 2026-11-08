@@ -28,12 +28,15 @@ everyone, so start there.
 This is the single most common confusion. Your report shows SPF **pass**, yet
 DMARC **fails**. How?
 
-SPF authenticates the **envelope sender** (the hidden `Return-Path`), not the
-`From:` address your recipients see. When you send through a marketing platform
-or ESP, the envelope is often *their* domain (e.g. `bounces.sendgrid.net`) while
-your `From:` is `you@yourdomain.com`. SPF passes for *their* domain — but that
-domain doesn't [align](/glossary/dmarc-alignment/) with yours, so it earns you
-nothing under DMARC.
+SPF authenticates the **envelope sender** — the [`MAIL FROM`](/rfc/5321/) address
+the sending server offers in the SMTP conversation, which reaches the mailbox as
+`Return-Path` if it is visible at all. It is not the `From:` address your
+recipients see. Send through a marketing platform or ESP and the envelope is
+usually a domain of the platform's own — `sendgrid.net`, say, until you set up a
+bounce domain of yours — while your `From:` stays `you@yourdomain.com`. SPF
+passes for *their* domain — but that domain doesn't
+[align](/glossary/dmarc-alignment/) with yours, so it earns you nothing under
+DMARC.
 
 **Fix:** get alignment, not just authentication. Either
 
@@ -58,14 +61,22 @@ aligns to your `From:` domain.
 
 Even when SPF *should* align, the record itself can fail:
 
-- **Too many DNS lookups.** SPF allows a maximum of **10**. Chained `include:`s
-  blow past this and cause a `permerror` — which counts as a failure.
+- **Too many DNS lookups.** SPF allows a maximum of **10** terms that query DNS;
+  the eleventh is a `permerror`, which counts as a failure. Chained `include:`s
+  blow past this. [SPF record syntax](/guides/spf-record-syntax/) covers which
+  terms cost a lookup and how to total them, and the [SPF record
+  checker](/tools/spf-checker/) expands a record term by term.
 - **More than one SPF record.** A domain must have exactly **one** `TXT` SPF
   record. Two records is also a `permerror`.
 - **A missing sender.** The sending IP simply isn't covered by any mechanism.
 
-**Fix:** keep a single record, flatten or prune `include:`s to stay at or under 10
-lookups, and make sure every real sender is represented. Example of a clean one:
+**Fix:** keep a single record, get the lookup count to ten or below, and make
+sure every real sender is represented. Prune the `include:`s for services you no
+longer send through first, then give a heavy sender its own subdomain, which
+comes with its own budget. Replacing an `include:` with the `ip4:` ranges behind
+it — "flattening" — gets you under the limit too, but you have taken on the
+maintenance: those ranges are the provider's to renumber without telling you.
+Example of a clean record:
 
 ```
 v=spf1 include:_spf.google.com include:sendgrid.net -all
@@ -77,8 +88,11 @@ DKIM fails when the signature can't be verified: the key isn't published, the
 **selector** is wrong, the provider isn't signing at all, or the message was
 modified in transit (some mailing lists rewrite bodies and break the signature).
 
-**Fix:** publish the exact selector record your provider specifies, confirm the
-provider has DKIM *enabled* (it's often off by default), and check that the
+**Fix:** publish the exact selector record your provider specifies — [find your
+DKIM selector](/guides/find-your-dkim-selector/) covers digging it out of a
+message you already have, and the [DKIM record checker](/tools/dkim-checker/)
+reads back what is published — confirm the provider has DKIM *enabled* (it's
+often off by default), and check that the
 signature's `d=` domain aligns with your `From:` domain. Aligned DKIM is the
 most robust way to pass DMARC because, unlike SPF, it survives most forwarding.
 
@@ -89,7 +103,7 @@ Auto-forwarded mail — someone forwards from `@yourdomain` to a personal Gmail 
 explanation is backwards.
 
 Plain forwarding breaks SPF *because the envelope doesn't change.* The forwarder
-relays your original [`MAIL FROM`](/rfc/5321/) from **its own** IP address, and
+relays your original `MAIL FROM` from **its own** IP address, and
 that IP is not in your SPF record, so the check fails. Nothing was rewritten;
 that is the problem.
 
@@ -129,18 +143,27 @@ as your domain and show, per source, whether SPF and DKIM **authenticated** and
 whether they **aligned**. That two-by-two (auth × alignment) tells you exactly
 which cause above applies:
 
-- SPF pass but not aligned → Cause "alignment trap" / Cause 1
+- SPF pass but not aligned → the alignment trap, above — or Cause 1, if you
+  don't recognize the source at all
 - SPF permerror → Cause 2
 - DKIM fail or no signature → Cause 3
 - Passes for known mail but fails only on forwarded paths → Cause 4
+- A `header_from` on a subdomain you weren't thinking about → Cause 5. Every
+  record carries the `From:` domain it was counted against, so a forgotten
+  subdomain names itself
 
 Learn to read them in [how to read a DMARC aggregate
 report](/guides/how-to-read-a-dmarc-aggregate-report/).
 
+One report is one receiver's view of one day, and most of these causes only
+separate out over a run of them — a source failing everywhere looks nothing like
+a source failing on one path. Keeping that comparison going across every source
+and every domain is the job [DMARC Analyzer](/) does, self-hosted.
+
 ## Quick checklist
 
 - [ ] Is at least one of SPF or DKIM **aligned** to your `From:` domain?
-- [ ] Exactly **one** SPF record, under **10** DNS lookups?
+- [ ] Exactly **one** SPF record, at **10** DNS lookups or fewer?
 - [ ] DKIM **enabled** at every provider, with the correct selector published?
 - [ ] Every legitimate sender in your reports **accounted for**?
 - [ ] A deliberate **`sp=`** and records on active **subdomains**?
