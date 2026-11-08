@@ -80,7 +80,9 @@ default; `aspf=s` turns that off and demands an exact match. Replacing an
 `include:` with the `ip4:` and `ip6:` ranges behind it — "flattening" — gets you
 under the limit too, but you have taken on the maintenance: those ranges are the
 provider's to renumber without telling you, and an IPv6 range you left out of
-the copy fails every recipient you reach over IPv6. Example of a clean record:
+the copy fails SPF for every message the provider sends from it — survivable on
+mail that also carries an aligned DKIM signature, not on mail that doesn't.
+Example of a clean record:
 
 ```
 v=spf1 include:_spf.google.com include:sendgrid.net -all
@@ -144,8 +146,10 @@ them specifically; the [tag reference](/guides/dmarc-record-tags/) has both.
 Don't guess — the answer is in the data. DMARC
 [aggregate reports](/glossary/dmarc-aggregate-report/) list every source sending
 as your domain and show, per source, whether SPF and DKIM **authenticated** and
-whether they **aligned**. That two-by-two (auth × alignment) tells you exactly
-which cause above applies:
+whether they **aligned**. Read the DKIM column first: one aligned pass is the
+whole test, so a source whose SPF passes unaligned beside an aligned DKIM
+signature is not failing and is not a cause. For the sources that did fail, that
+two-by-two (auth × alignment) tells you which one applies:
 
 - SPF pass but not aligned → the alignment trap, above. Don't recognize the
   source? Identify it before you authorize it — an unaligned pass fits someone
