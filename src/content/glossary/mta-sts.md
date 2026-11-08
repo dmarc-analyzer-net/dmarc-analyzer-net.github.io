@@ -1,7 +1,7 @@
 ---
 term: MTA-STS
 seoTitle: "MTA-STS: enforced TLS for inbound mail"
-description: MTA-STS forces mail sent to your domain to use encrypted TLS, closing a downgrade-attack gap that SPF, DKIM, and DMARC don't address.
+description: MTA-STS tells sending servers to require verified TLS when they deliver to your domain, closing a downgrade-attack gap SPF, DKIM, and DMARC leave open.
 aliases: ["MTA-STS record", "SMTP MTA Strict Transport Security"]
 related: ["dmarc", "spf", "dkim", "tls-rpt"]
 ---
@@ -17,7 +17,9 @@ verify *who sent* a message, MTA-STS protects *how it travels*: without it, an
 attacker can strip the `STARTTLS` upgrade and force mail to be sent in plaintext
 (a downgrade attack). MTA-STS makes the *sending* server refuse that fallback: you
 publish the policy, and the other side is the one that enforces it by declining to
-deliver over a connection it can't secure.
+deliver over a connection it can't secure. A server that hasn't implemented
+MTA-STS never looks for your policy and delivers exactly as it did before, so the
+protection you get is the protection your senders have built.
 
 Note the direction: MTA-STS protects mail **arriving at** your domain. It says
 nothing about mail you send — that's governed by the recipient's policy.
@@ -47,25 +49,46 @@ Bump the `id` whenever you change the policy — that's the only signal telling
 servers to refetch it. Leave it unchanged and your edit may go unnoticed for
 `max_age` seconds.
 
+The HTTPS endpoint is the expensive half: a certificate-managed web host per
+domain, serving four lines of text. [DMARC Analyzer](/) serves that file for
+every domain you monitor, so adding one costs a CNAME and a TXT record — see
+[hosting MTA-STS policies](/docs/mta-sts-hosting/).
+
 ## The three modes
 
 | Mode | Effect |
 |---|---|
-| `testing` | Failures are reported but mail is still delivered |
+| `testing` | Mail is delivered as normal; failures are reported to you, if you publish TLS-RPT |
 | `enforce` | Delivery is refused if TLS can't be validated |
-| `none` | Policy is withdrawn — use this to retire MTA-STS cleanly |
+| `none` | Senders treat your domain as having no policy at all |
 
-Start in `testing`, watch the reports, then move to `enforce`. The pattern
-mirrors `p=none` → `p=reject` in DMARC, and for the same reason: you want to
-discover breakage from a report, not from missing mail.
+Publish [TLS-RPT](/glossary/tls-rpt/) first, start in `testing`, watch the
+reports, then move to
+`enforce`. The pattern mirrors `p=none` → `p=reject` in DMARC, and for the same
+reason: you want to discover breakage from a report, not from missing mail. The
+order matters, because a sender only reports a `testing` failure if you have
+given it somewhere to send the report — without TLS-RPT, `testing` is silent and
+you learn nothing from it.
+
+`none` is the first step out, not the whole of it, and deleting the records is
+not how you leave: a sender holding a valid cached policy has to keep applying it
+even once the TXT record and the policy file are gone. Publish `mode: none` with
+a short `max_age`, bump the `id`, wait out the longest `max_age` you previously
+served, and only then remove the records.
 
 ## Requirements that catch people out
 
 - **The `mta-sts` subdomain needs a valid HTTPS certificate.** The whole scheme
-  rests on that TLS connection, so an expired cert on a static policy file
-  silently invalidates your policy.
-- **Every `mx` in the policy must match your real MX records**, and the
-  certificate presented by those mail hosts must match too.
+  rests on that TLS connection, and an expired cert on the policy host breaks it
+  two ways at once: senders that already hold your policy go on applying it until
+  `max_age` runs out, while senders that don't have one deliver as though you had
+  never published. Publish TLS-RPT and the failed fetches at least come back to
+  you.
+- **Every MX host that actually receives your mail must be covered by an `mx`
+  pattern.** The requirement runs that way round: the policy lists the hosts
+  senders are *allowed* to use, so naming one you haven't cut over to yet is
+  fine, while a live MX the policy misses is one senders refuse under `enforce`.
+  The certificate each of those hosts presents must match its name too.
 - **`max_age` is a caching commitment.** A long value (a week is typical) means
   senders keep enforcing an old policy after you change hosts — lower it *before*
   a migration, not during.
@@ -85,7 +108,8 @@ reports](/glossary/dmarc-aggregate-report/) play for authentication: without it,
 
 ## MTA-STS vs DANE
 
-Both force authenticated TLS. **DANE** publishes certificate fingerprints in DNS
+Both force authenticated TLS. **DANE** ([RFC 7672](/rfc/7672/)) publishes
+certificate fingerprints in DNS
 and depends on DNSSEC; **MTA-STS** uses the public web PKI and HTTPS instead,
 which is why it's far easier to deploy on domains without DNSSEC. They can
 coexist, and large providers support one, the other, or both.
