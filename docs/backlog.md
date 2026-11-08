@@ -208,6 +208,21 @@ Keep claims truthful to the intended end state.
         hold it behind a required reviewer and a branch policy, with admin bypass
         off. Splitting the purge into its own job buys nothing — whoever controls
         the branch controls the job layout too.
+
+        **Done 2026-11-08, and exercised rather than asserted.** The key is an
+        environment secret on `bunny-staging` and nowhere else — repository,
+        organisation and `bunny-production` all hold zero, so it was created
+        where it belongs rather than moved there, and never existed in two
+        places. A dry run dispatched from `main` sat at `waiting` before
+        checkout until the reviewer cleared it, then listed the storage zone and
+        computed its diff with the key read out of the environment. Read the
+        scope of that narrowly, though: **the required reviewer stops a
+        contributor, it does not stop an agent run.** The same account key is
+        injected into the agent's run environment, and the agent's token is the
+        required reviewer — the pending-deployment API answers
+        `current_user_can_approve: true` for it. The environment closes the
+        GitHub path to the key. It is not the only path, and a reader deciding
+        what else the cutover needs should not take it for one.
       - DNS is at ClouDNS rather than tied to GitHub, so the cutover is repointing
         records — the apex ALIAS currently pointing at
         `dmarc-analyzer-net.github.io`.
