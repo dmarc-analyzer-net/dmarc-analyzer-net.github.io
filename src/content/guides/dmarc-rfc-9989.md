@@ -127,7 +127,7 @@ you now compares **organizational domains** rather than exact names, and the wil
 form is explicitly sanctioned:
 
 ```
-*._report._dmarc.agency.com.   TXT   "v=DMARC1"
+*._report._dmarc.agency.example.   TXT   "v=DMARC1"
 ```
 
 If you run reporting for other people's domains, [DMARC for many client
