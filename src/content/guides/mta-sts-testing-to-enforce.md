@@ -85,9 +85,10 @@ v=STSv1; id=20260807120000
 Two things routinely go wrong at this step:
 
 **The `mta-sts` subdomain needs its own valid certificate.** The whole scheme
-rests on that HTTPS connection. An expired certificate on the policy host
-silently invalidates your policy — senders can't fetch it, so they fall back to
-behaving as if you have none.
+rests on that HTTPS connection. An expired certificate on the policy host stops
+senders fetching it: one that already holds a cached policy has to keep applying
+that until `max_age` runs out, and one that doesn't falls back to behaving as if
+you have none.
 
 **The id is the only refetch signal.** Change the policy and leave the id alone,
 and senders keep using the cached old one until `max_age` runs out. Bump it every
