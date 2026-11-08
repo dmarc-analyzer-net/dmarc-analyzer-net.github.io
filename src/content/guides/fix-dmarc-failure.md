@@ -73,10 +73,14 @@ Even when SPF *should* align, the record itself can fail:
 **Fix:** keep a single record, get the lookup count to ten or below, and make
 sure every real sender is represented. Prune the `include:`s for services you no
 longer send through first, then give a heavy sender its own subdomain, which
-comes with its own budget. Replacing an `include:` with the `ip4:` ranges behind
-it — "flattening" — gets you under the limit too, but you have taken on the
-maintenance: those ranges are the provider's to renumber without telling you.
-Example of a clean record:
+comes with its own budget. A subdomain only buys you anything once that sender's
+`Return-Path` actually uses it — moving the `include:` by itself authorizes
+nothing — and it stays aligned because DMARC accepts any subdomain of yours by
+default; `aspf=s` turns that off and demands an exact match. Replacing an
+`include:` with the `ip4:` and `ip6:` ranges behind it — "flattening" — gets you
+under the limit too, but you have taken on the maintenance: those ranges are the
+provider's to renumber without telling you, and an IPv6 range you left out of
+the copy fails every recipient you reach over IPv6. Example of a clean record:
 
 ```
 v=spf1 include:_spf.google.com include:sendgrid.net -all
@@ -143,8 +147,10 @@ as your domain and show, per source, whether SPF and DKIM **authenticated** and
 whether they **aligned**. That two-by-two (auth × alignment) tells you exactly
 which cause above applies:
 
-- SPF pass but not aligned → the alignment trap, above — or Cause 1, if you
-  don't recognize the source at all
+- SPF pass but not aligned → the alignment trap, above. Don't recognize the
+  source? Identify it before you authorize it — an unaligned pass fits someone
+  spoofing you as well as it fits a service a colleague signed up for, and only
+  the second one is Cause 1
 - SPF permerror → Cause 2
 - DKIM fail or no signature → Cause 3
 - Passes for known mail but fails only on forwarded paths → Cause 4
@@ -163,7 +169,7 @@ and every domain is the job [DMARC Analyzer](/) does, self-hosted.
 ## Quick checklist
 
 - [ ] Is at least one of SPF or DKIM **aligned** to your `From:` domain?
-- [ ] Exactly **one** SPF record, at **10** DNS lookups or fewer?
+- [ ] Exactly **one** SPF record, at **10** DNS-querying terms or fewer?
 - [ ] DKIM **enabled** at every provider, with the correct selector published?
 - [ ] Every legitimate sender in your reports **accounted for**?
 - [ ] A deliberate **`sp=`** and records on active **subdomains**?
