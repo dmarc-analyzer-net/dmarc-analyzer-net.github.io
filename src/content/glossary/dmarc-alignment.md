@@ -32,10 +32,11 @@ providers routinely sign and send from a subdomain of your domain.
 
 ## What breaks alignment in practice
 
-Mail that forged your domain outright never passed anything, so it looks like
-what it is. A pass that doesn't align looks like a success everywhere except
-DMARC — which is why "SPF and DKIM are green, so why is DMARC failing?" is the
-usual way this shows up.
+A forged message passes SPF and DKIM perfectly well — for the attacker's own
+domain, which is the thing alignment is there to catch. The same shape turns up
+in your own mail whenever a sender authenticates under its domain instead of
+yours, and that is where "SPF and DKIM are green, so why is DMARC failing?"
+comes from.
 
 - **Bulk senders using their own envelope domain.** Marketing platforms send with
   `MAIL FROM` on their infrastructure, so SPF passes for *them* and aligns with
@@ -43,13 +44,14 @@ usual way this shows up.
   DKIM signature whose `d=` is a subdomain of yours, or a custom return path on a
   subdomain of yours, which brings SPF into alignment instead.
 - **Google Workspace's default signing key.** Workspace signs everything from the
-  start, but until you generate a key in the admin console it signs with a key
-  Google owns, whose `d=` is a `*.gappssmtp.com` name — your domain with its dots
-  turned into hyphens, as in `yourdomain-com.20260115.gappssmtp.com`. That is a
-  real `dkim=pass` that never aligns — and the reason it goes unnoticed for
-  months is that every checker reports DKIM as working.
+  start, but until you generate your own key, publish it in DNS *and* start
+  authentication, it signs with a key Google owns, whose `d=` is a
+  `*.gappssmtp.com` name — your domain with its dots turned into hyphens, as in
+  `yourdomain-com.20260115.gappssmtp.com`. That is a real `dkim=pass` that never
+  aligns — and the reason it goes unnoticed for months is that every checker
+  reports DKIM as working.
 - **Microsoft 365 before custom DKIM**, which signs with the tenant's initial
-  `*.onmicrosoft.com` domain for the same reason and with the same result.
+  `*.onmicrosoft.com` domain, so mail from your own domain has the same problem.
 - **Forwarding and mailing lists**, where SPF breaks and DKIM may or may not
   survive intact. See [ARC](/glossary/arc/) for what that does and doesn't fix.
 
