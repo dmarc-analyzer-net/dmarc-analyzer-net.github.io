@@ -27,6 +27,51 @@ where it is versioned with the code it describes and travels with a clone.
   positioning and the keyword policy; the half of it that this repo's CI
   enforces is restated below, under *Writing content*.
 
+## This repo is public — so decide where a document goes before you write it
+
+**Anyone can read this repo.** That is easy to forget when the task is "write
+up the plan" and this is the checkout you happen to be in. Two documents were
+written here that should not have been: `docs/voice.md`, which quoted our
+positioning and keyword policy (#128), and `docs/measurement-migration-scope.md`,
+which inventoried our DNS provider, the apex records, the proposed Matomo host,
+the hosting bill and a dated cutover window (#130). Both were moved to the
+private `seo` repo. The rule below is what should have caught them.
+
+**Route by the kind of thing the document is, not by the repo you are editing:**
+
+| Kind | Example | Home |
+|---|---|---|
+| **Mechanics** — how the site builds, what CI enforces, conventions for editing the code | this file, `docs/content-and-seo.md`'s authoring patterns | **public**, here |
+| **Strategy and editorial judgement** — keyword data, positioning, competitor handling, the content plan, voice | `content-style-guide.md`, `content-plan.md` | **private** `seo` repo |
+| **Business and infrastructure** — costs, vendors, bills, hostnames, credentials policy, migration and cutover plans | `measurement-migration-scope.md` | **private** `seo` repo |
+
+The test, when a document straddles them: **would this help a competitor
+compete, or help an attacker find the soft spot?** A page-authoring convention
+helps neither. What we are steering around, what we pay, what we run it on, and
+when it will be mid-change all help one of them. Split by kind rather than
+mirroring — #128 considered keeping a copy in both repos and rejected it as two
+sources of truth for one rule.
+
+**`docs/` here is an allowlist, and `scripts/check-docs-placement.sh` enforces
+it in CI.** A new file in `docs/` fails the build until its name is added to the
+list in that script, so publishing one is a deliberate edit a reviewer can see
+rather than a file that arrives unexamined. Adding a name is the decision; the
+script only makes sure the decision gets made. It covers `docs/` because that is
+where both incidents landed — it is not a content scanner, and it cannot tell
+you that an *allowlisted* file has grown an internal section.
+
+Internal reasoning that is not a document at all — why you chose this over that,
+a note to your future self — goes in `docs/backlog.md`, a `{/* … */}` expression,
+or the task tracker. Never in `<!-- -->`, which reaches production; see
+*Conventions that will bite you*.
+
+**`docs/backlog.md` is allowlisted, not private.** It is the right home for
+"why this heading and not that one"; it is the wrong home for a cost, a vendor,
+a hostname or a cutover date, and the placement check cannot tell the
+difference because the file is already on the list. The routing table above
+still applies inside an allowlisted file. Reasoning of that kind goes to the
+private repo, and the backlog gets the pointer.
+
 ## Commands
 
 ```bash
@@ -58,14 +103,15 @@ Python or shell scripts — they take arguments, and `npm run x -- --flag` is a 
   `motion.ts` (`revealResults`), `blog.ts` (the byline and post-type labels).
 - `src/styles/global.css` — design tokens as CSS custom properties. **Never
   hard-code a hex**; use `var(--teal-600)` and friends.
-- `scripts/` — `crawl.py`, `check-doc-versions.sh`, `verify-docs-snippets.sh`,
-  `uptime-check.sh`.
+- `scripts/` — `crawl.py`, `check-doc-versions.sh`, `check-docs-placement.sh`,
+  `verify-docs-snippets.sh`, `uptime-check.sh`.
+- `docs/` — **allowlisted**; see *This repo is public*, above.
 
 ## CI, and what actually gates a change
 
-`.github/workflows/ci.yml` on every push and PR: version check → `astro check` →
-build → serve the preview → **`scripts/crawl.py`**. `deploy.yml` publishes on push
-to `main`, so **merging deploys to production**.
+`.github/workflows/ci.yml` on every push and PR: version check → docs placement
+check → `astro check` → build → serve the preview → **`scripts/crawl.py`**.
+`deploy.yml` publishes on push to `main`, so **merging deploys to production**.
 
 `uptime.yml` gates nothing — it is the one scheduled workflow, checking production
 via `scripts/uptime-check.sh` and appending to `uptime.csv` on the orphan branch
@@ -133,7 +179,8 @@ Full guidance in `docs/content-and-seo.md` and the private `seo` repo's
   our own editorial decisions, and the reader did not come for those. Keep every
   fact, change who the sentence is about — style guide §2a, which has the
   before-and-afters. Internal reasoning goes in the `---` frontmatter block, a
-  `{/* … */}` expression or `docs/backlog.md`; **never in `<!-- -->`**, which
+  `{/* … */}` expression or `docs/backlog.md` — which is public, so route it by
+  the table in *This repo is public* first; **never in `<!-- -->`**, which
   reaches production. `crawl.py` fails CI on a shipped comment over 40
   characters — long enough to catch a sentence, not a `<!-- TODO -->`, so a
   short one is still yours to spot.
