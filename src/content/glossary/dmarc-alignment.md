@@ -23,7 +23,8 @@ DMARC passes if **either** SPF or DKIM passes *and* aligns.
 ## Relaxed vs strict
 
 - **Relaxed** (default): the two domains need only share an organizational
-  domain, so `mail.yourdomain.com` aligns with `yourdomain.com`.
+  domain. For example, `mail.yourdomain.com` aligns with `yourdomain.com`
+  when both share `yourdomain.com` as their organizational domain.
 - **Strict**: the domains must be identical.
 
 Set the mode per mechanism with `aspf=` (SPF) and `adkim=` (DKIM) in the DMARC
@@ -41,8 +42,10 @@ comes from.
 - **Bulk senders using their own envelope domain.** Marketing platforms send with
   `MAIL FROM` on their infrastructure, so SPF passes for *them* and aligns with
   nothing. With relaxed alignment, either of two fixes works if the platform
-  offers it: a DKIM signature whose `d=` is a subdomain of yours, or a custom
-  return path on a subdomain of yours, which brings SPF into alignment instead.
+  offers it: a valid DKIM signature whose `d=` is a subdomain of yours, or a
+  custom return path on a subdomain of yours that authorizes the platform and
+  passes SPF. Both fixes require the authenticated domain to share the `From:`
+  domain's organizational domain; a subdomain can have a separate one.
   If you require strict alignment for the mechanism you use, its authenticated
   domain must match the `From:` domain exactly.
 - **Google Workspace's default signing key.** Workspace signs everything from the
@@ -61,7 +64,8 @@ comes from.
 Aggregate reports are where you see all of this: each row shows the SPF and DKIM
 results *and* whether they aligned, so a column of passes next to a DMARC fail is
 the signature of the problem. [Reading an aggregate
-report](/guides/how-to-read-a-dmarc-aggregate-report/) walks through it. The
-comparison the XML makes you assemble by hand — the domain each mechanism passed
-for, next to the `From:` domain, per sending source — is what
-[DMARC Analyzer](/) puts side by side.
+report](/guides/how-to-read-a-dmarc-aggregate-report/) walks through it.
+[DMARC Analyzer](/) groups reported `From:`, SPF and DKIM domains by sending
+source. Its source view shows the 15 highest-volume DKIM result groups; use the
+original report XML to inspect omitted results or compare domains within a
+specific report row.
