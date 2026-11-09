@@ -49,7 +49,7 @@ under coincidence.
 
 ## The part that changed how I think about it
 
-Here's the turn, and it has nothing to do with any particular receiver.
+None of what follows turns on any particular receiver.
 
 Your DMARC policy is published once, in one TXT record, for the whole internet.
 You cannot serve `p=none` to Gmail and `p=reject` to everyone else. Every
@@ -79,8 +79,8 @@ A number worth printing carries its method, the way the
 [survey posts](/blog/dmarc-t-tag-three-months/) do — which is a good deal more
 work than quoting somebody else's.
 
-So treat the above as what it is: one operator's pattern across a lot of
-domains, offered without a controlled experiment behind it.
+So take the pattern for what it is: one operator's experience across a lot of
+domains, with no controlled experiment behind it.
 
 ## The reasons that don't depend on anyone's filters
 
@@ -98,9 +98,9 @@ inboxes, [BIMI](/glossary/bimi/) requires `p=quarantine` or `p=reject` applied t
 all of your mail — a leftover `pct=` or `t=y` disqualifies you.
 
 **Getting there forces the cleanup.** You can't reach enforcement without
-finding every system that sends as your domain and fixing its SPF or DKIM. My
-honest suspicion is that this is where most of the real gain lives, and that the
-policy value gets the credit for it. A domain that reached `p=reject` is a domain
+finding every system that sends as your domain and fixing its SPF or DKIM. I
+suspect this is where most of the real gain lives, and that the policy value
+gets the credit for it. A domain that reached `p=reject` is a domain
 where somebody went through the senders one by one. That's a different domain
 from the one it was six months earlier, whatever the record says.
 
