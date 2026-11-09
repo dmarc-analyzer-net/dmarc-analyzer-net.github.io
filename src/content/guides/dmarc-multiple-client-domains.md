@@ -12,7 +12,7 @@ because when it is wrong nothing tells you.
 
 ## One mailbox, every client
 
-Use one dedicated mailbox — `dmarc@agency.com` — not one per client. Every
+Use one dedicated mailbox — `dmarc@agency.example` — not one per client. Every
 aggregate report names the domain it is about in its own metadata, so a single inbox
 demultiplexes cleanly, and adding a client becomes a DNS change rather than a
 mailbox provisioning task. A dedicated address rather than a shared human inbox
@@ -25,17 +25,19 @@ somewhere people read mail means somebody eventually files it away. See
 Here is the part that catches every agency once. When a *client's* record says
 
 ```
-v=DMARC1; p=none; rua=mailto:dmarc@agency.com
+v=DMARC1; p=none; rua=mailto:dmarc@agency.example
 ```
 
-you are asking receivers to send reports about `clientdomain.com` to a mailbox on a
-domain you control and they don't. Receivers will not do that on the strength of the
-client's record alone — otherwise anyone could point reports at a victim and use the
-world's mail servers to flood them. So the receiving domain has to say yes, by
-publishing a record of its own in **your** zone:
+you are asking receivers to send reports about `clientdomain.example` to a mailbox
+outside that record's organizational domain. That is the test, not who controls
+what — a client you have since acquired is still outside it, and still needs the
+record. Receivers will not send reports there on the strength of the client's
+record alone, otherwise anyone could point reports at a victim and use the world's
+mail servers to flood them. So the receiving domain has to say yes, by publishing a
+record of its own ([RFC 9990](/rfc/9990/)) in **your** zone:
 
 ```
-clientdomain.com._report._dmarc.agency.com.   TXT   "v=DMARC1"
+clientdomain.example._report._dmarc.agency.example.   TXT   "v=DMARC1"
 ```
 
 Miss it and the failure is completely silent. The client's record is valid, every
@@ -50,7 +52,7 @@ confirm a client is really reporting to you.
 You can authorise every domain at once with a wildcard:
 
 ```
-*._report._dmarc.agency.com.   TXT   "v=DMARC1"
+*._report._dmarc.agency.example.   TXT   "v=DMARC1"
 ```
 
 That covers any client, including ones you haven't onboarded yet, and it is the
@@ -58,14 +60,34 @@ form the specification explicitly blesses for a report consumer willing to recei
 reports for any domain.
 
 > **Do not mix the two schemes.** Publishing one explicit
-> `client1.com._report._dmarc.agency.com` alongside the wildcard breaks the wildcard
-> for every *other* `.com` client. Adding that name creates an intermediate node at
-> `com._report._dmarc.agency.com` in your zone, and DNS wildcard synthesis stops at
-> the closest existing node — so a lookup for
-> `client2.com._report._dmarc.agency.com` now finds that node, doesn't reach the
-> wildcard, and returns nothing. The client's reports stop arriving, and nothing you
-> changed was theirs. Pick per-client records or the wildcard, and if you need both,
-> publish the explicit ones under a separate label.
+> `client1.example._report._dmarc.agency.example` alongside the wildcard breaks the
+> wildcard for every *other* client whose domain ends in the same top-level label —
+> so one `.com` client published explicitly takes out every other `.com` client you
+> have. Adding that name creates an intermediate node at
+> `example._report._dmarc.agency.example` in your zone, and DNS wildcard synthesis
+> stops at the closest existing node — so a lookup for
+> `client2.example._report._dmarc.agency.example` now finds that node, doesn't
+> reach the wildcard, and returns nothing. The client's reports stop arriving, and
+> nothing you changed was theirs. Pick per-client records or the wildcard, and if
+> you need both, use a separate report destination host for the per-client records.
+
+For example, keep the wildcard for `agency.example` and publish the explicit
+record under `per-client.agency.example`:
+
+```
+client1.example._report._dmarc.per-client.agency.example.   TXT   "v=DMARC1"
+```
+
+Change that client's DMARC record to use the same destination host:
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@per-client.agency.example
+```
+
+Configure mail delivery for `per-client.agency.example` so that address reaches
+your reporting inbox. Leaving the client's `rua` pointed at `agency.example`
+would keep it authorised by the wildcard even after you removed the separate
+record. Revoking the separate record takes effect after cached copies expire.
 
 Per-client records are the tidier choice when you want authorisation to be
 revocable per client and visible in your zone; the wildcard is the pragmatic one
