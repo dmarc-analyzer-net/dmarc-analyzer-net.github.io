@@ -12,6 +12,8 @@ if (!base) throw new Error('Usage: node scripts/verify-report-analyzer.mjs <prev
 // https://www.rfc-editor.org/rfc/rfc9990.html#appendix-A
 const qualified = await readFile(new URL('./fixtures/aggregate-report-namespaced.xml', import.meta.url), 'utf8');
 const unqualified = qualified.replace(' xmlns="urn:ietf:params:xml:ns:dmarc-2.0"', '');
+assert.notEqual(unqualified, qualified, 'Unqualified fixture must remove the default namespace');
+assert.doesNotMatch(unqualified, /\sxmlns\s*=/, 'Unqualified fixture must have no default namespace');
 // Prefix every element, keeping exactly the same expanded names and content.
 const prefixed = qualified.replace(/<(\/?)([a-z_][\w.-]*)(?=[\s>])/g, '<$1d:$2')
   .replace('xmlns=', 'xmlns:d=');
