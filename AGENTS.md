@@ -90,6 +90,48 @@ Outbound links are skipped in CI. Check them by hand, or run the manual
 python3 scripts/crawl.py https://dmarc-analyzer.net
 ```
 
+## Opening a pull request: draft until it is ready
+
+**Open the PR as a draft, and mark it ready exactly once.** CodeRabbit's review
+allowance is hourly and shared across every repo and every agent session we run.
+Through early November it was being spent on commits nobody was going to read —
+one PR took five reviews in seventeen minutes — and the reply came back as
+`review limit reached` instead of a review. `.coderabbit.yaml` in the repo root
+narrows *when* a review fires: `drafts: false` keeps a draft unreviewed, and
+`auto_incremental_review: false` stops the automatic re-review on every push.
+Neither narrows what a review looks at.
+
+1. `gh pr create --draft`. Push as often as the work needs; none of it is
+   reviewed while the PR is a draft.
+2. Finish the implementation and run the gate yourself — `npm run check`,
+   `npm run build`, then serve the preview and run `scripts/crawl.py` against it.
+   CI runs the same checks, but a CI fix is another push, and a push on a ready
+   PR is the thing this workflow exists to avoid.
+3. `gh pr ready <n>`. Once. Marking a draft ready is itself a review event, so
+   the transition is what buys the review — **do not also comment
+   `@coderabbitai review`**, which spends a second one off the same allowance.
+4. **Check that a substantive review arrived.** When CodeRabbit declines on rate
+   limit it posts a *passing* check named `Review rate limited`, on purpose, so
+   it never blocks a merge on a protected branch. A green PR is therefore not
+   evidence that anything was reviewed; read the comments. If no review came,
+   `@coderabbitai review` once is the right move — that is the case the command
+   is for.
+5. Push fixes normally. They are not automatically re-reviewed. Ask for another
+   pass only when a fix changed something a reviewer should actually see, not as
+   a routine closing step.
+
+Two things this does **not** do. It does not guarantee one review per pull
+request: the vendor documents the draft→ready transition as the first review
+under its defaults, and separately documents `auto_incremental_review: false` as
+meaning "only the opening push is reviewed automatically" — a draft has no
+reviewed opening push, and which of the two governs the transition is not stated.
+Step 4 is why the workflow checks instead of assuming. And it does not eliminate
+collisions: two PRs marked ready in the same hour still contend for the same
+allowance. It removes the reviews nobody asked for. It does not schedule the ones
+we want.
+
+Merging still deploys to production, and merging is still Michael's call.
+
 ## Conventions that will bite you
 
 - **Trailing slashes on every internal link.** `/glossary/spf/`, never
