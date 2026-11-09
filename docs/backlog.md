@@ -201,9 +201,11 @@ Keep claims truthful to the intended end state.
       cost, and what each option buys. It is private because it inventories
       infrastructure next to the bill and the cutover window; it was written here
       first, which is the incident that produced the placement rule in
-      `AGENTS.md`. Approvals, costs, staging results, the sequence and the open
-      decisions all live there and are deliberately not restated here — a status
-      line in a public file is both a disclosure and a thing that goes stale.
+      `AGENTS.md`. Approvals, costs, the cutover sequence and the open decisions
+      all live there and are deliberately not restated here — a status line in a
+      public file is both a disclosure and a thing that goes stale. The staging
+      work recorded under the deploy credential below is the exception, and
+      stays: it is a fact about this repository's own workflow.
       **No DNS record has been touched and this site is still served by GitHub
       Pages.**
 
