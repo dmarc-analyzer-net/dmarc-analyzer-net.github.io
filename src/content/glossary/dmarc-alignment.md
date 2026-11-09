@@ -58,5 +58,5 @@ results *and* whether they aligned, so a column of passes next to a DMARC fail i
 the signature of the problem. [Reading an aggregate
 report](/guides/how-to-read-a-dmarc-aggregate-report/) walks through it. The
 comparison the XML makes you assemble by hand — the domain each mechanism passed
-for, next to the `From:` domain, for one sending source — is what
+for, next to the `From:` domain, per sending source — is what
 [DMARC Analyzer](/) puts side by side.
