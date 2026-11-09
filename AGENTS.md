@@ -136,6 +136,76 @@ Outbound links are skipped in CI. Check them by hand, or run the manual
 python3 scripts/crawl.py https://dmarc-analyzer.net
 ```
 
+## Opening a pull request: draft until it is ready
+
+**Open the PR as a draft, and mark it ready exactly once.** CodeRabbit's review
+allowance is hourly and shared across every repo and every agent session we run.
+Through early November it was being spent on commits nobody was going to read —
+one PR took five reviews in seventeen minutes — and the reply came back as
+`review limit reached` instead of a review. `.coderabbit.yaml` in the repo root
+narrows *when* a review fires: `drafts: false` keeps a draft unreviewed, and
+`auto_incremental_review: false` stops the automatic re-review on every push.
+Neither narrows what a review looks at.
+
+1. `gh pr create --draft`. Push as often as the work needs; none of it is
+   reviewed while the PR is a draft.
+2. Finish the implementation and run the gate yourself —
+   `./scripts/check-doc-versions.sh`, `npm run check`, `npm run build`, then serve
+   the preview and run `scripts/crawl.py` against it.
+   CI runs the same checks, but a CI fix is another push, and a push on a ready
+   PR is the thing this workflow exists to avoid.
+3. `gh pr ready <n>`. Once. Marking a draft ready is itself a review event, so
+   the transition is what buys the review — **do not also comment
+   `@coderabbitai review`**, which spends a second one off the same allowance.
+4. **Check that a substantive review arrived.** When CodeRabbit declines on rate
+   limit it still reports — as a check named `CodeRabbit` whose conclusion is
+   **neutral**, carrying the title *"Review rate limited"*, plus a warning
+   comment on the PR giving the minutes until the next included review. Neutral
+   does not fail a PR, by design, so it never blocks a merge. A PR with no red
+   check is therefore not evidence anything was reviewed; open the check or read
+   the comment. Once the window has passed, `@coderabbitai review` is the right
+   move — a review that was declined is exactly the case that command is for.
+   This repo is public and draws on CodeRabbit's **free OSS** allowance, which is
+   smaller than the paid one and is the limit we actually hit.
+   If no CodeRabbit check or comment appears, first allow the initial review to
+   start; check existing reviews and comments before sending anything. If none
+   starts, request one `@coderabbitai full review` in its own plain-text PR
+   comment. The [command reference](https://docs.coderabbit.ai/reference/review-commands)
+   does not require a preceding `pause`; that command stops automatic reviews,
+   rather than imposing a timed delay. Respect any reported cooldown before
+   retrying, and never send a second request while a review is processing.
+   Give CI and CodeRabbit at most ten minutes in a run, stopping sooner when
+   they settle. If the review is still missing, record the PR link and what is
+   outstanding on its task, schedule a bounded follow-up, and leave it waiting.
+   Check the command's formatting, app installation and permissions, target-branch
+   review settings, and webhook delivery using the vendor's
+   [troubleshooting checklist](https://kb.coderabbit.ai/articles/1442026547-troubleshoot-why-coderabbit-reviews-might-not-trigger).
+   If a manual trigger still produces no review, report the configuration or
+   service problem; do not keep requesting reviews or merge as though one happened.
+5. Push fixes normally. They are not automatically re-reviewed. Ask for another
+   pass only when a fix changed something a reviewer should actually see, not as
+   a routine closing step.
+
+**That the transition fires at all is observed, not assumed.** Marking #148 ready
+produced a CodeRabbit run seven seconds later — rate-limited, but a run. What is
+still unverified is whether it fires once `auto_incremental_review: false` is on
+the base branch: the vendor documents that setting as meaning "only the opening
+push is reviewed automatically", and a draft has no reviewed opening push. Step 4
+is why the workflow checks rather than assumes.
+
+Two things this does **not** do. It does not guarantee one review per pull
+request, for the reason above. And it does not eliminate collisions: two PRs
+marked ready in the same hour still contend for the same allowance — which is how
+#148 met the limit on its own first review, the allowance already spent by the
+day's other PRs. It removes the reviews nobody asked for. It does not schedule
+the ones we want.
+
+Note also that CodeRabbit reads `.coderabbit.yaml` **from the base branch**, not
+from your branch. A PR that changes it is reviewed under the old settings; the
+new ones apply to the PR after it.
+
+Merging still deploys to production, and merging is still Michael's call.
+
 ## Conventions that will bite you
 
 - **Trailing slashes on every internal link.** `/glossary/spf/`, never
