@@ -103,8 +103,9 @@ Neither narrows what a review looks at.
 
 1. `gh pr create --draft`. Push as often as the work needs; none of it is
    reviewed while the PR is a draft.
-2. Finish the implementation and run the gate yourself — `npm run check`,
-   `npm run build`, then serve the preview and run `scripts/crawl.py` against it.
+2. Finish the implementation and run the gate yourself —
+   `./scripts/check-doc-versions.sh`, `npm run check`, `npm run build`, then serve
+   the preview and run `scripts/crawl.py` against it.
    CI runs the same checks, but a CI fix is another push, and a push on a ready
    PR is the thing this workflow exists to avoid.
 3. `gh pr ready <n>`. Once. Marking a draft ready is itself a review event, so
@@ -120,6 +121,21 @@ Neither narrows what a review looks at.
    move — a review that was declined is exactly the case that command is for.
    This repo is public and draws on CodeRabbit's **free OSS** allowance, which is
    smaller than the paid one and is the limit we actually hit.
+   If no CodeRabbit check or comment appears, first allow the initial review to
+   start; check existing reviews and comments before sending anything. If none
+   starts, request one `@coderabbitai full review` in its own plain-text PR
+   comment. The [command reference](https://docs.coderabbit.ai/reference/review-commands)
+   does not require a preceding `pause`; that command stops automatic reviews,
+   rather than imposing a timed delay. Respect any reported cooldown before
+   retrying, and never send a second request while a review is processing.
+   Give CI and CodeRabbit at most ten minutes in a run, stopping sooner when
+   they settle. If the review is still missing, record the PR link and what is
+   outstanding on its task, schedule a bounded follow-up, and leave it waiting.
+   Check the command's formatting, app installation and permissions, target-branch
+   review settings, and webhook delivery using the vendor's
+   [troubleshooting checklist](https://kb.coderabbit.ai/articles/1442026547-troubleshoot-why-coderabbit-reviews-might-not-trigger).
+   If a manual trigger still produces no review, report the configuration or
+   service problem; do not keep requesting reviews or merge as though one happened.
 5. Push fixes normally. They are not automatically re-reviewed. Ask for another
    pass only when a fix changed something a reviewer should actually see, not as
    a routine closing step.
