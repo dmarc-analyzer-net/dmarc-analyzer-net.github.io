@@ -81,6 +81,47 @@ Keep claims truthful to the intended end state.
       the five leaked notes are described in the past tense — they were fixed in
       the same change, so one in `dist/` now is a regression.
 
+- [x] (done) **A rule for which repo a document goes in, because the item above
+      did not produce one in time.** Raised 2026-11-06 by Michael against #130:
+      *"again internal doc on public repo — can we make a rule to avoid that?"*
+      The scope document for the measurement migration had been written into
+      `docs/` here. "Again" is exact: the item above moved `docs/voice.md` to the
+      private repo the same day and left the Medium Priority item below asking for
+      the policy sentence. Hours later the next document landed in the same place.
+      One recurrence is not a lapse of attention, it is a missing rule.
+
+      **This one was worse than the voice doc, and the difference is what the rule
+      had to key on.** `voice.md` leaked strategy — positioning, the keyword
+      policy. The scope document inventoried infrastructure — the provider and
+      record layout, the host a new service would run on, the bill, and a dated
+      cutover sequence with its rollback window. Enumerating which, here, would
+      repeat the mistake; the list is in the document, in the private repo.
+      Published together those are a map of what to attack and when the target
+      is mid-change, and a rule phrased only as "keep strategy private" would
+      not have caught them.
+
+      **So the routing is by kind, in three buckets** — mechanics public;
+      strategy and editorial judgement private; business and infrastructure
+      private — with the test being whether a document helps a competitor compete
+      or an attacker find the soft spot. Written up in `AGENTS.md` under *This
+      repo is public*, which is placed before the other conventions because it
+      governs where you write rather than how.
+
+      **`scripts/check-docs-placement.sh` makes `docs/` an allowlist**, run in CI
+      before the build. A new file fails until its name is added to the script, so
+      publishing is a visible line in a reviewed diff rather than an unexamined
+      file. **It is deliberately not a content scanner**, by the same argument the
+      item above used to reject a phrase check: a grep for "internal" or for
+      currency symbols would have missed `voice.md` entirely and would fire on any
+      honest page about competitor pricing. The failure mode both incidents share
+      is not a phrase, it is a new file nobody asked the question about — and a
+      660-line diff does not invite the question. Its limit, stated in the script:
+      it cannot tell you an *allowlisted* file has grown an internal section.
+
+      The two existing files are allowlisted as **grandfathered, not endorsed**,
+      and the comment in the script says so and points at the open item below.
+      Encoding that decision as a list is what finally makes it a decision.
+
 - [x] (done) **Sitemap `<lastmod>` from git, and homepage prose links to the P0
       pages.** Search Console's URL Inspection API (run 2026-09-13 across 54
       content pages) showed 24 had not been crawled since late July — every page
@@ -154,6 +195,31 @@ Keep claims truthful to the intended end state.
       self-hosted Matomo.** Two goals in one change: server-side visitor
       statistics, which the site has none of today, and getting off a host with no
       control over response headers.
+
+      **Scoped 2026-11-06 in the private `seo` repo's
+      `docs/measurement-migration-scope.md`** — what it would take, what it would
+      cost, and what each option buys. It is private because it inventories
+      infrastructure next to the bill and the cutover window; it was written here
+      first, which is the incident that produced the placement rule in
+      `AGENTS.md`. Approvals, costs, the cutover sequence and the open decisions
+      all live there and are deliberately not restated here — a status line in a
+      public file is both a disclosure and a thing that goes stale. The staging
+      work recorded under the deploy credential below is the exception, and
+      stays: it is a fact about this repository's own workflow.
+      **No DNS record has been touched and this site is still served by GitHub
+      Pages.**
+
+      Two corrections belong here, because without them this entry keeps
+      asserting things measurement has disproved. **The apex is four A records**
+      to GitHub's anycast IPs, not the ALIAS described below; it is `www` that is
+      the CNAME. What that implies for a move is in the scope document, and it is
+      not the simple record edit this entry assumes. And **the Cloudflare Workers
+      option fails upstream of the question flagged below as unverified**: trace
+      events do carry referer and user-agent, but under Workers Static Assets a
+      request matching an asset does not invoke the Worker by default, so there is
+      no trace event to log. `run_worker_first` can force the invocation, at the
+      cost of rebuilding static serving by hand — so it is a different project,
+      not a setting.
 
       **The analytics requirement is what decides the host.** Statistics must be
       server-side only — the audience is email and security administrators, who
@@ -474,6 +540,19 @@ inferred. What follows is what that found and what it left.
       deliberately; they were public by default. The decision wanted is one
       sentence of policy — which of *strategy*, *reasoning* and *mechanics* may
       be public — applied to both files, not a reflexive move of either.
+
+      **Updated 2026-11-06.** The policy sentence now exists, in `AGENTS.md` under
+      *This repo is public*, written after a second document reached this repo
+      before anyone applied it. It does **not** settle this item. Both files are
+      allowlisted in `scripts/check-docs-placement.sh` as grandfathered, which
+      stops the list growing by accident but deliberately does not answer whether
+      these two belong on it. Applying the new test honestly is uncomfortable in
+      both directions: this file names what a third-party audit found and reasons
+      about competitor positioning, which fails the test; it is also the design
+      record an agent is told to read before re-deciding anything, and the
+      "open-source project showing its working" argument is real. That is a call
+      for Michael, not a cleanup. What changed is only that it is now a decision
+      about two named files on a list, rather than about an unbounded directory.
 
 - [x] (done) Build reusable SEO/content components: `JsonLd.astro`, `Breadcrumbs.astro` (BreadcrumbList), `RelatedLinks.astro`.
 - [x] (done) Build `Cta.astro` — closing call-to-action band, wired into the guide, provider, and comparison templates (glossary intentionally omits it).

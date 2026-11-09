@@ -24,12 +24,17 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Cheap and independent of the build, so it runs first — a stale version
+      # Cheap and independent of the build, so these run first — a stale version
       # pin should fail in seconds rather than after a full build and crawl.
       - name: Documentation version check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./scripts/check-doc-versions.sh
+
+      # This repo is public. Fails on a file in docs/ that nobody decided to
+      # publish — see AGENTS.md, "This repo is public".
+      - name: Documentation placement check
+        run: ./scripts/check-docs-placement.sh
 
       - uses: actions/setup-node@v5
         with:
