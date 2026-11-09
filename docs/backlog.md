@@ -14,6 +14,21 @@ Keep claims truthful to the intended end state.
 
 ## High Priority
 
+- [x] (done) **Verify report analyzer XML namespaces in a browser.** Checked
+      2026-11-09 in Chromium 158 against the actual page: bare XML, the default
+      `urn:ietf:params:xml:ns:dmarc-2.0` namespace, and prefixed elements all
+      render the same metadata, dates, counts and rows. The suspected failure
+      did not reproduce: these `querySelector` calls match namespaced elements
+      by local name, including when the elements carry a prefix. No parser fix
+      was needed, and the unqualified **Load sample** XML is unchanged.
+
+      `scripts/verify-report-analyzer.mjs` now checks those three forms with a
+      synthetic report validated against RFC 9990 Appendix A, plus namespaced XML file
+      upload, malformed-input rejection and Load sample recovery. Assertions
+      cover every displayed table cell as well as the summary, rather than
+      accepting a visible but empty results panel. CI runs it against the built
+      preview with Playwright and Chromium; no browser code ships with the site.
+
 - [x] (done) **Write down the voice, and stop publishing our own editorial
       notes.** Raised 2026-11-06 against the roundup's "Two things this table
       deliberately does not show, because we would lose them" — read as an

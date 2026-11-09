@@ -54,3 +54,9 @@ jobs:
 
       - name: Technical SEO crawl
         run: python3 scripts/crawl.py http://localhost:4321 --skip-external
+
+      - name: Install Chromium for report analyzer verification
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify report analyzer in Chromium
+        run: node scripts/verify-report-analyzer.mjs http://localhost:4321

@@ -37,9 +37,12 @@ npm run preview   # serve the built site
 npm run check     # astro check
 ```
 
-There is **no test suite and no linter.** The gate is `astro check`, the build (Zod
-frontmatter schemas fail it), and `scripts/crawl.py`. Do not add an npm alias for the
-Python or shell scripts — they take arguments, and `npm run x -- --flag` is a footgun.
+There is **no general test suite and no linter.** The gates are `astro check`, the
+build (Zod frontmatter schemas fail it), `scripts/crawl.py`, and a focused Chromium
+check for the report analyzer. With a local preview running, install the browser
+with `npx playwright install --with-deps chromium`, then run
+`node scripts/verify-report-analyzer.mjs http://localhost:4321`. Do not add an npm
+alias for the Python or shell scripts — they take arguments, and `npm run x -- --flag` is a footgun.
 
 ## Layout
 
@@ -64,8 +67,8 @@ Python or shell scripts — they take arguments, and `npm run x -- --flag` is a 
 ## CI, and what actually gates a change
 
 `.github/workflows/ci.yml` on every push and PR: version check → `astro check` →
-build → serve the preview → **`scripts/crawl.py`**. `deploy.yml` publishes on push
-to `main`, so **merging deploys to production**.
+build → serve the preview → **`scripts/crawl.py`** → Chromium report analyzer
+verification. `deploy.yml` publishes on push to `main`, so **merging deploys to production**.
 
 `uptime.yml` gates nothing — it is the one scheduled workflow, checking production
 via `scripts/uptime-check.sh` and appending to `uptime.csv` on the orphan branch
