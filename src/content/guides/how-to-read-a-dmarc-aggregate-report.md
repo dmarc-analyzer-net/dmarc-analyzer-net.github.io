@@ -23,6 +23,8 @@ published:
 ```xml
 <report_metadata>
   <org_name>google.com</org_name>
+  <email>noreply-dmarc-support@google.com</email>
+  <report_id>...</report_id>
   <date_range><begin>...</begin><end>...</end></date_range>
 </report_metadata>
 <policy_published>
@@ -33,7 +35,9 @@ published:
 
 ## The rows are where the signal is
 
-Each `<record>` groups messages by sending source:
+Each `<record>` groups messages by sending source, `From:` domain and result,
+so one IP can appear in several records if its mail did not all authenticate
+the same way:
 
 ```xml
 <record>
@@ -41,17 +45,49 @@ Each `<record>` groups messages by sending source:
     <source_ip>203.0.113.10</source_ip>
     <count>128</count>
     <policy_evaluated>
+      <disposition>none</disposition>
       <dkim>pass</dkim>
       <spf>fail</spf>
     </policy_evaluated>
   </row>
+  <identifiers>
+    <header_from>yourdomain.com</header_from>
+  </identifiers>
+  <auth_results>
+    <dkim>
+      <domain>yourdomain.com</domain>
+      <selector>s1</selector>
+      <result>pass</result>
+    </dkim>
+    <spf>
+      <domain>bounces.esp.example</domain>
+      <result>pass</result>
+    </spf>
+  </auth_results>
 </record>
 ```
 
 Read it as: *128 messages from 203.0.113.10; DKIM passed and aligned, SPF did
 not.* Because [DMARC](/glossary/dmarc/) passes when **either** mechanism passes
-and [aligns](/glossary/dmarc-alignment/), this row is a **DMARC pass** — no
-action needed.
+and [aligns](/glossary/dmarc-alignment/), this row is a **DMARC pass** — the
+mail is riding on DKIM alone, which is worth repairing before you tighten
+policy, but nothing here is losing mail to DMARC today. That is not the same
+as being delivered: spam filtering is a separate decision, and no aggregate
+report shows it.
+
+All three children of `<record>` are required, and the two outside `<row>` are
+the ones that answer *why*. `<identifiers>` carries the `From:` domain the
+policy was looked up on. `<auth_results>` carries what SPF and DKIM actually
+returned, before DMARC asked whether either one aligned — and the gap between
+the two blocks is this row's whole story. SPF **passed**, for
+`bounces.esp.example`, and `<policy_evaluated>` still says `fail`, because that
+domain and the `<header_from>` share no organizational domain. It is not that
+the two strings differ: relaxed alignment, the default, would have accepted
+`mail.yourdomain.com` here. It will never accept another organization's domain,
+however well its own SPF is set up. Judge a row on `<policy_evaluated>`
+alone and a perfectly healthy SPF record looks broken; that mismatch is the
+[alignment trap](/guides/fix-dmarc-failure/), and `<auth_results>` is the only
+place in the report that shows it.
 
 ## Which rows actually need action
 
