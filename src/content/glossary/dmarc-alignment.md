@@ -32,7 +32,7 @@ providers routinely sign and send from a subdomain of your domain.
 
 ## What breaks alignment in practice
 
-A forged message passes SPF and DKIM perfectly well — for the attacker's own
+A forged message can pass SPF and DKIM perfectly well — for the attacker's own
 domain, which is the thing alignment is there to catch. The same shape turns up
 in your own mail whenever a sender authenticates under its domain instead of
 yours, and that is where "SPF and DKIM are green, so why is DMARC failing?"
