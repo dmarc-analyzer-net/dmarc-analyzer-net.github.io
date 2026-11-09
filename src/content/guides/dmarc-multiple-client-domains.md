@@ -66,10 +66,10 @@ reports for any domain.
 > have. Adding that name creates an intermediate node at
 > `example._report._dmarc.agency.example` in your zone, and DNS wildcard synthesis
 > stops at the closest existing node — so a lookup for
-> `client2.example._report._dmarc.agency.example` now finds that node, doesn't reach the
-> wildcard, and returns nothing. The client's reports stop arriving, and nothing you
-> changed was theirs. Pick per-client records or the wildcard, and if you need both,
-> publish the explicit ones under a separate label.
+> `client2.example._report._dmarc.agency.example` now finds that node, doesn't
+> reach the wildcard, and returns nothing. The client's reports stop arriving, and
+> nothing you changed was theirs. Pick per-client records or the wildcard, and if
+> you need both, publish the explicit ones under a separate label.
 
 Per-client records are the tidier choice when you want authorisation to be
 revocable per client and visible in your zone; the wildcard is the pragmatic one
