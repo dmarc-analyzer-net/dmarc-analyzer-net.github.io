@@ -113,9 +113,8 @@ alias for the Python or shell scripts — they take arguments, and `npm run x --
 ## CI, and what actually gates a change
 
 `.github/workflows/ci.yml` on every push and PR: version check → docs placement
-check → `astro check` → build → serve the preview → **`scripts/crawl.py`** →
-Chromium report analyzer verification. `deploy.yml` publishes on push to `main`,
-so **merging deploys to production**.
+check → `astro check` → build → serve the preview → **`scripts/crawl.py`**.
+`deploy.yml` publishes on push to `main`, so **merging deploys to production**.
 
 `uptime.yml` gates nothing — it is the one scheduled workflow, checking production
 via `scripts/uptime-check.sh` and appending to `uptime.csv` on the orphan branch
