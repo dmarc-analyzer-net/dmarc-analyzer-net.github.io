@@ -114,17 +114,21 @@ const schema = {
         <ul>
           <li><strong>Messages</strong> — how many the provider saw from that
             IP over the report's date range, not a running total.</li>
-          <li><strong>DKIM</strong> and <strong>SPF</strong> — the raw result
-            for that mechanism, straight from the report's
-            <code>policy_evaluated</code> block.</li>
+          <li><strong>DKIM</strong> and <strong>SPF</strong> — the result
+            after DMARC checked
+            <a href="/glossary/dmarc-alignment/">alignment</a>, from the
+            report's <code>policy_evaluated</code> block. A mechanism can
+            authenticate perfectly and still read <code>fail</code> here; the
+            result it returned on its own is in <code>auth_results</code>,
+            which this table does not show.</li>
           <li><strong>Disposition</strong> — what the receiver actually did
             with the mail: <code>none</code>, <code>quarantine</code>, or
             <code>reject</code>, per your published
             <a href="/glossary/dmarc-policy/">policy</a>.</li>
           <li><strong>DMARC</strong> — pass if <strong>either</strong> DKIM or
             SPF passed <em>and</em>
-            <a href="/glossary/dmarc-alignment/">aligned</a>; the report's raw
-            fields don't state this outright, so the tool derives it.</li>
+            <a href="/glossary/dmarc-alignment/">aligned</a>; the report never
+            states this outright, so the tool derives it.</li>
         </ul>
         <p>
           A pass in one column and a fail in the other is normal, not a bug —
