@@ -3,7 +3,7 @@ title: Nobody rewards p=reject, except the receivers that do
 seoTitle: What p=reject did for my mail
 description: Every guide says the DMARC policy value doesn't affect your own mail's deliverability. Running mail for a lot of domains, that stopped matching what I saw.
 type: engineering
-publishDate: 2026-11-07
+publishDate: 2026-11-09
 ---
 
 I had two domains sending the same kind of mail, from the same systems, both
