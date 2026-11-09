@@ -34,7 +34,7 @@ what — a client you have since acquired is still outside it, and still needs t
 record. Receivers will not send reports there on the strength of the client's
 record alone, otherwise anyone could point reports at a victim and use the world's
 mail servers to flood them. So the receiving domain has to say yes, by publishing a
-record of its own in **your** zone:
+record of its own ([RFC 9990](/rfc/9990/)) in **your** zone:
 
 ```
 clientdomain.example._report._dmarc.agency.example.   TXT   "v=DMARC1"
@@ -69,7 +69,25 @@ reports for any domain.
 > `client2.example._report._dmarc.agency.example` now finds that node, doesn't
 > reach the wildcard, and returns nothing. The client's reports stop arriving, and
 > nothing you changed was theirs. Pick per-client records or the wildcard, and if
-> you need both, publish the explicit ones under a separate label.
+> you need both, use a separate report destination host for the per-client records.
+
+For example, keep the wildcard for `agency.example` and publish the explicit
+record under `per-client.agency.example`:
+
+```
+client1.example._report._dmarc.per-client.agency.example.   TXT   "v=DMARC1"
+```
+
+Change that client's DMARC record to use the same destination host:
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@per-client.agency.example
+```
+
+Configure mail delivery for `per-client.agency.example` so that address reaches
+your reporting inbox. Leaving the client's `rua` pointed at `agency.example`
+would keep it authorised by the wildcard even after you removed the separate
+record. Revoking the separate record takes effect after cached copies expire.
 
 Per-client records are the tidier choice when you want authorisation to be
 revocable per client and visible in your zone; the wildcard is the pragmatic one
