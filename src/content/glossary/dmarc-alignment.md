@@ -40,9 +40,11 @@ comes from.
 
 - **Bulk senders using their own envelope domain.** Marketing platforms send with
   `MAIL FROM` on their infrastructure, so SPF passes for *them* and aligns with
-  nothing. Either of the two fixes works, and the platform has to offer it: a
-  DKIM signature whose `d=` is a subdomain of yours, or a custom return path on a
-  subdomain of yours, which brings SPF into alignment instead.
+  nothing. With relaxed alignment, either of two fixes works if the platform
+  offers it: a DKIM signature whose `d=` is a subdomain of yours, or a custom
+  return path on a subdomain of yours, which brings SPF into alignment instead.
+  If you require strict alignment for the mechanism you use, its authenticated
+  domain must match the `From:` domain exactly.
 - **Google Workspace's default signing key.** Workspace signs everything from the
   start, but until you generate your own key, publish it in DNS *and* start
   authentication, it signs with a key Google owns, whose `d=` is a
@@ -51,7 +53,8 @@ comes from.
   aligns — and the reason it goes unnoticed for months is that every checker
   reports DKIM as working.
 - **Microsoft 365 before custom DKIM**, which signs with the tenant's initial
-  `*.onmicrosoft.com` domain, so mail from your own domain has the same problem.
+  `*.onmicrosoft.com` domain. That signature does not align with your custom
+  `From:` domain; it aligns when `From:` uses the initial tenant domain.
 - **Forwarding and mailing lists**, where SPF breaks and DKIM may or may not
   survive intact. See [ARC](/glossary/arc/) for what that does and doesn't fix.
 
