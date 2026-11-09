@@ -111,24 +111,36 @@ Neither narrows what a review looks at.
    the transition is what buys the review — **do not also comment
    `@coderabbitai review`**, which spends a second one off the same allowance.
 4. **Check that a substantive review arrived.** When CodeRabbit declines on rate
-   limit it posts a *passing* check named `Review rate limited`, on purpose, so
-   it never blocks a merge on a protected branch. A green PR is therefore not
-   evidence that anything was reviewed; read the comments. If no review came,
-   `@coderabbitai review` once is the right move — that is the case the command
-   is for.
+   limit it still reports — as a check named `CodeRabbit` whose conclusion is
+   **neutral**, carrying the title *"Review rate limited"*, plus a warning
+   comment on the PR giving the minutes until the next included review. Neutral
+   does not fail a PR, by design, so it never blocks a merge. A PR with no red
+   check is therefore not evidence anything was reviewed; open the check or read
+   the comment. Once the window has passed, `@coderabbitai review` is the right
+   move — a review that was declined is exactly the case that command is for.
+   This repo is public and draws on CodeRabbit's **free OSS** allowance, which is
+   smaller than the paid one and is the limit we actually hit.
 5. Push fixes normally. They are not automatically re-reviewed. Ask for another
    pass only when a fix changed something a reviewer should actually see, not as
    a routine closing step.
 
+**That the transition fires at all is observed, not assumed.** Marking #148 ready
+produced a CodeRabbit run seven seconds later — rate-limited, but a run. What is
+still unverified is whether it fires once `auto_incremental_review: false` is on
+the base branch: the vendor documents that setting as meaning "only the opening
+push is reviewed automatically", and a draft has no reviewed opening push. Step 4
+is why the workflow checks rather than assumes.
+
 Two things this does **not** do. It does not guarantee one review per pull
-request: the vendor documents the draft→ready transition as the first review
-under its defaults, and separately documents `auto_incremental_review: false` as
-meaning "only the opening push is reviewed automatically" — a draft has no
-reviewed opening push, and which of the two governs the transition is not stated.
-Step 4 is why the workflow checks instead of assuming. And it does not eliminate
-collisions: two PRs marked ready in the same hour still contend for the same
-allowance. It removes the reviews nobody asked for. It does not schedule the ones
-we want.
+request, for the reason above. And it does not eliminate collisions: two PRs
+marked ready in the same hour still contend for the same allowance — which is how
+#148 met the limit on its own first review, the allowance already spent by the
+day's other PRs. It removes the reviews nobody asked for. It does not schedule
+the ones we want.
+
+Note also that CodeRabbit reads `.coderabbit.yaml` **from the base branch**, not
+from your branch. A PR that changes it is reviewed under the old settings; the
+new ones apply to the PR after it.
 
 Merging still deploys to production, and merging is still Michael's call.
 
