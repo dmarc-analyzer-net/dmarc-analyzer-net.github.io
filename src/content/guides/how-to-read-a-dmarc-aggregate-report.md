@@ -23,6 +23,8 @@ published:
 ```xml
 <report_metadata>
   <org_name>google.com</org_name>
+  <email>noreply-dmarc-support@google.com</email>
+  <report_id>...</report_id>
   <date_range><begin>...</begin><end>...</end></date_range>
 </report_metadata>
 <policy_published>
