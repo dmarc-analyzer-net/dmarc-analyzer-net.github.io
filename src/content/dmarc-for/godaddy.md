@@ -18,11 +18,11 @@ Check the product name in your Email & Office Dashboard. GoDaddy's
 give the same default for its two mailbox products; an email security add-on
 can change what you need.
 
-| Email service | SPF `include:` |
+| Email service | SPF record value or `include:` |
 |---|---|
 | **Professional Email**, including powered by Titan | `include:secureserver.net` |
 | **Microsoft 365 from GoDaddy**, without Advanced Email Security | `include:secureserver.net` (GoDaddy's documented default) |
-| **Microsoft 365 from GoDaddy with Advanced Email Security** | Copy the value from your Email & Office Dashboard |
+| **Microsoft 365 from GoDaddy with Advanced Email Security** | Copy the complete SPF record value from your Email & Office Dashboard into the TXT record’s *Value* field |
 | Microsoft 365 bought directly, with GoDaddy as DNS only | `include:spf.protection.outlook.com` |
 | Google Workspace, with GoDaddy as DNS only | `include:_spf.google.com` |
 
