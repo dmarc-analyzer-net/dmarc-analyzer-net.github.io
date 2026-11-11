@@ -33,7 +33,9 @@ for [transactional](/glossary/transactional-email/) and marketing streams.
 For example, publish `marketing._bimi.yourdomain.com` and add
 `BIMI-Selector: v=BIMI1; s=marketing` to those messages. Include that header in
 the message's DMARC-aligned [DKIM](/glossary/dkim/) signature so receivers can
-trust the selection.
+trust the selection. When a provider requires certificates, each distinct logo
+needs a matching certificate. Reusing a certificate for another logo can display
+the original logo or fail validation.
 
 ## BIMI needs DMARC enforcement
 
@@ -44,10 +46,11 @@ does not compensate for an organizational domain still at `p=none`.
 
 Check more than `p=`:
 
-- **`sp=none`** leaves subdomains unenforced. BIMI's authentication rules also
-  reject this setting on the organizational domain, even for mail from the
-  organizational domain itself. Omit `sp=` to inherit `p=`, or set it to
-  `quarantine` or `reject`.
+- **`sp=none`** on the organizational domain leaves subdomains unenforced.
+  BIMI's authentication rules reject this setting on either the organizational
+  domain's record or the `From:` domain's record, including a subdomain record
+  where DMARC itself ignores `sp=`. The check also applies to mail from the
+  organizational domain itself. Omit `sp=`, or set it to `quarantine` or `reject`.
 - **Legacy `pct=` below 100** does not meet the
   [BIMI Group's deployment requirements](https://bimigroup.org/implementation-guide/).
   The current DMARC specification removed `pct`, though deployed receivers
