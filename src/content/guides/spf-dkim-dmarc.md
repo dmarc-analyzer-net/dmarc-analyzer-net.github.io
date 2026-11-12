@@ -122,8 +122,8 @@ November 12, 2026:
 
 **Gmail:** [Google's requirements](https://support.google.com/mail/answer/81126)
 call for SPF, DKIM and DMARC (at least `p=none`), plus alignment for direct mail.
-Marketing and subscribed messages need one-click unsubscribe and a visible body
-link. Keep Postmaster Tools spam rates below 0.3%; valid forward/reverse DNS,
+Marketing and subscribed messages need [one-click unsubscribe](/rfc/8058/) and
+a visible body link. Keep Postmaster Tools spam rates below 0.3%; valid forward/reverse DNS,
 TLS and correctly formatted messages are also required.
 
 Google's [bulk-sender FAQ](https://support.google.com/mail/answer/14229414)
