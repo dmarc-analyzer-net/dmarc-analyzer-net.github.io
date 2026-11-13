@@ -13,10 +13,6 @@ self-hosted** analyzers. The right pick depends less on features — most parse 
 same [aggregate reports](/glossary/dmarc-aggregate-report/) — and more on
 **hosting model, pricing, and who ends up holding your report data**.
 
-> Full disclosure: we build **DMARC Analyzer**, one of the open-source options
-> below. We've kept this list factual and included where each alternative
-> genuinely wins.
-
 ## What to weigh
 
 - **Hosting** — cloud SaaS (fastest to start) vs [self-hosted](/docs/install/) (you [own the data](/docs/data-protection/)).
@@ -87,11 +83,11 @@ server.
 
 Keep every report on your own infrastructure, with no per-domain fees:
 
-- **[parsedmarc](/compare/parsedmarc/)** — the best-known OSS parser; powerful,
-  but you run an Elasticsearch/OpenSearch stack for dashboards.
-- **DMARC Analyzer** — open source and self-hosted, but ships as a single
+- **[DMARC Analyzer](/)** — open source and self-hosted, but ships as a single
   container with dashboards built in and **agency multi-tenancy** — no search
   cluster to operate.
+- **[parsedmarc](/compare/parsedmarc/)** — the best-known OSS parser; powerful,
+  but you run an Elasticsearch/OpenSearch stack for dashboards.
 - Several lighter-weight projects exist too — see our
   [open-source & self-hosted roundup](/compare/open-source-dmarc-analyzer/).
 
