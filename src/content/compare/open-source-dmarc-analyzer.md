@@ -4,16 +4,13 @@ seoTitle: 'Best open-source DMARC analyzers'
 competitor: Open source & self-hosted
 roundup: true
 description: The open-source, self-hosted DMARC analyzers worth knowing — parsedmarc and lighter projects — compared on setup, dashboards, and scale.
-publishDate: 2026-07-23
+publishDate: 2026-11-13
 ---
 
 If you'd rather **not** send your DMARC report data to a vendor's cloud, the
 open-source, self-hosted route keeps everything on your own infrastructure — and
 avoids per-domain pricing entirely. The options split cleanly into "powerful but
 heavy" and "so light it keeps no history."
-
-> Full disclosure: **DMARC Analyzer** (this project) is one of the options
-> below. We've described the others accurately and where they fit best.
 
 ## Why self-host
 
@@ -35,15 +32,15 @@ heavy" and "so light it keeps no history."
 | dmarc-report-converter | Go | A scheduled CLI job — no service to run | Static HTML output, no dashboard | No | No |
 | Other lightweight viewers | Go / PHP | A single small service + SQLite/MySQL | Basic, built in | Usually no | — |
 
-- **[parsedmarc](/compare/parsedmarc/)** — the most established. A flexible parser
-  with rich outputs, but dashboards mean standing up and maintaining a search
-  stack (Elasticsearch/OpenSearch + Kibana/Grafana). Best if you already run one
-  or want a CLI parser for your own pipeline.
-- **DMARC Analyzer** — open source and self-hosted like parsedmarc, but ships as
+- **[DMARC Analyzer](/)** — open source and self-hosted like parsedmarc, but ships as
   a single container with PostgreSQL and dashboards built in, plus per-client
   multi-tenancy for agencies. Turnkey, without a search cluster to babysit. It also
   ships a maintained Helm chart — which none of the named alternatives here do — if
   you would rather run it on Kubernetes than on a single host.
+- **[parsedmarc](/compare/parsedmarc/)** — the most established. A flexible parser
+  with rich outputs, but dashboards mean standing up and maintaining a search
+  stack (Elasticsearch/OpenSearch + Kibana/Grafana). Best if you already run one
+  or want a CLI parser for your own pipeline.
 - **dmarc-report-viewer** — the smallest credible option: a single Rust binary or
   a small container with an IMAP client built in. It also reads SMTP TLS
   (TLS-RPT) reports, as parsedmarc and this project both do. As of July
