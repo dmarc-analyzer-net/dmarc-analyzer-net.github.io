@@ -1,105 +1,123 @@
 ---
 term: BIMI
 seoTitle: "BIMI: your logo in authenticated email"
-description: BIMI (Brand Indicators for Message Identification) displays your brand logo beside authenticated email — but only once your domain is at DMARC enforcement.
+description: BIMI lets supporting inboxes show your brand logo beside authenticated email. Learn the DMARC enforcement, SVG logo and certificate requirements.
 aliases: ["BIMI record", "Brand Indicators for Message Identification"]
 related: ["dmarc", "dmarc-policy", "dkim"]
 ---
 
-**BIMI** (Brand Indicators for Message Identification) is a standard that
-displays your **brand logo** next to your messages in supporting inboxes (Gmail,
-Apple Mail, Yahoo, and others). It's the visible reward for getting email
-authentication right.
+**BIMI** (Brand Indicators for Message Identification) lets supporting inboxes
+display your **brand logo** beside authenticated messages. You publish a DNS
+record pointing to the logo, but DMARC enforcement and the inbox provider's
+requirements determine whether it can appear. Publishing the record does not
+guarantee display.
 
-BIMI is published as a `TXT` record at `default._bimi.yourdomain.com` pointing to
-your logo:
+BIMI is specified in a [working Internet-Draft](https://datatracker.ietf.org/doc/html/draft-brand-indicators-for-message-identification),
+rather than a published RFC.
 
-```
+## The BIMI record
+
+Publish a `TXT` record at `default._bimi.yourdomain.com`:
+
+```text
 v=BIMI1; l=https://yourdomain.com/logo.svg; a=https://yourdomain.com/vmc.pem
 ```
 
-- **`l=`** — an HTTPS URL to your logo, in a specific **SVG Tiny PS** format.
-- **`a=`** — link to a **Verified Mark Certificate (VMC)**, which several
-  providers (notably Gmail) require before showing the logo.
+- **`l=`** — an HTTPS URL to your logo, in **SVG Tiny PS** format.
+- **`a=`** — an HTTPS URL to a certificate PEM file. Gmail accepts a
+  **Verified Mark Certificate (VMC)** or a **Common Mark Certificate (CMC)**;
+  providers that accept self-asserted logos may not require this tag.
 
-`default` is the selector. A message can name a different one with a
-`BIMI-Selector` header, which is how a brand runs distinct logos for, say,
-[transactional](/glossary/transactional-email/) and marketing streams.
+`default` is the selector. A different selector lets a brand use distinct logos
+for [transactional](/glossary/transactional-email/) and marketing streams.
+For example, publish `marketing._bimi.yourdomain.com` and add
+`BIMI-Selector: v=BIMI1; s=marketing` to those messages. Include that header in
+the message's DMARC-aligned [DKIM](/glossary/dkim/) signature so receivers can
+trust the selection. When a provider requires certificates, each distinct logo
+needs a matching certificate. Reusing a certificate for another logo can display
+the original logo or fail validation.
 
-## The catch: BIMI needs DMARC enforcement
+## BIMI needs DMARC enforcement
 
-BIMI only works if your domain is already at **enforcement** — a
-[DMARC](/glossary/dmarc/) [policy](/glossary/dmarc-policy/) of `p=quarantine` or
-`p=reject`, not `p=none`. In other words, BIMI is a reason to *finish* your DMARC
-rollout, not a shortcut around it.
+Your [DMARC policy](/glossary/dmarc-policy/) must be `p=quarantine` or
+`p=reject`, with enforcement on both the organizational domain and the
+domain in the message's `From:` address. A subdomain's own enforcement record
+does not compensate for an organizational domain still at `p=none`.
 
-Two details beyond the policy value itself:
+Check more than `p=`:
 
-- The policy must apply to **all** your mail. A partial rollout via `pct=`
-  disqualifies the domain — and so does `t=y`, the tag that
-  [replaced it](/guides/dmarc-rfc-9989/), since it asks receivers not to apply the
-  policy at all.
-- Check `sp=` as well. A root at `p=reject` with `sp=none` leaves subdomains
-  unenforced, and mail from those subdomains won't qualify.
+- **`sp=none`** on the organizational domain leaves subdomains unenforced.
+  BIMI's authentication rules reject this setting on either the organizational
+  domain's record or the `From:` domain's record, including a subdomain record
+  where DMARC itself ignores `sp=`. The check also applies to mail from the
+  organizational domain itself. Omit `sp=`, or set it to `quarantine` or `reject`.
+- **Legacy `pct=` below 100** does not meet the
+  [BIMI Group's deployment requirements](https://bimigroup.org/implementation-guide/).
+  The current DMARC specification removed `pct`, though deployed receivers
+  still use it; do not leave a partial rollout configured.
+- **`t=y` is test mode**, defined in [RFC 9989](/rfc/9989/).
+  It downgrades `quarantine` to `none` and `reject` to `quarantine`;
+  it does not turn every policy into `none`. Finish testing and remove
+  `t=y` (or use `t=n`) before deploying BIMI. Provider guidance still
+  describes legacy `pct` checks, so do not assume uniform handling of the
+  newer tag.
+
+Before enforcing across many client domains, use **[DMARC Analyzer](/)** to
+identify legitimate sending sources that still fail DMARC in aggregate reports.
+Follow [from monitoring to enforcement](/guides/from-monitoring-to-enforcement/)
+to fix those sources before changing policy.
 
 ## The logo has strict requirements
 
-Not any SVG will do. It must be **SVG Tiny Portable/Secure (SVG Tiny PS)** —
-a deliberately restricted profile with no scripts, no external references, and
-no animation. In practice:
+Use **SVG Tiny Portable/Secure (SVG Tiny PS)**, a restricted SVG profile
+without scripts, external references or animation. Serve the file over HTTPS
+without authentication or access restrictions.
 
-- Square aspect ratio, with a solid (non-transparent) background
-- Centred artwork that stays legible when rendered very small
-- Served over HTTPS
+Use square artwork, keep the logo centered and legible at small sizes, and
+prefer a solid background. These are practical display recommendations;
+a transparent background alone does not make an SVG invalid. Gmail adds
+its own requirements, including a minimum width and height of 96 pixels
+specified in absolute pixels.
 
-Most brand SVGs need converting rather than uploading as-is.
+## VMC or CMC: check the recipient requirements
 
-## VMC: the expensive part
+A **VMC** verifies your organization's rights to the logo and generally
+requires a registered trademark. A **CMC** provides a route for logos without
+trademark registration, subject to the issuer's validation requirements.
 
-A **Verified Mark Certificate** proves the logo is really yours. It's issued by
-a small number of certificate authorities, generally requires a **registered
-trademark**, involves identity verification, and carries an annual cost — this,
-not the DNS record, is what stops most organisations.
+[Gmail accepts either certificate](https://knowledge.workspace.google.com/admin/security/set-up-bimi?hl=en).
+A VMC also enables Gmail's verified checkmark; a CMC does not provide that
+checkmark. Check eligibility and renewal costs with the issuer before buying.
 
-A related **Common Mark Certificate (CMC)** covers marks without trademark
-registration, but provider support differs from VMC support, so check what your
-target inboxes accept before buying either.
+[Apple Mail requires both the sender and the mailbox provider to meet its
+BIMI requirements](https://support.apple.com/en-us/108340). Its documentation
+describes VMCs and other BIMI evidence documents; support in the Mail app
+does not mean every account viewed in that app will show a logo.
+Yahoo can display self-asserted logos without a certificate, subject to its
+own display criteria.
 
-Support varies, and not in the way "Gmail wants a certificate" suggests. **Gmail
-and Apple Mail both require one** — the two inboxes most likely to make the
-investment worth it — while some others, Yahoo among them, will display a
-self-asserted record. So a VMC is closer to the price of entry than an optional
-extra.
+## Check which inboxes support BIMI
 
-## Microsoft doesn't support BIMI at all
+The [BIMI Group's provider list](https://bimigroup.org/bimi-infographic/)
+lists Microsoft as not supporting BIMI (the list is dated May 2025).
+Do not budget for a certificate expecting BIMI logos in Outlook or
+Microsoft 365. Other branding features are separate from BIMI.
 
-Worth knowing before you budget for a certificate, because it is the fact that
-decides the whole question for a lot of senders. Outlook, Outlook.com and
-Microsoft 365 do **not** display BIMI logos — Microsoft is listed among the
-providers that do not support it, not among those considering it.
-
-The providers that do are Apple, Google, Yahoo, Fastmail, Zoho, Comcast, GMX,
-Web.de, Zone, Zoner, LaPoste, OnetPoczta, KDDI, NTT docomo and Cloudmark. Read
-that list against your own recipients: if you mail consumers, it covers most of
-them; if you mail businesses, a large share of your audience is on Microsoft and
-will never see the logo you paid to certify. The record is harmless either way —
-an unsupported inbox ignores it — but the certificate is not free, and this is
-what it does and doesn't buy.
+Supporting providers can still withhold a logo based on reputation or their
+display rules. Match the provider requirements to your actual recipients
+before investing in a certificate.
 
 ## Why the logo isn't showing
 
 | Cause | Check |
 |---|---|
-| Policy still `p=none` | The domain isn't at enforcement |
-| `pct=` below 100, or `t=y` | Partial or test-only enforcement disqualifies the domain |
-| `sp=none` on the root | Subdomain mail isn't enforced |
-| No VMC | Required by Gmail and Apple; some others accept self-asserted |
-| Reader is on Outlook | Microsoft doesn't support BIMI, so there is nothing to show |
-| Logo rejected | Not valid SVG Tiny PS, or not square |
-| Message failed DMARC | BIMI applies only to mail that passes |
+| DMARC enforcement incomplete | Check the organizational domain, the `From:` domain, `sp=`, legacy `pct=` and test mode |
+| Certificate missing or invalid | Gmail requires a VMC or CMC; check the target provider's accepted evidence |
+| Unsupported mailbox or client | Confirm BIMI support for the account and app being used |
+| Logo or certificate cannot be fetched | Check HTTPS, public access and the SVG profile |
+| Message failed authentication | Check its DMARC result; receivers may apply trusted-forwarder exceptions |
+| Everything validates but no logo appears | Provider reputation thresholds, display rules or caching may still prevent it |
 
-The usual answer is the first row. The typical order is: authenticate with SPF
-and [DKIM](/glossary/dkim/) → move DMARC to enforcement → prepare an SVG Tiny PS
-logo (and a VMC if you want Gmail) → publish the BIMI record. Getting to
-enforcement is the real work — see [from monitoring to
-enforcement](/guides/from-monitoring-to-enforcement/).
+Authenticate your sending sources, finish DMARC enforcement, prepare the logo
+and any required certificate, then publish the BIMI record. BIMI adds a display
+signal to authenticated mail; it does not guarantee inbox placement.
