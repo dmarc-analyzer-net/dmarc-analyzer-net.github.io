@@ -119,8 +119,10 @@ Deleting the "unused" one breaks your next rotation.
 ## 3. DMARC
 
 With SPF and DKIM in place, publish a [DMARC](/glossary/dmarc/) `TXT` record at
-`_dmarc.yourdomain.com`, starting in monitoring mode. Edit an existing record
-instead of adding a second one, and create the mailbox named in `rua=`:
+`_dmarc.yourdomain.com`. For a new record, start in monitoring mode as shown
+below. If a record already exists, edit it instead of adding a second one:
+keep its existing policy, including `p=quarantine` or `p=reject`, when adding or
+updating `rua=`. Create the mailbox named in `rua=`:
 
 ```
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
