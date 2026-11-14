@@ -1,7 +1,7 @@
 ---
 title: 'DMARC record tags: every tag and what its default does'
 seoTitle: DMARC record tags and their defaults
-description: A field reference for every DMARC record tag — p, sp, np, pct, rua, ruf, adkim, aspf, fo, ri and rf — with each tag's default and whether you need it.
+description: DMARC record tags and defaults — p, sp, np, rua, ruf, adkim, aspf, fo, t and psd — plus historic pct, ri and rf, and when to use each.
 publishDate: 2026-07-28
 ---
 
@@ -10,32 +10,43 @@ want. That is the useful thing to know before you start adding them: a short rec
 is not an incomplete one, and every tag you publish at its default is a tag you can
 get wrong later.
 
-## Every tag at a glance
+## Current tags at a glance
+
+**DMARC** (Domain-based Message Authentication, Reporting, and Conformance,
+[RFC 9989](/rfc/9989/)) defines these current policy-record tags.
 
 | Tag | What it does | Default if absent | Do you need it? |
 |---|---|---|---|
 | `v` | Marks the record as DMARC | none — required, and must be first | Always |
-| `p` | Policy for the domain itself | none | Always publish it |
+| `p` | Policy for the domain itself | `none` with a valid `rua`; otherwise no DMARC processing | Always publish it explicitly |
 | `sp` | Policy for existing subdomains | inherits `p` | Only to make subdomains *differ* |
-| `np` | Policy for subdomains that don't exist | follows `sp`, or `p` if no `sp` | Optional; useful with parked names |
-| `pct` | Apply the policy to a percentage of failing mail | `100` | As a temporary quarantine ramp only |
-| `rua` | Where aggregate reports go | none — no reports are sent | Yes. This is the point of DMARC |
-| `ruf` | Where per-message failure reports go | none | Almost never |
+| `np` | Policy for non-existent subdomains | follows `sp`, or `p` if no `sp` | Optional; useful with parked names |
+| `rua` | Where aggregate reports go | none — no aggregate reports requested | Yes, to monitor results |
+| `ruf` | Where per-message failure reports go | none — no failure reports requested | Usually leave it off |
 | `adkim` | DKIM alignment mode: relaxed or strict | `r` (relaxed) | Rarely |
 | `aspf` | SPF alignment mode: relaxed or strict | `r` (relaxed) | Rarely |
-| `fo` | When failure reports are generated | `0` | Only alongside `ruf` |
-| `ri` | Requested seconds between aggregate reports | `86400` (a day) | No — advisory |
-| `rf` | Requested failure-report format | `afrf` | No — one value is defined |
-| `t` | Testing mode: apply the policy, or don't | `n` | See `pct` below |
-| `psd` | Declares the name a public suffix domain | `u` (work it out) | No — registry operators only |
+| `fo` | When failure reports are requested | `0` | Only alongside `ruf` |
+| `t` | Test the applicable policy one level below enforcement | `n` — apply the published policy | Only for testing; check receiver support |
+| `psd` | Identifies a public suffix or an organizational-domain boundary | `u` — discover the boundary via DNS | For public suffixes or explicit organizational boundaries |
 
-Anything not in that list is ignored by receivers, which is why a typo is silent
-rather than fatal.
+Unknown tags are ignored. That makes a misspelt tag easy to overlook; errors in
+recognised tags can instead change how the record is processed.
 
-The list is a registry rather than a fixed set: `pct`, `rf` and `ri` are formally
-**historic** as of [RFC 9989](/rfc/9989/), while `np` and `t` are new there.
-Receivers still honour the historic three, so nothing breaks — they are simply
-not what to reach for in a record you are writing today.
+### Historic tags
+
+`pct`, `ri` and `rf` have been removed from the current specification and are
+registered as **historic**. Their defaults below describe the older standard,
+not settings a current receiver must implement.
+
+| Tag | Historic purpose | Historic default | Use in a new record? |
+|---|---|---|---|
+| `pct` | Percentage of failing mail subject to the published policy | `100` | Avoid relying on percentage sampling |
+| `ri` | Requested seconds between aggregate reports | `86400` (a day) | No |
+| `rf` | Requested failure-report format | `afrf` | No |
+
+A receiver using the current specification ignores these as unknown tags. An
+older implementation may still interpret them. Publishing a tag does not prove
+that a receiver supports it.
 
 ## The record you actually want
 
@@ -45,72 +56,119 @@ For most domains, starting out:
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-Three tags. Everything omitted is already at the default in the table above:
-relaxed alignment on both mechanisms, the full mail stream, daily reports, no
-failure reports. The [record generator](/tools/dmarc-generator/) builds records this
-way deliberately — it leaves out every tag you haven't changed.
+Three tags. Relaxed alignment and normal policy application are already the
+defaults. `rua` requests aggregate reports; it does not guarantee that every
+receiver will send them or that they will arrive on an exact daily schedule.
+The [record generator](/tools/dmarc-generator/) can build this starting record.
+
+## `p`: publish the policy explicitly
+
+`p` is recommended rather than required in the current specification. If an
+otherwise valid record omits it, a `rua` containing at least one syntactically
+valid reporting URI lets processing continue as `p=none`. Without such a `rua`,
+the receiver applies no DMARC processing to the message. The same fallback
+applies to an invalid `p`, `sp` or `np` value.
+
+Publish `p=none`, `p=quarantine` or `p=reject` explicitly. That makes your intent
+clear and avoids depending on a fallback that older implementations may not share.
+These policies express your handling preference; receivers retain local control
+over delivery.
 
 ## `sp` and `np`: subdomains
 
-This is the tag pair people get wrong most often, and the mistakes are quiet ones.
-
-**Absent `sp` does not mean "no subdomain policy".** Subdomains inherit `p`. If you
-publish `p=reject` on `yourdomain.com` and nothing else, mail failing DMARC from
-`mail.yourdomain.com` is rejected too. That is usually what you want, and it means
-`sp` is a tag for *exceptions*, not for switching subdomain protection on.
+**Absent `sp` does not mean "no subdomain policy".** When a subdomain inherits
+its organizational domain's record, it inherits `p` unless `sp` or `np` changes
+the applicable policy. With `p=reject` at `yourdomain.com`, an existing
+`mail.yourdomain.com` without its own record inherits that rejection request.
 
 ```
 v=DMARC1; p=reject; sp=quarantine; rua=mailto:dmarc@yourdomain.com
 ```
 
-Two things about it that surprise people:
+This record requests rejection for the domain itself and quarantine for existing
+subdomains that inherit it. `sp=none` would instead request no DMARC enforcement
+for those subdomains, even with `p=reject` on the parent.
 
-- **`sp` is ignored in a record published *on* a subdomain.** It only has meaning on
-  the organizational domain, because that is where a receiver looks it up. Putting
-  `sp=` on `mail.yourdomain.com` does nothing at all.
-- **`sp=none` under an enforcing `p` is a real hole**, not a cautious setting. It
-  publishes "reject forgeries of my domain, and deliver forgeries of every
-  subdomain" — and attackers read DNS.
+A record at the exact domain in the message's `From:` address takes precedence
+and uses its own `p`. Otherwise, the DNS tree walk selects a record at the
+organizational domain, or at the public suffix if appropriate; an intermediate
+record is not automatically the policy for every name beneath it.
 
-`np` covers subdomains that don't resolve at all, which is worth having because
-nobody sends legitimate mail from a name that doesn't exist:
+**A delegated subdomain can be an organizational domain.** For example, publish
+this at `_dmarc.department.yourdomain.com`:
+
+```
+v=DMARC1; p=reject; sp=quarantine; np=reject; psd=n; rua=mailto:dmarc@yourdomain.com
+```
+
+For receivers using the tree walk, `psd=n` makes `department.yourdomain.com` an
+organizational boundary. Its `sp` and `np` then govern inheriting names beneath
+it. Merely delegating DNS does not establish that boundary. A subdomain record
+that is not selected as an organizational-domain or public-suffix policy does
+not pass its `sp` down the tree.
+
+`np` applies to **non-existent subdomains**, meaning a DNS response of `NXDOMAIN`.
+A name without an A or MX record is not necessarily non-existent. For those
+non-existent names, `np` takes precedence over `sp`; if `np` is absent, the
+policy falls back to `sp`, then `p`:
 
 ```
 v=DMARC1; p=quarantine; np=reject; rua=mailto:dmarc@yourdomain.com
 ```
 
-It takes precedence over `sp` for those names, and falls back to `sp` — then `p` —
-when it's absent.
+Older receivers using a public suffix list can identify a different
+organizational domain and may not support `np`. Publish explicit records at
+sending domains when you need a specific policy across implementations.
 
-## `pct`: what it really does, and where it's going
+## `t`: testing the applicable policy
 
-`pct` applies your policy to a share of *failing* messages, which makes it a ramp:
-publish `p=quarantine; pct=25` and roughly a quarter of failing mail is quarantined
-while the rest is delivered normally.
+`t=n` is the default: request the policy specified by the applicable `p`, `sp`
+or `np`. `t=y` requests testing one level below that policy:
 
-The trap is that the unselected mail is **not exempted** — it drops to the next
-weaker policy. Under `quarantine` the next step down is `none`, so the ramp behaves
-as expected. Under `reject` it doesn't: `p=reject; pct=25` rejects a quarter of
-failing mail and *quarantines the other three quarters*. None of it is delivered
-normally, which is not what "25%" suggests to anyone reading it.
+| Applicable policy | With `t=y` |
+|---|---|
+| `reject` | `quarantine` |
+| `quarantine` | `none` |
+| `none` | `none` — unchanged |
 
-It is also on its way out. The current revision of the DMARC specification removes
-`pct` entirely, having found that receivers implemented values other than 0 and 100
-inconsistently enough to be unreliable, and replaces the two values that did work
-with `t=y` (test — apply one level below the stated policy) and `t=n` (the default —
-apply it). Receivers honour `pct` today and will for some time, so a quarantine ramp
-still works, but treat it as a transitional technique rather than part of a record
-you intend to keep. Ramping by *scope* — one subdomain at a time with `sp` — has
-none of these problems. [What changed in the new DMARC
-standard](/guides/dmarc-rfc-9989/) covers this and the rest of the revision.
+```
+v=DMARC1; p=reject; t=y; rua=mailto:dmarc@yourdomain.com
+```
+
+This requests quarantine for failing messages while testing a rejection policy.
+`t` does not change report generation or sample a percentage of messages.
+Receivers may also use special handling associated with test mode.
+
+An older receiver that does not recognise `t` ignores it and sees `p=reject`.
+Do not depend on `t=y` alone to prevent rejection during a rollout; publish
+`p=none` explicitly when you want monitoring without a DMARC enforcement request.
+
+## `pct`: historic percentage sampling
+
+Under the [previous DMARC specification](/rfc/7489/), `pct` selected a share of
+failing messages for the published policy. `p=quarantine; pct=25` requested
+quarantine for roughly a quarter; the rest reverted to normal local handling.
+With `p=reject; pct=25`, the receiver was advised to reject the selected quarter
+and treat the rest as `quarantine`. Neither case guaranteed inbox delivery.
+
+Percentage sampling was removed because implementations handled intermediate
+values inconsistently. `t=y` replaces the testing use of `pct=0`; `t=n` is normal
+policy application. It does not replace a percentage ramp.
+
+**A receiver following the current specification ignores `pct`.** A record with
+`p=reject; pct=25` can therefore request rejection for all failing messages at
+that receiver, while an older receiver may still sample. Do not use `pct` as a
+reliable limit on enforcement. Roll out by scope using explicit records on
+individual sending subdomains. [What changed in the new DMARC
+standard](/guides/dmarc-rfc-9989/) covers the broader transition.
 
 ## `rua` vs `ruf`
 
-Both take a comma-separated list of `mailto:` destinations, and they are not
-variations on a theme:
+Both accept comma-separated reporting URIs. Use `mailto:` destinations for
+email reporting:
 
-- **`rua`** is the aggregate stream: one XML summary per receiver per day, counts
-  and results, no message content. This is the tag that makes DMARC a source of
+- **`rua`** is the aggregate stream: XML summaries of counts and results,
+  usually daily, without message content. This is the tag that makes DMARC a source of
   information rather than a switch. Publish it from day one.
 - **`ruf`** is per-message failure reports. Few receivers send them at all; those
   that do may redact heavily, and what arrives can include message content, so the
@@ -118,8 +176,8 @@ variations on a theme:
   Most domains should leave it off.
 
 `fo` only modifies `ruf` behaviour — with no `ruf`, receivers ignore it. Its values
-are colon-separated: `0` (report when everything fails, the default), `1` (report
-when anything fails, which is what people usually mean), `d` for DKIM failures
+are colon-separated: `0` (request a report when neither mechanism produces an aligned pass, the
+default), `1` (request one when either mechanism fails to produce an aligned pass), `d` for DKIM failures
 regardless of alignment and `s` for SPF ones. `1` and `0` are mutually exclusive.
 
 ### Reporting to a mailbox on another domain
@@ -149,37 +207,49 @@ send from a subdomain of yours. Reach for strict only when you have a specific
 reason to reject subdomain-signed mail, and check your reports first — see
 [alignment](/glossary/dmarc-alignment/) for what the comparison actually is.
 
-## `ri` and `rf`: the two you can ignore
+## `ri` and `rf`: historic reporting preferences
 
-`ri` asks for a reporting interval in seconds. Receivers must support daily and
-*should* support hourly, but anything other than daily is best-effort, and in
-practice you get daily reports whatever you ask for. `rf` names the failure-report
-format, and exactly one format is defined, so the only value it can carry is its
-default. The current revision of the specification drops both.
+`ri` requested a reporting interval in seconds, with a default of `86400`.
+The older specification required support for daily reports and recommended
+hourly reports on request, with non-daily intervals supplied on a best-effort
+basis. It was never a guarantee of hourly delivery. The current specification
+has no `ri` setting; leaving it out avoids an unsupported scheduling request.
 
-## `psd`: not for you, unless you run a registry
+`rf` requested the failure-report format. The older specification defined only
+`afrf`, its default. The current specification removes the tag rather than
+requiring it to select that format. Neither historic tag belongs in a new record.
 
-`psd` declares whether a name is a **public suffix domain** — the level above the
-domains people register, like `co.uk`. It exists for registry and public-suffix
-operators, who publish a policy covering names beneath them. Its default, `u`, means
-"work it out", which is what receivers do for everyone else.
+## `psd`: public suffixes and organizational boundaries
 
-It is in this reference for one reason: if you find `psd=y` on an ordinary company
-domain, it was almost certainly copied from someone else's record, and it changes how
-policy is discovered for every name underneath you. Remove it. Our
-[record checker](/tools/dmarc-checker/) flags it for exactly that case.
+`psd` helps the DNS tree walk identify organizational domains:
+
+- **`y`** declares a public suffix domain, the level above domains registered
+  beneath it. Public-suffix operators must use this value on their policy records.
+- **`n`** declares the publishing domain an organizational domain for itself and
+  its subdomains. This can be useful for delegated departments or customers.
+- **`u`**, the default, leaves organizational-domain discovery to the tree walk.
+
+Most company domains can omit `psd`. Do not copy `psd=y` into an ordinary company
+record: it changes the organizational boundary used for policy discovery and
+alignment. Our [record checker](/tools/dmarc-checker/) flags that case.
+
+Use `psd=n` only when you intend to establish that boundary. Older receivers can
+still use a public suffix list, and the tree walk has a depth limit: for author
+domains longer than eight labels it skips some intermediate names. Publish a
+record at the exact sending domain rather than relying on a deeply nested
+boundary to be found.
 
 ## Tags that don't exist
 
-The failure mode for all of these is silence: the record parses, the setting is
-ignored, and nothing tells you.
+Some mistakes are ignored; others prevent DMARC processing. DNS will still
+publish the TXT record, so check its contents after saving it.
 
 | Mistake | Why it fails |
 |---|---|
 | `v=dmarc1` | The version value is case-sensitive |
 | `p=none; v=DMARC1` | `v` must come first, or the record may be ignored entirely |
-| `rua=dmarc@yourdomain.com` | `rua` takes a URI — the `mailto:` scheme is required |
-| `pct=25%` | An integer, no percent sign |
+| `rua=dmarc@yourdomain.com` | `rua` takes a URI; use `mailto:` for email delivery |
+| `pct=25%` | Historic `pct` took an integer; current receivers ignore the tag |
 | `policy=reject`, `subdomain_policy=none` | Not tag names; unknown tags are ignored |
 | Two DMARC records at `_dmarc` | Ambiguous, so receivers apply no policy at all |
 

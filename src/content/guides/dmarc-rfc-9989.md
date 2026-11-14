@@ -53,25 +53,27 @@ v=DMARC1; p=reject; t=y; rua=mailto:dmarc@yourdomain.com
 the default and means "apply the policy as published". It is the direct successor to
 `pct=0` — the value people used to signal "I am watching, don't act yet".
 
-The honest position on timing: **receivers honour `pct` today and will for a while**, so
-a percentage ramp still works, and it is what most guidance on the internet still
-describes. `t` is where the standard has gone, but `pct` is still being added: of the
-DMARC records first published across the top million domains between August and
-October 2026, one in eight included it
-([three months of measurements](/blog/dmarc-t-tag-three-months/)). Treat a `pct` ramp as a transitional
-technique with an end date rather than part of a record you intend to keep, and if
-you want a gradual move to enforcement without either tag, ramp by *scope* instead —
-one subdomain at a time with `sp`. The
-[monitoring-to-enforcement guide](/guides/from-monitoring-to-enforcement/) walks
-through that.
+**Receiver support can differ.** A receiver following the current specification
+ignores `pct`; an older receiver may still interpret it and may ignore `t`.
+Publishing `p=reject; pct=25` therefore does not reliably limit rejection to a
+quarter of failing messages, and `p=reject; t=y` does not protect against rejection
+by an implementation that ignores `t`.
+
+`pct` still appears in newly published records: of the DMARC records first published
+across the top million domains between August and October 2026, one in eight
+included it ([three months of measurements](/blog/dmarc-t-tag-three-months/)).
+That measures what domain owners publish, not what receivers implement. For a
+gradual rollout, use explicit policies on individual sending subdomains. The
+[monitoring-to-enforcement guide](/guides/from-monitoring-to-enforcement/) covers
+the staged path.
 
 ## What was added
 
 - **`t`**, above.
-- **`psd`**, a flag for registry and public-suffix operators, declaring that a name
-  sits above the organizational domains beneath it. If you run a company domain this
-  tag is not for you, and finding it in your record almost always means it was copied
-  from someone else's.
+- **`psd`**, a flag for organizational boundaries: `y` declares a public suffix,
+  while `n` declares the publishing domain an organizational domain for itself and
+  its subdomains. Most company domains can omit it; delegated subdomains can use
+  `psd=n` to establish their own boundary.
 - **`np`** is now part of the core standard. It sets a policy for subdomains that
   don't resolve at all, and it previously lived in a separate experimental document.
   Worth publishing: nobody sends legitimate mail from a name that doesn't exist.
@@ -93,10 +95,10 @@ RFC 9989 replaces that with a **DNS tree walk**. A receiver queries `_dmarc` at 
 domain in the `From:` header; if there is no valid record there, it walks up the tree
 looking for one. The practical consequences:
 
-- **The walk queries every name on the way up**, so records published at more than one
-  level are all seen. The policy applied is still the one at the author domain or at
-  the organizational domain, so an intermediate record is passed over rather than
-  obeyed.
+- **The walk can discover records at several levels.** It is bounded: for author
+  domains longer than eight labels, some intermediate names are skipped. Policy
+  discovery prefers a record at the author domain, then its organizational domain,
+  then its public suffix. An intermediate record is not automatically inherited.
 - **A delegated subdomain can declare itself an organizational domain**, by publishing
   `psd=n`. That is what makes its own `sp` and `np` govern the names beneath it, and
   it is what large organisations devolving DNS to departments or customers were
@@ -139,14 +141,14 @@ comes with mixing it with per-client ones.
 Three checks, and then get on with your day:
 
 1. **Look for a sub-100 `pct`** in any record you meant to finish ramping. That is the
-   one finding here with live consequences — a forgotten `pct=25` means three quarters
-   of failing mail is being treated more softly than you think. Our
+   one finding here with live consequences — a forgotten `pct=25` can produce different
+   enforcement at receivers that sample and those that ignore it. Our
    [record checker](/tools/dmarc-checker/) flags it.
 2. **Drop `ri` and `rf`** if you find them. They do nothing, they never did much, and
    they now name tags that are not in the specification.
 3. **If you have delegated subdomains**, check which of them publish DMARC records,
-   since the tree walk makes them discoverable where the old public-suffix approach
-   might not have.
+   and whether any declare an organizational boundary with `psd=n`. The tree walk
+   and the older public-suffix approach can select different organizational domains.
 
 Nothing here requires a rushed change. The value of knowing it is that the next time
 you read guidance recommending `pct`, or a tool tells you `t=y` is an unrecognised tag,
