@@ -74,9 +74,9 @@ the staged path.
   while `n` declares the publishing domain an organizational domain for itself and
   its subdomains. Most company domains can omit it; delegated subdomains can use
   `psd=n` to establish their own boundary.
-- **`np`** is now part of the core standard. It sets a policy for subdomains that
-  don't resolve at all, and it previously lived in a separate experimental document.
-  Worth publishing: nobody sends legitimate mail from a name that doesn't exist.
+- **`np`** is now part of the core standard. It sets a policy for non-existent
+  subdomains (`NXDOMAIN`), and previously lived in a separate experimental document.
+  Missing A or MX records alone do not make a domain non-existent.
 
 Every tag with its default is on the [DMARC record tags](/guides/dmarc-record-tags/)
 page, which is the reference to keep open.
@@ -115,7 +115,8 @@ and what happens without it is more specific than "it breaks":
 
 - **With a valid `rua`**, receivers treat the record as `p=none` and carry on, so you
   get reports and no enforcement.
-- **Without a `rua`**, receivers apply no DMARC processing to the message at all.
+- **Without a syntactically valid reporting URI in `rua`**, receivers apply no
+  DMARC processing to the message at all.
 
 Publish `p` explicitly regardless — relying on a default that used to be an error is a
 poor bet — but if you inherit a record with no policy, that is what it is doing.

@@ -176,9 +176,10 @@ email reporting:
   Most domains should leave it off.
 
 `fo` only modifies `ruf` behaviour — with no `ruf`, receivers ignore it. Its values
-are colon-separated: `0` (request a report when neither mechanism produces an aligned pass, the
-default), `1` (request one when either mechanism fails to produce an aligned pass), `d` for DKIM failures
-regardless of alignment and `s` for SPF ones. `1` and `0` are mutually exclusive.
+are colon-separated: `0` (request a report when neither mechanism produces an
+aligned pass, the default), `1` (request one when either mechanism fails to
+produce an aligned pass), `d` for DKIM failures regardless of alignment and `s`
+for SPF ones. `1` and `0` are mutually exclusive.
 
 ### Reporting to a mailbox on another domain
 
@@ -239,7 +240,7 @@ domains longer than eight labels it skips some intermediate names. Publish a
 record at the exact sending domain rather than relying on a deeply nested
 boundary to be found.
 
-## Tags that don't exist
+## Tag mistakes to check
 
 Some mistakes are ignored; others prevent DMARC processing. DNS will still
 publish the TXT record, so check its contents after saving it.
