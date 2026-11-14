@@ -41,7 +41,9 @@ they observed:
 `begin` and `end` are Unix timestamps in seconds, in UTC: this example covers
 November 13, 2026. They describe the reporting window, not the first and last
 message. `<count>` values later in the report belong to that window. Use the
-reporter and report ID to spot duplicate submissions before adding volumes.
+reporter, report ID and policy domain to spot duplicate submissions before
+adding volumes. Reports for different policy domains are distinct, even when
+the reporter and report ID match; do not discard them as duplicates.
 
 `<policy_published><domain>` is the domain where the policy was found. It can
 differ from a row's `header_from` when a subdomain inherits policy. Here,
