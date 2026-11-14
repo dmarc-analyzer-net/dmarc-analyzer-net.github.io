@@ -4,7 +4,8 @@ seoTitle: 'Best open-source DMARC analyzers'
 competitor: Open source & self-hosted
 roundup: true
 description: The open-source, self-hosted DMARC analyzers worth knowing — parsedmarc and lighter projects — compared on setup, dashboards, and scale.
-publishDate: 2026-11-13
+publishDate: 2026-07-23
+updatedDate: 2026-11-13
 ---
 
 If you'd rather **not** send your DMARC report data to a vendor's cloud, the
