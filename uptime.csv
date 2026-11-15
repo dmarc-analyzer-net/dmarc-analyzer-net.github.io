@@ -75,3 +75,5 @@ timestamp_utc,target,ok,http_code,remote_ip,time_namelookup,time_connect,time_ap
 2026-11-15T07:45:03Z,https://dmarc-analyzer.net/guides/spf-record-syntax/,1,200,185.199.111.153,0.000793,0.019079,0.040951,0.082636,0.098886,49659,1,
 2026-11-15T14:59:34Z,https://dmarc-analyzer.net/,1,200,185.199.108.153,0.052913,0.054469,0.063365,0.161002,0.162375,71471,1,
 2026-11-15T14:59:34Z,https://dmarc-analyzer.net/guides/spf-record-syntax/,1,200,185.199.108.153,0.000851,0.001860,0.010258,0.108294,0.109354,49659,1,
+2026-11-15T20:18:40Z,https://dmarc-analyzer.net/,1,200,185.199.110.153,0.040789,0.042476,0.054889,0.088509,0.090320,71471,1,
+2026-11-15T20:18:40Z,https://dmarc-analyzer.net/guides/spf-record-syntax/,1,200,185.199.110.153,0.000860,0.002498,0.012277,0.046729,0.048485,49659,1,
