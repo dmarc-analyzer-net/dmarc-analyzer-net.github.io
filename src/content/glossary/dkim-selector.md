@@ -1,58 +1,73 @@
 ---
 term: DKIM selector
 seoTitle: "DKIM selector: how receivers find the key"
-description: A DKIM selector is the label that points to a specific DKIM public key in DNS, letting a domain publish and rotate multiple signing keys at once.
+description: A DKIM selector identifies a public key under the signing domain in DNS. Learn how s= and d= locate the key, support rotation, and differ from alignment.
 aliases: ["DKIM selectors", "selector"]
 related: ["dkim", "dmarc", "spf"]
 ---
 
-A **DKIM selector** is the label that identifies *which* [DKIM](/glossary/dkim/)
-public key a receiver should use to verify a message. It lets one domain publish
-several keys — for different providers or for rotation — without them colliding.
+A **DKIM selector** is the name that identifies which [DKIM](/glossary/dkim/)
+public key a receiver should use to verify a signature. Defined in
+[RFC 6376](/rfc/6376/), it lets one signing domain publish separate keys for
+different services or for rotation.
 
-The selector appears in two places. In DNS, the key lives at:
+## How the receiver finds the key
 
-```
-<selector>._domainkey.yourdomain.com
-```
+Each `DKIM-Signature` header supplies the selector in `s=` and the signing domain
+in `d=`. The receiver queries for a TXT record at:
 
-and in every signed message's `DKIM-Signature` header as the `s=` tag:
-
-```
-DKIM-Signature: v=1; a=rsa-sha256; d=yourdomain.com; s=google; ...
+```text
+<selector>._domainkey.<signing-domain>
 ```
 
-Here the selector is `google`, so the receiver fetches the key from
-`google._domainkey.yourdomain.com`.
+For example, these tags from a signature:
 
-## Why selectors exist
+```text
+d=yourdomain.com; s=mail2026;
+```
 
-Without them a domain could publish only one DKIM key, and every service sending
-on its behalf would have to share the private half — which no provider will do.
-The selector turns a single domain into a namespace: your mailbox provider, your
-marketing platform and your helpdesk each publish a key under their own label,
-and each names its own label in `s=` when it signs.
+give the lookup name `mail2026._domainkey.yourdomain.com`. These are only two
+tags, not a complete signature. The signing domain determines the lookup
+location even when it differs from the visible `From:` domain.
 
-The same mechanism makes rotation possible without downtime. A new key goes up
-under a new selector, signing switches to it, and the old one stays published
-until the last message signed with it has been delivered.
+## Separate keys and rotation
 
-## The two halves of a signature
+Separate selectors let your mailbox service and marketing service sign for the
+same domain with different private keys. They do not need to share one private
+key.
 
-A selector only says which key to fetch. It says nothing about *whose* domain
-took responsibility — that is the `d=` tag beside it. Both matter, and for
-different reasons: `s=` has to resolve for the signature to verify at all, and
-`d=` has to [align](/glossary/dmarc-alignment/) with the `From:` domain for a
-verified signature to satisfy [DMARC](/glossary/dmarc/). A `dkim=pass` under your
-provider's `d=` rather than your own is the classic near-miss.
+For routine rotation, publish a new key under a new selector before switching
+signing to it. Allow for DNS caching, then keep the old public key available
+while messages carrying its signatures may still need verification. Removing
+it too soon can break verification of mail already in transit.
 
-## Not enumerable
+## A selector does not establish alignment
 
-A selector is an ordinary DNS label with no reserved format — `google`, `s1`,
-`selector2` and `20240115` are all valid — and `_domainkey` is not a listable
-zone. You can only look up a selector you already know, which is why tools that
-check whether DKIM is configured have to guess from a list of common names.
+The selector locates a key; `d=` identifies the domain taking responsibility
+for the signature. For a DKIM pass to satisfy [DMARC](/glossary/dmarc/)
+([RFC 9989](/rfc/9989/)), that signing domain must
+[align](/glossary/dmarc-alignment/) with the visible `From:` domain. Relaxed
+alignment accepts the same organizational domain; strict alignment requires an
+exact match.
 
-**See:** [how to find your DKIM selector](/guides/find-your-dkim-selector/) for
-the practical steps, the selectors each provider uses, and what to do when one
-does not resolve.
+A message can have several signatures. One passing, aligned signature is enough
+for DMARC to pass, even if another signature fails or uses an unaligned domain.
+Aligned SPF can also produce a DMARC pass.
+
+When you monitor many sending services, [DMARC Analyzer](/) puts raw DKIM
+results and the DMARC verdict beside each source, so you can distinguish a
+key-verification problem from an alignment problem.
+
+## Selector names and discovery
+
+Selectors can contain several DNS labels separated by dots: `mail2026` and
+`mail2026.eu` are both valid. A selector does not have to identify a provider
+or encode a date.
+
+DKIM defines no query that lists every selector for a domain. A checker that
+tries common names can miss a custom selector; an unsuccessful guess does not
+prove DKIM is absent. A signed message or the sending service's settings gives
+you the selector to query.
+
+For the practical steps, use [how to find your DKIM
+selector](/guides/find-your-dkim-selector/).
