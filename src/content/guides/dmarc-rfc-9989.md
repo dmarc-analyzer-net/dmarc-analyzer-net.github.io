@@ -3,6 +3,7 @@ title: What changed in the new DMARC standard (RFC 9989)
 seoTitle: What changed in DMARC RFC 9989
 description: DMARC has a new specification. What RFC 9989 changed — pct, ri and rf removed, t and psd added, the tree walk replacing the public suffix list — and what to do.
 publishDate: 2026-07-28
+updatedDate: 2026-11-14
 ---
 
 **DMARC has a new specification.** [RFC 9989](/rfc/9989/) replaced

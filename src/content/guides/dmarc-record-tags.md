@@ -3,6 +3,7 @@ title: 'DMARC record tags: every tag and what its default does'
 seoTitle: DMARC record tags and their defaults
 description: DMARC record tags and defaults — p, sp, np, rua, ruf, adkim, aspf, fo, t and psd — plus historic pct, ri and rf, and when to use each.
 publishDate: 2026-07-28
+updatedDate: 2026-11-14
 ---
 
 **A DMARC record is a list of tags**, and most of them already have the default you
