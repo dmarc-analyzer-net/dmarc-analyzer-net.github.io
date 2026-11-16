@@ -54,8 +54,9 @@ v=DMARC1; p=reject; sp=quarantine; np=reject; rua=mailto:dmarc@yourdomain.com
 
 This requests rejection for failing mail using `yourdomain.com`, quarantine for
 existing subdomains inheriting the record, and rejection for non-existent
-subdomains. Verify legitimate sending names before using `np=reject`: a
-misconfigured sender can use a non-existent name too.
+subdomains. Receivers without `np=` support ignore it and use `sp=quarantine`
+for those non-existent subdomains instead. Verify legitimate sending names
+before using `np=reject`: a misconfigured sender can use a non-existent name too.
 
 ## Testing and the legacy pct tag
 
@@ -75,7 +76,8 @@ Do not rely on `pct=25` to enforce exactly a quarter of failing mail. See the
 Review all known sending services and important forwarding and mailing-list
 routes before tightening policy. `p=reject` can disrupt legitimate indirect mail;
 it is not a universal destination for every sending domain. Domains using it must
-sign their mail with valid DKIM signatures rather than rely only on SPF.
+sign their mail with valid DKIM signatures whose signing domain aligns with
+the visible `From:` domain, rather than rely only on SPF.
 
 When you manage several domains, [DMARC Analyzer](/) groups their aggregate
 reports in one self-hosted dashboard so you can investigate failing sources
