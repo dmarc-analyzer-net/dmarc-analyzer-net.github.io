@@ -100,8 +100,9 @@ and shows the record it actually found:
   automatically, typing the full name creates
   `_dmarc.yourdomain.com.yourdomain.com` — see [no DMARC record
   found](/guides/no-dmarc-record-found/).
-- **Two DMARC records exist.** Duplicates are treated as no policy at all, so an
-  old `p=none` alongside your new `p=reject` leaves you unenforced.
+- **Two DMARC records exist.** Receivers discard both at that DNS name instead
+  of choosing your new `p=reject`. A subdomain can still inherit an applicable
+  organizational-domain policy; fix duplicates by editing one existing record.
 - **A subdomain has its own weaker policy** — or none, in which case it follows the
   root's `sp=` if the subdomain exists and the root's `np=` if it doesn't. Watch
   the order when the tag that applies isn't published: an existing subdomain falls

@@ -181,7 +181,7 @@ ignored, and nothing tells you.
 | `rua=dmarc@yourdomain.com` | `rua` takes a URI — the `mailto:` scheme is required |
 | `pct=25%` | An integer, no percent sign |
 | `policy=reject`, `subdomain_policy=none` | Not tag names; unknown tags are ignored |
-| Two DMARC records at `_dmarc` | Ambiguous, so receivers apply no policy at all |
+| Two DMARC records at the same DNS name | Both are discarded there; a subdomain can still inherit an applicable organizational-domain policy |
 
 ## Reading the tags a receiver actually saw
 

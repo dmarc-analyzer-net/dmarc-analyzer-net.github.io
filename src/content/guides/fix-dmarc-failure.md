@@ -51,7 +51,8 @@ makes the SPF-alignment problem moot.
 
 If a legitimate service (CRM, help desk, invoicing tool, newsletter) sends as
 your domain but you never set it up for authentication, it will fail. Every such
-source shows up in your [aggregate reports](/glossary/dmarc-aggregate-report/).
+source can appear in your [aggregate reports](/glossary/dmarc-aggregate-report/)
+when a participating receiver observes its mail.
 
 **Fix:** for each real source, add its SPF `include:` and publish its DKIM key
 (most providers give you a selector and a CNAME/TXT to add). Then confirm it
@@ -144,8 +145,8 @@ them specifically; the [tag reference](/guides/dmarc-record-tags/) has both.
 ## How to diagnose which one it is
 
 Don't guess — the answer is in the data. DMARC
-[aggregate reports](/glossary/dmarc-aggregate-report/) list every source sending
-as your domain and show, per source, whether SPF and DKIM **authenticated** and
+[aggregate reports](/glossary/dmarc-aggregate-report/) list the sources observed
+by reporting receivers and show, per source, whether SPF and DKIM **authenticated** and
 whether they **aligned**. Read the DKIM column first: one aligned pass is the
 whole test, so a source whose SPF passes unaligned beside an aligned DKIM
 signature is not failing and is not a cause. For the sources that did fail, that
