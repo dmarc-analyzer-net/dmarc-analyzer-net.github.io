@@ -102,7 +102,8 @@ and shows the record it actually found:
   found](/guides/no-dmarc-record-found/).
 - **Two DMARC records exist.** Receivers discard both at that DNS name instead
   of choosing your new `p=reject`. A subdomain can still inherit an applicable
-  organizational-domain policy; fix duplicates by editing one existing record.
+  organizational-domain policy. Combine the required settings into one DMARC
+  record and delete the extra record.
 - **A subdomain has its own weaker policy** — or none, in which case it follows the
   root's `sp=` if the subdomain exists and the root's `np=` if it doesn't. Watch
   the order when the tag that applies isn't published: an existing subdomain falls
