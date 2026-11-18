@@ -120,8 +120,8 @@ longer yours. So SRS is not a fix for DMARC either; it just moves the failure on
 step along.
 
 Some forwarders also modify the message — a footer, a rewritten subject — which
-**breaks DKIM** on top. Either way the result is a DMARC failure for mail you did
-legitimately send.
+**can break DKIM** when it changes signed content. Forwarded mail fails DMARC
+when neither SPF nor any DKIM signature still passes with alignment.
 
 **Fix:** there's no perfect fix, but aligned DKIM survives forwarding that doesn't
 modify the message, and [ARC](/glossary/arc/) lets participating receivers honor a
