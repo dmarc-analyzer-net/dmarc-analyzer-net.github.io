@@ -33,7 +33,7 @@ const schema = {
           { label: 'SPF record checker', href: path },
         ]} />
         <h1 style="font-family:'Space Grotesk',sans-serif; font-size:42px; line-height:1.08; letter-spacing:-0.03em; font-weight:600; margin:20px 0 14px; max-width:720px;">SPF record checker</h1>
-        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Expands every <code class="mono">include:</code> and counts your DNS lookups against the limit of 10. Cross it and SPF stops working — with no bounce, no warning, and a record that still looks correct.</p>
+        <p style="font-size:var(--text-lg); line-height:1.5; color:var(--gray-700); margin:0; max-width:640px;">Expands every <code class="mono">include:</code> and counts your DNS lookups against the limit of 10. Cross it and SPF returns a permanent error, even when the record looks correct. Receivers may reject affected mail.</p>
       </div>
     </section>
 
@@ -75,10 +75,10 @@ const schema = {
         </p>
         <p>
           Cross the limit and the result is <code>permerror</code>. Receivers
-          treat that as "SPF did not pass", so mail that authenticated perfectly
-          well yesterday starts failing — and nothing tells you. No bounce
-          mentions it. Your DNS is valid. The record looks exactly as it did when
-          it worked. This is the single most common way a working SPF setup dies.
+          treat that as "SPF did not pass", so mail that authenticated yesterday can stop passing SPF. A receiver
+          may reject affected mail and report the error during delivery; do not
+          assume there will be no bounce. The record can still look correct
+          even though evaluation exceeds the limit.
         </p>
 
         <h3>How this tool counts</h3>
@@ -123,8 +123,8 @@ const schema = {
         <h2>SPF alone does not stop spoofing</h2>
         <p>
           SPF authorises <em>servers</em>, not the address a reader sees. It
-          checks the envelope sender, which nobody looks at, and it survives
-          neither forwarding nor mailing lists. That is why
+          checks the envelope sender, which nobody looks at, and plain forwarding can break it
+          when the envelope sender is preserved but the connecting IP changes. That is why
           <a href="/glossary/dmarc/">DMARC</a> exists: it requires the
           SPF-authenticated domain to
           <a href="/glossary/dmarc-alignment/">align</a> with the visible
@@ -359,7 +359,7 @@ const schema = {
       out.push({
         level: 'bad',
         title: `${total} DNS lookups — over the limit of ${LOOKUP_LIMIT}`,
-        detail: 'Receivers stop evaluating and return permerror, which counts as "SPF did not pass". Mail that authenticated yesterday can start failing, and nothing bounces to tell you.',
+        detail: 'Receivers stop evaluating and return permerror, which counts as "SPF did not pass". Mail that authenticated yesterday can stop passing SPF, and receivers may reject it with a delivery error.',
         link: { href: '/guides/spf-record-syntax/', label: 'How to get back under' },
       });
     } else if (total >= LOOKUP_LIMIT - 1) {

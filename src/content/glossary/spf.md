@@ -1,57 +1,83 @@
 ---
 term: SPF
 seoTitle: "SPF (Sender Policy Framework)"
-description: SPF is a DNS record listing which servers are allowed to send mail for your domain, so receivers can reject forgeries from everywhere else.
+description: SPF checks whether a sending server may use the envelope sender's domain. Learn its DNS record, results, lookup limit and role in DMARC.
 aliases: ["Sender Policy Framework"]
 related: ["dkim", "dmarc", "dmarc-alignment"]
 ---
 
-**SPF** (Sender Policy Framework, [RFC 7208](/rfc/7208/)) is a `TXT` record that lists the servers
-authorised to send mail for your domain. A receiving server checks the
-connecting server's IP against that list and marks the message as an SPF pass or
-fail.
+**SPF** (Sender Policy Framework, [RFC 7208](/rfc/7208/)) lets a domain publish
+a DNS `TXT` record authorising sending servers. The receiver checks the connecting
+server's IP against the record for the SMTP envelope sender's domain, rather than
+the visible `From:` address. SPF can also check the `HELO`/`EHLO` domain; that
+identity is used when the envelope sender is empty, as on delivery-status messages.
+
+## What an SPF record means
+
+This illustrative record authorises one documentation IP and a fictional mail
+provider's senders:
 
 ```
-v=spf1 include:_spf.google.com include:sendgrid.net -all
+v=spf1 ip4:192.0.2.10 include:_spf.sender.example -all
 ```
 
-- `include:` pulls in another sender's authorised ranges (your ESP, for example).
-- `-all` means "reject everything not listed"; `~all` is a softer "mark as suspicious".
+- `ip4:` authorises an IPv4 address or range; `ip6:` does the same for IPv6.
+- `include:` evaluates another domain's SPF record. A pass there makes this
+  mechanism match; it does not import the other domain's final policy.
+- `-all` returns **fail** for every remaining IP: the domain says it is not
+  authorised. Rejection is the receiver's decision, not a command in the record.
+- `~all` returns **softfail**, a weaker statement of non-authorisation. Receivers
+  should not reject solely on that result, but it is still not a pass.
 
-SPF alone is easy to bypass, because it checks the hidden envelope sender, not
-the `From:` address a person sees. That gap is why
-[DMARC](/glossary/dmarc/) adds [alignment](/glossary/dmarc-alignment/) and pairs
-SPF with [DKIM](/glossary/dkim/). It also breaks on plain forwarding, where the
-forwarder relays your mail from an address that was never in your record.
+SPF also has **neutral** (no assertion), **none** (no applicable record),
+**temperror** (a temporary evaluation problem) and **permerror** (a record or
+evaluation problem requiring correction). A pass authorises use of the checked
+domain; it does not prove the message is safe or guarantee delivery.
+
+## Why SPF alone does not protect the visible From address
+
+An attacker can pass SPF for a domain they control while putting your domain in
+the visible `From:` address. [DMARC](/glossary/dmarc/) closes that gap by requiring
+a passing SPF result for an [aligned domain](/glossary/dmarc-alignment/), or a
+passing, aligned [DKIM](/glossary/dkim/) signature. An SPF error alone therefore
+does not establish a DMARC failure: aligned DKIM can still satisfy DMARC.
+
+Plain forwarding often breaks SPF because the receiver sees the forwarder's IP,
+while the original envelope sender stays the same. Rewriting the envelope sender
+can make SPF pass for the forwarder, but that domain may not align with the
+original visible `From:` domain. A surviving aligned DKIM signature can still pass
+DMARC on forwarded mail.
 
 ## The 10-lookup limit
 
-A record may cause at most **10** DNS lookups while it is being evaluated. Exceed
-it and the result is `permerror`, which counts as an SPF failure — and it happens
-silently, because nothing bounces and the record still looks perfectly valid.
+SPF evaluation has a limit of **10 DNS-querying terms**, including those reached
+through nested includes and redirects. It is not simply a count of TXT records or
+DNS packets. Evaluation stops at the first matching mechanism, so different
+sending IPs can reach different parts of the same record.
 
-Six terms count toward the limit, not just `include:`:
-
-| Counts | Doesn't count |
+| Counts toward the term limit | Does not count toward the term limit |
 |---|---|
 | `include:`, `a`, `mx`, `ptr`, `exists:`, `redirect=` | `ip4:`, `ip6:`, `all`, `exp=` |
 
-Two things catch people out here, because a term count of 1 looks safe. Every MX
-or PTR record returned counts against that same ten, so a domain with a dozen MX
-hosts `permerror`s on a single `mx` term. Underneath that sits a separate cap:
-resolving any one of those hosts must not require more than 10 address records.
+Exceeding the limit returns `permerror`, not `fail`. Neither is an SPF pass.
+Receivers can reject mail on a permanent error, so do not assume it will fail
+silently. Additional limits apply to MX/PTR processing and empty DNS answers;
+ten top-level terms are not a guarantee that evaluation will succeed.
 
-The practical consequence is that `ip4:`/`ip6:` ranges are free while every
-`include:` you add is not, so the fix for a record at the limit is to replace
-includes with the address ranges behind them, or to drop senders you no longer
-use. The [SPF record checker](/tools/spf-checker/) expands every include
-recursively and gives you the real count.
+Remove unused senders and unnecessary `a` or `mx` terms before replacing provider
+includes with fixed IP ranges. That replacement, called flattening, makes you
+responsible for tracking the provider's IP changes. The
+[SPF record checker](/tools/spf-checker/) helps inspect nested includes; the
+[SPF syntax guide](/guides/spf-record-syntax/) covers the individual mechanisms.
 
-## One record per domain, not one per sender
+## One record per DNS name
 
-A domain may publish only **one** `v=spf1` TXT record. Adding a second one for
-a new sender — a common result of onboarding a new mail platform without
-touching the existing record — leaves two SPF records at the same name, and
-receivers `permerror` that exactly as they would a record over the lookup
-limit. The fix is a single record combining every sender with `include:`, not
-a second one alongside the first.
+Publish at most **one** `v=spf1` TXT record at each name. Two applicable SPF
+records produce `permerror`; combine authorised senders in one record instead.
+Unrelated TXT records can coexist with it. A subdomain needs its own SPF record
+if it sends mail: SPF does not inherit the parent domain's record.
+
+Across many client domains, [DMARC Analyzer](/) groups incoming reports in one
+self-hosted console. Its [domain detail view](/docs/domain-detail/) separates
+raw SPF results from DMARC evaluation, helping you distinguish authentication
+errors from alignment problems in the mail receivers report.
