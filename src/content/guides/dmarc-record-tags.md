@@ -253,7 +253,7 @@ publish the TXT record, so check its contents after saving it.
 | `rua=dmarc@yourdomain.com` | `rua` takes a URI; use `mailto:` for email delivery |
 | `pct=25%` | Historic `pct` took an integer; current receivers ignore the tag |
 | `policy=reject`, `subdomain_policy=none` | Not tag names; unknown tags are ignored |
-| Two DMARC records at `_dmarc` | Ambiguous, so receivers apply no policy at all |
+| Two DMARC records at the same DNS name | Both are discarded there; a subdomain can still inherit an applicable organizational-domain policy |
 
 ## Reading the tags a receiver actually saw
 
