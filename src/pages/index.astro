@@ -69,16 +69,16 @@ const appSchema = {
 // Rendered below *and* emitted as FAQPage JSON-LD by <Faq>, from this one array.
 const FAQS: FaqItem[] = [
   {
-    q: 'What is DMARC, in one sentence?',
-    a: "DMARC is an email standard that lets a domain owner tell receiving servers what to do with mail that fails authentication — monitor it, quarantine it, or reject it — and get reports on who is sending as their domain. It's how you stop others from spoofing your clients' brands.",
+    q: 'What does DMARC do?',
+    a: "DMARC checks whether SPF or DKIM passes for a domain aligned with the visible From address. You can request reports and ask receivers to quarantine or reject failures; receivers decide how to handle them. Its scope is the domain in the From address.",
   },
   {
     q: 'Why run it myself instead of a hosted tool?',
-    a: 'Cost and control. Hosted platforms bill per domain and per message, so an agency with dozens of clients pays the most. Self-hosting removes that ceiling, keeps sensitive report data on your own infrastructure, and lets you customise the tool to your workflow.',
+    a: 'Cost and control. DMARC Analyzer has no per-domain or per-message licence fees. You choose where report data is stored and can customise the code to your workflow. You also operate the service, including updates, backups and access control.',
   },
   {
     q: 'How many domains can it handle?',
-    a: 'There is no built-in limit. Domains are grouped by client, and the background worker scales with your database — the same install comfortably serves a handful of domains or several hundred across many clients.',
+    a: 'There is no built-in domain-count limit. Group domains by client in one instance; capacity depends on report volume, retention and the resources you provide, so size and monitor the deployment for your workload.',
   },
   {
     q: 'What do I need to run it?',
@@ -104,7 +104,7 @@ const FAQS: FaqItem[] = [
             <span style="font-size:12.5px; font-weight:500; color:var(--brand);">Open source · Apache-2.0 · Self-hosted</span>
           </div>
           <h1 style="font-size:58px; line-height:1.03; letter-spacing:-0.03em; font-weight:600; margin:0 0 22px; max-width:860px;">Open-source DMARC monitoring for agencies running <span style="color:var(--brand);">many domains</span>.</h1>
-          <p style="font-size:var(--text-lead); line-height:1.5; color:var(--gray-700); margin:0 0 34px; max-width:640px;">See every client's email authentication in one place. Ingest DMARC reports, spot spoofing and misconfiguration, and move each domain to full enforcement — on an open-source analyzer you host yourself, without paying per-domain for a closed platform.</p>
+          <p style="font-size:var(--text-lead); line-height:1.5; color:var(--gray-700); margin:0 0 34px; max-width:640px;">Review your clients' reported email authentication in one place. Ingest DMARC reports, spot spoofing and misconfiguration, and work toward enforcement with open-source DMARC monitoring you host yourself, without per-domain licence fees.</p>
           <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px;">
             <a class="btn-primary" href="#quickstart" style="display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 20px; border-radius:var(--radius-md); background:var(--brand); color:var(--teal-50) !important; font-size:var(--text-md); font-weight:600;">
               <Icon name="rocket" style="font-size:17px;" /> Get started
@@ -132,7 +132,7 @@ const FAQS: FaqItem[] = [
 
       <!-- DASHBOARD MOCKUP -->
       <section style="max-width:1160px; margin:0 auto; padding:24px 32px 40px;">
-        <BrowserFrame url="app.dmarc-analyzer.net / overview">
+        <BrowserFrame url="Example workspace / overview">
           <div class="mock-shell" style="display:flex;">
             <aside style="width:214px; flex-shrink:0; border-right:1px solid var(--border-default); background:var(--surface-page); padding:16px 12px; display:flex; flex-direction:column; gap:2px;">
               <div style="font-size:11px; font-weight:500; color:var(--text-faint); padding:4px 10px 6px;">Agency workspace</div>
@@ -179,8 +179,8 @@ const FAQS: FaqItem[] = [
                   </div>
                 </div>
                 <div style="border:1px solid var(--border-default); border-radius:var(--radius-md); padding:14px 15px; background:var(--surface-card);">
-                  <div style="font-size:var(--text-xs); color:var(--text-faint); margin-bottom:8px;">Spoofing blocked</div>
-                  <div style="display:flex; align-items:baseline; gap:7px;"><span style="font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">3,481</span><span style="font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); border-radius:5px; padding:2px 5px;">7 active</span></div>
+                  <div style="font-size:var(--text-xs); color:var(--text-faint); margin-bottom:8px;">DMARC failures</div>
+                  <div style="display:flex; align-items:baseline; gap:7px;"><span style="font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; letter-spacing:-0.02em; font-variant-numeric:tabular-nums;">3,481</span><span style="font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); border-radius:5px; padding:2px 5px;">7 sources</span></div>
                 </div>
               </div>
               {/* Reserved example domains only, even in a mockup. These rows
@@ -210,7 +210,7 @@ const FAQS: FaqItem[] = [
                   <div style="display:flex; align-items:center; gap:9px;"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--red-600);"></span><span class="mono" style="font-size:var(--text-sm);">example.net</span></div>
                   <span class="mono" style="font-size:var(--text-xs); color:var(--gray-700); background:var(--surface-sunken); justify-self:start; padding:2px 7px; border-radius:5px;">p=none</span>
                   <div style="display:flex; align-items:center; gap:9px;"><div style="flex:1; height:6px; border-radius:var(--radius-pill); background:var(--surface-sunken); overflow:hidden;"><div style="width:61%; height:100%; background:var(--red-600);"></div></div><span style="font-size:var(--text-xs); color:var(--text-faint); font-variant-numeric:tabular-nums; width:36px; text-align:right;">61%</span></div>
-                  <span style="justify-self:end; font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); padding:3px 9px; border-radius:var(--radius-pill);">Spoofing</span>
+                  <span style="justify-self:end; font-size:11px; font-weight:600; color:var(--status-danger-fg); background:var(--tint-red-bg); padding:3px 9px; border-radius:var(--radius-pill);">Investigate</span>
                 </div>
                 <div class="row-hover" style="display:grid; grid-template-columns:1.6fr 1fr 1.3fr 0.8fr; gap:12px; align-items:center; padding:12px 16px;">
                   <div style="display:flex; align-items:center; gap:9px;"><span style="width:8px; height:8px; border-radius:var(--radius-pill); background:var(--teal-600);"></span><span class="mono" style="font-size:var(--text-sm);">example.org</span></div>
@@ -258,7 +258,7 @@ const FAQS: FaqItem[] = [
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
             <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-red-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="triangle-alert" style="font-size:18px; color:var(--tint-red-fg);" /></span>
             <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Spoofing &amp; threat detection</h3>
-            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Unauthenticated sources surface the moment they appear, with sending IP, volume, and geography.</p>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Investigate sources that fail DMARC in the reports you receive, with sending IP and volume. Failures can be spoofing, misconfiguration or legitimate forwarding.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
             <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--status-warn-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="chart-column" style="font-size:18px; color:var(--amber-600);" /></span>
@@ -268,12 +268,12 @@ const FAQS: FaqItem[] = [
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
             <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-purple-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="download" style="font-size:18px; color:var(--tint-purple-fg);" /></span>
             <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">White-label client reports</h3>
-            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">A clean monthly summary per domain — your logo, your colours — a non-technical client can actually read.</p>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">Send each client a monthly summary across their domains, using your agency's name, logo and colours.</p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
             <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-olive-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="database" style="font-size:18px; color:var(--tint-olive-fg);" /></span>
             <h3 style="font-size:16px; font-weight:600; margin:0 0 7px; letter-spacing:-0.01em;">Self-hosted, your data</h3>
-            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">One container with PostgreSQL, on Docker Compose or Kubernetes. Client data never leaves your infrastructure.</p>
+            <p style="font-size:13.5px; line-height:1.55; color:var(--gray-700); margin:0;">One application container plus PostgreSQL, on Docker Compose or Kubernetes. You control the database, report sources and optional backup storage. <a href="/docs/data-protection/" style="color:var(--brand) !important; font-weight:600;">See the data flow &rarr;</a></p>
           </div>
           <div class="lift" style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:22px;">
             <span style="display:inline-flex; width:36px; height:36px; border-radius:var(--radius-md); background:var(--tint-indigo-bg); align-items:center; justify-content:center; margin-bottom:14px;"><Icon name="key-round" style="font-size:18px; color:var(--tint-indigo-fg);" /></span>
@@ -296,24 +296,24 @@ const FAQS: FaqItem[] = [
         <div style="max-width:1160px; margin:0 auto; padding:64px 32px;">
           <div style="max-width:620px; margin-bottom:44px;">
             <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">How it works</div>
-            <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">From raw XML to enforced in three steps.</h2>
-            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0;">The pipeline runs continuously in the background. You just watch compliance climb.</p>
+            <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">From raw XML to your next policy decision.</h2>
+            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0;">The worker collects reports in the background. You investigate legitimate senders, fix authentication and choose when to tighten each domain's policy.</p>
           </div>
           <div class="grid-3" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
             <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:26px;">
               <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><span class="mono" style="font-size:var(--text-xs); font-weight:600; color:var(--brand);">01</span><span style="flex:1; height:1px; background:var(--border-strong);"></span><Icon name="inbox" style="font-size:20px; color:var(--brand);" /></div>
               <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Sync the mailbox</h3>
-              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Publish a DMARC record pointing report addresses at your inbox, then connect that mailbox once. Reports arrive automatically from every mailbox provider.</p>
+              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Add your clients and domains, then connect your reporting mailbox. Publish a DMARC record with rua pointing to it; authorise external report destinations in DNS. Participating receivers send reports, usually daily.</p>
             </div>
             <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:26px;">
               <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><span class="mono" style="font-size:var(--text-xs); font-weight:600; color:var(--brand);">02</span><span style="flex:1; height:1px; background:var(--border-strong);"></span><Icon name="funnel" style="font-size:20px; color:var(--brand);" /></div>
               <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Parse &amp; align</h3>
-              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">The worker unpacks each report, resolves sending sources, and checks SPF and DKIM alignment — grouping thousands of rows into a handful of clear signals.</p>
+              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">The worker unpacks reports and groups sending sources with the SPF, DKIM and alignment results reported by receivers. Inspect the evidence without reading every XML row.</p>
             </div>
             <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); padding:26px;">
               <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;"><span class="mono" style="font-size:var(--text-xs); font-weight:600; color:var(--brand);">03</span><span style="flex:1; height:1px; background:var(--border-strong);"></span><Icon name="layout-dashboard" style="font-size:20px; color:var(--brand);" /></div>
               <h3 style="font-size:17px; font-weight:600; margin:0 0 8px; letter-spacing:-0.01em;">Monitor &amp; enforce</h3>
-              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Every domain gets a live compliance score, a threat feed, and a recommended next policy change. Tighten from none to reject with confidence.</p>
+              <p style="font-size:var(--text-base); line-height:1.55; color:var(--gray-700); margin:0;">Review each domain's reported compliance and enforcement guidance. Fix legitimate senders and test important forwarding and mailing-list routes before changing DNS; a clean reporting window alone is not proof every route works.</p>
             </div>
           </div>
         </div>
@@ -324,8 +324,8 @@ const FAQS: FaqItem[] = [
         <div class="split" style="display:grid; grid-template-columns:0.9fr 1.1fr; gap:48px; align-items:center;">
           <div>
             <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">Quick start</div>
-            <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">Running in under five minutes.</h2>
-            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0 0 24px;">One container for the whole application, plus PostgreSQL. Download the compose file, generate a key, and open the dashboard. Prerequisites are Docker and a mailbox for report delivery.</p>
+            <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">Start with Docker Compose.</h2>
+            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0 0 24px;">Before starting, restrict access to port 8080 to trusted administrators. Run these commands in a new directory with Docker Compose, curl and OpenSSL installed. Use HTTPS or a secure tunnel before creating the first administrator or entering credentials, then connect a reporting mailbox. For internet-facing use, follow the setup guide to configure HTTPS.</p>
             <ul style="list-style:none; padding:0; margin:0 0 28px; display:flex; flex-direction:column; gap:12px;">
               <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Console and report ingestion in one container</li>
               <li style="display:flex; gap:10px; align-items:flex-start; font-size:var(--text-base); color:var(--gray-800);"><Icon name="circle-check" style="font-size:17px; color:var(--brand); margin-top:1px;" /> Split them, or bring your own PostgreSQL, when you need to</li>
@@ -350,7 +350,7 @@ const FAQS: FaqItem[] = [
               { type: 'cmd', text: 'docker compose up -d' },
               { type: 'gap' },
               { type: 'ok', text: 'app      → http://localhost:8080' },
-              { type: 'ok', text: 'postgres → localhost:5432' },
+              { type: 'ok', text: 'postgres → internal network only' },
             ]}
           />
         </div>
@@ -362,21 +362,21 @@ const FAQS: FaqItem[] = [
           <div style="max-width:620px; margin-bottom:40px;">
             <div style="font-size:var(--text-sm); font-weight:600; color:var(--brand); margin-bottom:12px;">Why open source</div>
             <h2 style="font-size:38px; line-height:1.08; letter-spacing:-0.02em; font-weight:600; margin:0 0 16px;">The same insight, without per-domain pricing.</h2>
-            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0;">Hosted DMARC platforms charge by the domain and by the message volume — which punishes exactly the agencies with the most to monitor.</p>
+            <p style="font-size:var(--text-body-lg); line-height:1.5; color:var(--gray-700); margin:0;">Compare domain limits, message-volume allowances and operating costs when choosing a hosted plan. DMARC Analyzer has no licence fees; you pay for hosting and operate the service yourself.</p>
           </div>
           <div style="border:1px solid var(--border-strong); border-radius:var(--radius-lg); background:var(--surface-card); overflow:hidden;">
             <div class="grid-3" style="display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:0;">
               <div style="padding:16px 20px; border-bottom:1px solid var(--border-default); font-size:var(--text-sm); font-weight:500; color:var(--text-faint);">&nbsp;</div>
               <div style="padding:16px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); background:var(--teal-50); display:flex; align-items:center; gap:8px;"><LogoMark size={22} /><span style="font-family:'Space Grotesk',sans-serif; font-size:var(--text-base); font-weight:600;">DMARC Analyzer</span></div>
-              <div style="padding:16px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); font-weight:500; color:var(--gray-700);">Hosted platforms</div>
+              <div style="padding:16px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); font-weight:500; color:var(--gray-700);">Typical hosted plan</div>
 
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); font-size:var(--text-base); color:var(--gray-800);">Pricing model</div>
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); background:var(--teal-50); font-size:var(--text-base); color:var(--brand-hover); font-weight:600;">Free · self-hosted</div>
-              <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Per domain + volume tiers</div>
+              <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Subscription; limits vary</div>
 
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); font-size:var(--text-base); color:var(--gray-800);">Domains included</div>
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); background:var(--teal-50); font-size:var(--text-base); color:var(--brand-hover); font-weight:600;">Unlimited</div>
-              <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Capped by plan</div>
+              <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Plan-dependent</div>
 
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); font-size:var(--text-base); color:var(--gray-800);">Where client data lives</div>
               <div style="padding:15px 20px; border-bottom:1px solid var(--border-default); border-left:1px solid var(--border-default); background:var(--teal-50); font-size:var(--text-base); color:var(--brand-hover); font-weight:600;">Your infrastructure</div>
@@ -384,10 +384,10 @@ const FAQS: FaqItem[] = [
 
               <div style="padding:15px 20px; font-size:var(--text-base); color:var(--gray-800);">Extend &amp; modify</div>
               <div style="padding:15px 20px; border-left:1px solid var(--border-default); background:var(--teal-50); font-size:var(--text-base); color:var(--brand-hover); font-weight:600;">Full source, Apache-2.0</div>
-              <div style="padding:15px 20px; border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Closed</div>
+              <div style="padding:15px 20px; border-left:1px solid var(--border-default); font-size:var(--text-base); color:var(--text-faint);">Vendor-dependent</div>
             </div>
           </div>
-          <p style="font-size:12.5px; color:var(--text-faint); margin:14px 0 0;">Comparison reflects the common commercial model of hosted DMARC tools. Named products are trademarks of their respective owners and are not affiliated with this project.</p>
+          <p style="font-size:12.5px; color:var(--text-faint); margin:14px 0 0;">Hosted plans vary in domain limits, reporting allowances and support. Compare the current terms with the cost of running your own instance.</p>
         </div>
       </section>
 
@@ -404,7 +404,7 @@ const FAQS: FaqItem[] = [
         </div>
         <div class="prose" style="font-size:var(--text-body-lg); line-height:1.6; color:var(--gray-700);">
           <p>Start with how <a href="/guides/spf-dkim-dmarc/">SPF, DKIM and DMARC fit together</a>, then <a href="/guides/how-to-read-a-dmarc-aggregate-report/">how to read an aggregate report</a> — the XML this tool turns into a dashboard. When a source fails, <a href="/guides/fix-dmarc-failure/">why email fails DMARC</a> and the meaning of <a href="/glossary/dmarc-alignment/">alignment</a> cover most cases; a checker saying <a href="/guides/dmarc-policy-not-enabled/">"DMARC policy not enabled"</a> or <a href="/guides/no-dmarc-record-found/">"no DMARC record found"</a> each has its own fix.</p>
-          <p>On the DNS side there is a field reference for <a href="/guides/spf-record-syntax/">SPF record syntax</a>, a guide to <a href="/guides/find-your-dkim-selector/">finding your DKIM selector</a>, and the call between <a href="/glossary/dmarc-quarantine-vs-reject/">quarantine and reject</a>. Provider walkthroughs cover <a href="/dmarc-for/google-workspace/">Google Workspace</a>, <a href="/dmarc-for/microsoft-365/">Microsoft 365</a>, <a href="/dmarc-for/godaddy/">GoDaddy</a> and <a href="/dmarc-for/cloudflare/">Cloudflare</a>. Once you are at enforcement, <a href="/glossary/mta-sts/">MTA-STS</a> and <a href="/glossary/bimi/">BIMI</a> are the next two records worth publishing.</p>
+          <p>On the DNS side there is a field reference for <a href="/guides/spf-record-syntax/">SPF record syntax</a>, a guide to <a href="/guides/find-your-dkim-selector/">finding your DKIM selector</a>, and the call between <a href="/glossary/dmarc-quarantine-vs-reject/">quarantine and reject</a>. Provider walkthroughs cover <a href="/dmarc-for/google-workspace/">Google Workspace</a>, <a href="/dmarc-for/microsoft-365/">Microsoft 365</a>, <a href="/dmarc-for/godaddy/">GoDaddy</a> and <a href="/dmarc-for/cloudflare/">Cloudflare</a>. <a href="/glossary/mta-sts/">MTA-STS</a> protects inbound transport independently of DMARC; <a href="/glossary/bimi/">BIMI</a> can display a verified brand logo at participating providers once its enforcement and certificate requirements are met.</p>
         </div>
       </section>
 
