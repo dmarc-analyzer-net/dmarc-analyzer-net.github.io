@@ -12,9 +12,9 @@ mailing list adds to record what [SPF](/glossary/spf/) and
 receiver further down the line can see the message authenticated correctly on
 arrival at the intermediary, even though it no longer does.
 
-The problem it addresses is real and common: plain forwarding breaks SPF, and
-mailing lists that add a subject tag or a footer break the DKIM signature. The
-mail is legitimate, and it fails [DMARC](/glossary/dmarc/) anyway — the case
+The problem it addresses is real and common: plain forwarding can break SPF, and
+mailing lists that change a signed subject or signed body can break DKIM. If
+neither mechanism still passes with alignment, legitimate mail fails [DMARC](/glossary/dmarc/) anyway — the case
 described in [why your email is failing DMARC](/guides/fix-dmarc-failure/) and in
 [what breaks at enforcement](/glossary/dmarc-quarantine-vs-reject/).
 

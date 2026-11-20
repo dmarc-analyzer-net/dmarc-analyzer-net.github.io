@@ -88,11 +88,11 @@ providers change. Keep the reports flowing so a new failing source shows up as a
 blip rather than a support ticket — the whole point of publishing `rua=` in the
 first place.
 
-One thing not to wait for: **forwarding and mailing-list failures never reach
-zero.** Plain forwarding breaks SPF and lists break DKIM, so a portion of your
-reports will always show aligned-fail rows for mail that is perfectly legitimate.
-"No failures at all" is therefore not an achievable exit criterion — the criterion
-is that every source *you control* authenticates. [ARC](/glossary/arc/) is often
+**Forwarding and mailing lists can cause legitimate DMARC failures.** Forwarding
+can break SPF, and a list that changes signed content can break DKIM. A surviving
+passing, aligned signature can still satisfy DMARC. Investigate failing sources
+and test important indirect routes before enforcement; a clean reporting window
+alone does not prove every legitimate route will work. [ARC](/glossary/arc/) is often
 raised as the answer here; it is worth knowing what it does and doesn't buy before
 you postpone enforcement on the strength of it.
 
