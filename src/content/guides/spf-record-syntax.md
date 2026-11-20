@@ -183,15 +183,16 @@ default, so a mechanism with no prefix means pass:
 | Qualifier | Result | On `all` |
 |---|---|---|
 | `+` | Pass (default if omitted) | `+all` — **never do this**, authorizes the world |
-| `-` | Fail (hard) | `-all` — reject everything else (recommended) |
-| `~` | SoftFail | `~all` — mark suspicious but accept (use while testing) |
+| `-` | Fail (hard) | `-all` — declare all remaining IPs unauthorised |
+| `~` | SoftFail | `~all` — weaker non-authorisation; not a pass |
 | `?` | Neutral | `?all` — no opinion |
 
 ### `-all` vs `~all`
 
 This is the decision people agonise over, and under DMARC it matters less than it
-looks. Both produce an SPF result that fails alignment, and your DMARC policy —
-not the SPF qualifier — decides what happens to the message:
+looks. Neither result is an SPF pass, so neither can satisfy DMARC through SPF.
+A passing, aligned DKIM signature can still satisfy DMARC. Receivers may also
+apply SPF policy independently when deciding whether to accept mail:
 
 ```
 v=spf1 include:_spf.google.com ~all    # while you are still finding senders
@@ -248,8 +249,10 @@ not a control, and most operators never set one.
 
 ## The rules that trip people up
 
-- **One record only.** A domain must have exactly one SPF `TXT` record. Two
-  produces a `permerror` — and a [DMARC failure](/guides/fix-dmarc-failure/).
+- **One record only.** Publish at most one SPF `TXT` record at each DNS name. Two
+  produces a `permerror`. That cannot satisfy DMARC through SPF, though a
+  passing, aligned DKIM signature can still do so; see
+  [diagnosing DMARC failures](/guides/fix-dmarc-failure/).
 - **Ten DNS-lookup limit.** Six terms cost a lookup — `include`, `a`, `mx`,
   `ptr`, `exists` and `redirect` — and the total must stay **≤ 10**. Ten is
   allowed; eleven `permerror`s. Chained providers blow past this fast.
