@@ -36,8 +36,11 @@ This is the source of most SPF confusion. A message can pass SPF perfectly while
 the visible `From:` shows a completely different domain, which is precisely the
 gap [DMARC](/glossary/dmarc/) closes by requiring a passing result with
 [alignment](/glossary/dmarc-alignment/) to the visible From domain. Either
-aligned SPF or aligned DKIM can satisfy DMARC. SPF does not inherit: a record
-at `yourdomain.com` does not cover `news.yourdomain.com`.
+aligned SPF or aligned DKIM can satisfy DMARC. For SPF, DMARC uses the
+`MAIL FROM` result, with the HELO-derived identity only when `MAIL FROM` is
+empty. A separate HELO pass cannot satisfy DMARC if a non-empty `MAIL FROM`
+fails SPF. SPF does not inherit: a record at `yourdomain.com` does not cover
+`news.yourdomain.com`.
 
 ## Mechanisms
 
@@ -299,8 +302,10 @@ none. The initial TXT lookup is not one of those ten terms.
 Provider policies can change their nesting without a change to your own record.
 The [SPF record checker](/tools/spf-checker/) expands includes and redirects
 to help inspect that structure. Its static count is not an exact evaluation
-for every message: matching can stop early, macros depend on message inputs,
-and MX/PTR processing and void limits need separate attention. A policy that
+for every message: matching can stop early and macros depend on message inputs.
+The checker expands each target only once; a receiver can evaluate a repeated
+include's subtree again, so the displayed count can be too low. MX/PTR
+processing and void limits also need separate attention. A policy that
 exceeds the budget on one path may still pass for a sender matched earlier,
 making the problem appear intermittent.
 
