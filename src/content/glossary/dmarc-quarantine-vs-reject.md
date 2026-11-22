@@ -20,10 +20,13 @@ two enforcing [DMARC policies](/glossary/dmarc-policy/), defined in
 The third policy, `p=none`, requests no DMARC-based enforcement. Add `rua=`
 to request aggregate reports; reporting is separate from the policy choice.
 
-DMARC fails when neither SPF nor DKIM produces a pass that
+DMARC fails when completed checks produce no SPF or DKIM pass that
 [aligns](/glossary/dmarc-alignment/) with the visible `From:` domain. One
-aligned pass is enough. A DMARC pass avoids the failure policy, but **does not
-guarantee delivery**: receivers still apply spam and other local checks.
+aligned pass is enough. If a required DNS query errors and neither mechanism
+produces an aligned pass, the result is indeterminate: neither pass nor fail,
+so the failure policy cannot apply. A DMARC pass avoids the failure policy,
+but **does not guarantee delivery**: receivers still apply spam and other local
+checks.
 
 ## When to use each
 
@@ -32,7 +35,8 @@ guarantee delivery**: receivers still apply spam and other local checks.
   rejection, but mail in spam can still go unnoticed.
 - Consider **`reject`** when legitimate sending sources and important forwarding
   routes have been checked and the remaining delivery risk is acceptable.
-  It gives receivers a stronger signal against unauthorized use of your
+  Your messages must carry valid, aligned DKIM signatures; do not rely solely
+  on SPF. It gives receivers a stronger signal against unauthorized use of your
   `From:` domain. It does not stop lookalike-domain or display-name spoofing.
 
 **Reject is not a universal destination.** Domains whose users post to Internet
