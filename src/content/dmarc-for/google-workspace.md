@@ -102,8 +102,14 @@ the value. A TXT record cannot be proxied through Cloudflare.
 passes with a domain aligned to the visible `From:` domain. Configure both
 paths, then test actual mail.
 
-If you have no DMARC record, create a mailbox that accepts report attachments
-and add a TXT record at `_dmarc.yourdomain.com`:
+Check the policy already applicable to your sending domain before publishing
+a record. A subdomain without its own record can inherit its organizational
+domain’s `sp` policy, or `p` when `sp` is absent. A local record overrides
+that inherited policy: do not add `p=none` if it would weaken existing
+enforcement.
+
+If no enforcing policy applies, create a mailbox that accepts report
+attachments and add a TXT record at `_dmarc.yourdomain.com`:
 
 ```text
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
@@ -116,7 +122,9 @@ made at your DNS host, not in Gmail's Admin console.
 
 ## Verify it worked
 
-Check DNS, substituting your domain and the selector you actually chose:
+Check DNS, substituting your domain and the selector you actually chose.
+For a sending subdomain, also check its organizational domain’s DMARC record
+to establish the applicable inherited policy before making changes:
 
 ```sh
 dig +short TXT yourdomain.com
@@ -186,5 +194,9 @@ such as billing runs. Clean reports do not prove every route is safe.
 
 For a Workspace domain whose users may post to Internet mailing lists,
 `p=reject` is not a universal goal. If considering it despite that risk, monitor
-with `p=none` for at least a month, then `p=quarantine` for an equally long
-period, and assess the effects on those users before deciding.
+at the current applicable policy without weakening existing enforcement.
+For a domain starting at `p=none`, monitor for at least a month before moving
+to `p=quarantine`. Spend at least a month at `p=quarantine` and assess the
+effects on those users before considering `p=reject`. A domain already at
+`p=quarantine` can use its existing monitoring history; it does not need to
+return to `p=none`.
