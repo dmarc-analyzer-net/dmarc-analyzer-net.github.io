@@ -16,15 +16,19 @@ and you only see what participating receivers report.
 ## Requesting reports
 
 You request them with the `rua=` tag in your [DMARC](/glossary/dmarc/) record.
-For a new monitoring setup with a mailbox you control:
+First check whether your domain already has a record or inherits a policy from
+an ancestor domain. If either applies, add or update `rua` in that existing
+record at the policy domain without replacing its policy or other tags.
+Publishing a new `p=none` record at a subdomain overrides its inherited policy.
+
+If no existing or inherited policy applies, start monitoring with a mailbox
+you control:
 
 ```
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-If you already publish a record, add or update `rua` in that record without
-replacing its policy or other tags. Make sure the mailbox can receive the
-attachments. Three details matter:
+Make sure the mailbox can receive the attachments. Three details matter:
 
 - **Compression is recommended.** The XML should be GZIP-compressed and attached as
   `application/gzip`; a receiver that sends it uncompressed uses `text/xml`,
