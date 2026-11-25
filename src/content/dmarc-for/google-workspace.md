@@ -2,174 +2,201 @@
 title: Set up SPF, DKIM & DMARC for Google Workspace
 seoTitle: 'DMARC for Google Workspace: setup'
 provider: Google Workspace
-description: How to set up SPF, DKIM and DMARC for Google Workspace (Gmail) — the exact DNS records, where to turn DKIM on, and the Google-specific gotchas.
+description: How to set up SPF, DKIM and DMARC for Google Workspace (Gmail) — the DNS records, custom DKIM signing, alignment checks, and reporting limits.
 publishDate: 2026-07-23
-updatedDate: 2026-07-25
+updatedDate: 2026-11-23
 ---
 
-Google Workspace sends your mail through Google's servers, so authenticating it
-is mostly about publishing the right DNS records and **turning DKIM on** — which,
-despite what most people assume, is *off* by default. Here's the full setup.
+Set up DMARC for Google Workspace by authorizing your senders with SPF,
+enabling DKIM signing for your domain, and publishing a DMARC record in DNS.
+Check existing records first: preserve working authentication and any
+quarantine or reject policy already in place.
 
 ## 1. SPF
 
-Add a single [SPF](/glossary/spf/) `TXT` record at your root domain authorizing
-Google to send:
+[SPF](/glossary/spf/) ([RFC 7208](/rfc/7208/)) checks the sending IP against
+the SMTP envelope domain, not the visible `From:` address. If Google Workspace
+is your only sender and you have no SPF record, Google's
+[recommended record](https://knowledge.workspace.google.com/admin/security/set-up-spf)
+is a `TXT` record at your root domain:
 
-```
-v=spf1 include:_spf.google.com -all
+```text
+v=spf1 include:_spf.google.com ~all
 ```
 
-`_spf.google.com` covers Gmail and the Workspace sending infrastructure, and
-Google keeps it current — never list Google's IP addresses yourself.
+Google maintains the authorized ranges behind `_spf.google.com`. `~all`
+returns softfail for other IPs; `-all` returns fail. Neither result determines
+delivery by itself. Preserve an existing record's qualifier unless you intend
+to change that policy.
 
 ### Adding other senders
 
-If a newsletter tool, CRM, or helpdesk also sends as your domain, add its
-`include:` to the **same** record. Never publish a second SPF record:
+Inventory newsletters, forms, CRMs and helpdesks before editing SPF. Add only
+the authorization each provider requires for the envelope domain it actually
+uses. A service using its own return-path domain may need no apex SPF change;
+configure its aligned DKIM or custom return path instead.
 
-```
-v=spf1 include:_spf.google.com include:servers.mcsv.net -all
-```
+Keep one SPF record per name. Two selected `v=spf1` records return
+`permerror`, not `fail`. An aligned DKIM pass can still make DMARC pass.
 
-Two SPF records is a `permerror`, which counts as a failure. Also watch the
-**10-lookup limit**. `_spf.google.com` is a flat list of `ip4:` and `ip6:`
-ranges, so it costs one lookup of your ten — but a term you add beside it may
-fetch a record carrying includes of its own, and those count too. [SPF record
-syntax](/guides/spf-record-syntax/) covers counting and flattening, and the
-[SPF record checker](/tools/spf-checker/) expands a record term by term if you
-want the running total.
+The limit is **ten DNS-querying terms evaluated**, including nested terms,
+not ten providers or ten DNS packets. Google's include currently contains IP
+ranges without nested includes, but its contents can change. The
+[SPF syntax guide](/guides/spf-record-syntax/) explains the budget; the
+[SPF checker](/tools/spf-checker/) inspects current DNS, rather than predicting
+every message's evaluation.
 
-> **Using the Gmail SMTP relay or a routing service?** Mail relayed through a
-> third party leaves that provider's IPs, not Google's. Its `include:` has to be
-> in your record too, or the relayed mail fails SPF.
+> **SMTP relay and outbound gateways differ.** Google's SMTP relay sends
+> through Google. A third-party outbound gateway sends the final hop from its
+> own IPs: authorize those for the envelope domain too. A gateway that changes
+> signed content can also break DKIM. Check a message after the whole route.
 
 ### Subdomains
 
-SPF doesn't inherit. A subdomain that sends mail needs its own record; one that
-sends none is better off with an explicit reject record:
+SPF does not inherit from the root. Publish authorization at each envelope
+subdomain you use. A name that must never be used for an envelope sender or
+HELO identity can publish:
 
-```
+```text
 v=spf1 -all
 ```
 
-## 2. DKIM — you must generate your own key
+That record does not protect a visible `From:` address on its own.
 
-Workspace signs your mail with [DKIM](/glossary/dkim/) from the start, and that is
-exactly what makes this step easy to skip. Until you generate a key, Google signs
-with a **default key it owns**, whose signing domain is a `*.gappssmtp.com` name —
-something like `yourdomain-com.20260115.gappssmtp.com`.
+## 2. DKIM — sign with your domain
 
-That signature is real and it passes. What it does not do is
-[align](/glossary/dmarc-alignment/): the `d=` is Google's domain, not yours, so it
-contributes nothing to DMARC. A checker reports DKIM as working, your reports show
-`dkim=pass`, and the domain still fails DMARC on every message that SPF doesn't
-rescue.
+[DKIM](/glossary/dkim/) ([RFC 6376](/rfc/6376/)) verifies a signature using
+the domain in `d=` and selector in `s=`. A valid signature for Google's domain
+does not authenticate your visible sender domain for DMARC.
 
-So the step below is not "turn DKIM on" — it is "make the signature yours".
+Check your current signing domain before generating another key. Some partner
+setups already configure custom DKIM; a `*.gappssmtp.com` signing domain does
+not align with `yourdomain.com`.
 
-1. In the **Google Admin console**, go to *Menu → Apps → Google Workspace →
-   Gmail → Authenticate email*.
-2. Select your domain, choose a **2048-bit** key, and click **Generate new
-   record**.
-3. Google gives you a `TXT` record with the [selector](/glossary/dkim-selector/)
-   **`google`** — publish it at `google._domainkey.yourdomain.com`.
-4. Return to the console and click **Start authentication**.
+Follow Google's [DKIM setup](https://knowledge.workspace.google.com/admin/security/set-up-dkim):
 
-The selector is always `google` unless you change it. Two timings catch people
-out: after you first turn on Gmail for your organization you may have to wait
-**24–72 hours** before the key is even available in the console, and once
-published it can take up to **48 hours** for DKIM to start working.
+1. Sign in as a **super administrator**. Open *Menu → Apps → Google Workspace
+   → Gmail → Authenticate email* and select the domain.
+2. If a new key is needed, click **Generate New Record**, select **2048 bits**
+   where your DNS host supports it, choose a selector, then click **Generate**.
+   The default selector is `google`; use a different one if that name is
+   already serving another key.
+3. Publish the exact TXT name and value Google supplies. With the default
+   selector, the full name is `google._domainkey.yourdomain.com`. A DNS panel
+   that appends your domain needs only `google._domainkey` in its host field.
+4. Once the record resolves, return to the selected domain and click
+   **Start authentication**. Verify the status and a delivered test message.
 
-> **2048-bit keys and older DNS hosts.** A 2048-bit public key exceeds the
-> 255-character limit for a single TXT string. Most DNS providers split it
-> automatically; a few require you to paste it as multiple quoted strings. If
-> your host rejects the value outright, that's the reason — not a bad key.
+Newly enabled Gmail can require **24–72 hours** before key generation is
+available. Authentication can take up to **48 hours** after publication.
+Repeat the setup and test for each sending domain.
 
-Workspace publishes DKIM as a `TXT` record, which spares you the trap that catches
-Microsoft 365 users on [Cloudflare](/dmarc-for/cloudflare/) — `TXT` records cannot be
-proxied, so there is no cloud icon to get wrong here. Cloudflare's Email Routing and
-SPF interactions still apply if it hosts your DNS.
+A 2048-bit key needs multiple TXT character-strings when each is limited to
+255 characters. Keep them in **one TXT record**; DNS joins the strings without
+adding spaces. Check your DNS host's input format if it rejects or truncates
+the value. A TXT record cannot be proxied through Cloudflare.
 
 ## 3. DMARC
 
-Once SPF and DKIM are live, publish a [DMARC](/glossary/dmarc/) record in
-monitoring mode at `_dmarc.yourdomain.com`:
+[DMARC](/glossary/dmarc/) ([RFC 9989](/rfc/9989/)) passes when SPF or DKIM
+passes with a domain aligned to the visible `From:` domain. Configure both
+paths, then test actual mail.
 
-```
+Check the policy already applicable to your sending domain before publishing
+a record. A subdomain without its own record can inherit its organizational
+domain’s `sp` policy, or `p` when `sp` is absent. A local record overrides
+that inherited policy: do not add `p=none` if it would weaken existing
+enforcement.
+
+If no enforcing policy applies, create a mailbox that accepts report
+attachments and add a TXT record at `_dmarc.yourdomain.com`:
+
+```text
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-`p=none` [monitors without affecting delivery](/glossary/dmarc-policy/); `rua=`
-is where [aggregate reports](/glossary/dmarc-aggregate-report/) are sent. See
-[publish your first DMARC record](/guides/publish-your-first-dmarc-record/) for
-the safe rollout.
+`p=none` requests no DMARC-specific delivery action; spam filters still apply.
+`rua` requests aggregate reports. If a record already exists, edit it without
+adding a second record or weakening an established policy. These changes are
+made at your DNS host, not in Gmail's Admin console.
 
 ## Verify it worked
 
-Confirm all three records resolve:
+Check DNS, substituting your domain and the selector you actually chose.
+For a sending subdomain, also check its organizational domain’s DMARC record
+to establish the applicable inherited policy before making changes:
 
-```
+```sh
 dig +short TXT yourdomain.com
 dig +short TXT google._domainkey.yourdomain.com
 dig +short TXT _dmarc.yourdomain.com
 ```
 
-Then send a message to an external mailbox and read its `Authentication-Results`
-header. In Gmail, *Show original* displays SPF, DKIM, and DMARC results directly:
+Send to a separate recipient mailbox. In Gmail, open *More → Show original*
+and inspect the recipient's trusted `Authentication-Results` header. A
+successful example is:
 
-```
+```text
 Authentication-Results: mx.example.net;
  spf=pass smtp.mailfrom=yourdomain.com;
  dkim=pass header.d=yourdomain.com;
  dmarc=pass header.from=yourdomain.com
 ```
 
-The detail that matters is `header.d` — it must be **your** domain. A `dkim=pass`
-on some other domain still fails DMARC, because DMARC requires
-[alignment](/glossary/dmarc-alignment/), not merely a valid signature.
+Compare `smtp.mailfrom` and each passing `header.d` with `header.from`.
+Default relaxed [alignment](/glossary/dmarc-alignment/) allows domains sharing
+an organizational domain; strict alignment requires an exact match. One
+unaligned DKIM signature does not prevent another aligned signature or aligned
+SPF from passing DMARC.
 
 ## Where reports come from
 
-Google sends DMARC aggregate reports **once per day**, from `google.com`. Expect
-your first one roughly 24 hours after publishing the record — and expect it to
-cover only mail Google received, which is why you need reports from every
-receiver, not just this one.
+[Aggregate reports](/glossary/dmarc-aggregate-report/) ([RFC 9990](/rfc/9990/))
+cover mail evaluated by reporting receivers. Google is one reporter, not a
+record of everything Workspace sent. Reports usually arrive daily, but the
+first report is not guaranteed within 24 hours. Coverage can be incomplete
+and delivery delayed; silence does not prove that no mail failed.
+
+For many client domains, [DMARC Analyzer](/) groups received reports in one
+self-hosted console without per-domain fees. Its [domain detail
+view](/docs/domain-detail/) separates raw SPF/DKIM results from the aligned
+DMARC verdict, so you can investigate failures by source and reporter.
 
 ## Google-specific gotchas
 
-- **`dkim=pass` is not the same as DKIM working.** Generating the record isn't
-  enough — until you click *Start authentication*, Google keeps signing with its
-  own `*.gappssmtp.com` key, which passes and never aligns. Check `header.d=` in
-  your reports, not just the pass or fail.
-- **Google Groups and forwarding break SPF.** A forwarded message arrives from
-  the forwarder's IP, so SPF fails; DKIM survives forwarding, which is why you
-  want both rather than either.
-- **Calendar invites and aliases** send as the domain too — check them before
-  enforcing.
-- **One SPF record only** — a leftover second record causes a `permerror` and a
-  [DMARC failure](/guides/fix-dmarc-failure/).
-- **Propagation** — DKIM changes can take up to 48h; don't move to
-  `quarantine`/`reject` until reports confirm Gmail is aligned.
+- **Publishing a key is only part of setup.** Confirm *Start authentication*
+  and test the signing domain on delivered mail.
+- **Forwarding can break SPF.** The forwarder's IP may be unauthorized for
+  the original envelope domain. Rewriting that domain can make SPF pass
+  without preserving alignment. DKIM can survive unchanged forwarding, but
+  mailing-list subject changes or footers can break it.
+- **Test every route.** Include aliases, Calendar invitations, applications,
+  outbound gateways and any Google Groups or mailing lists your users use.
+- **DNS publication is not proof of signing.** Cached answers and reports
+  can lag behind changes. Check fresh messages as well as incoming reports.
 
 ## Common failures and what they mean
 
-| Symptom | Usual cause |
+| Symptom | What to check |
 |---|---|
-| `dkim=pass` with `header.d=…gappssmtp.com` | Still Google's default key — "Start authentication" was never clicked |
-| `dkim=none` on all mail | Mail is leaving via a non-Google server, which the default key never signs |
-| DNS host rejects the DKIM value | 2048-bit key exceeds one 255-char TXT string |
-| `spf=permerror` | Two SPF records, or over the 10-lookup limit |
-| `spf=fail` on forwarded mail only | Expected — rely on DKIM alignment instead |
-| `dmarc=fail` while DKIM passes | `header.d` isn't your domain — an alignment problem |
-
-If you run Workspace for a portfolio of clients, the reports pile up fast: one
-XML file per receiver per domain per day, all of it useless until something
-parses and aggregates it. That's the job [DMARC Analyzer](/) does — self-hosted,
-every client domain in one dashboard, no per-domain pricing.
+| `dkim=pass` with an unaligned `header.d` | Custom signing setup and any other passing signatures; aligned SPF can still pass DMARC |
+| `dkim=none` | No signature was evaluated; inspect the message route and signing configuration |
+| DNS host rejects the DKIM value | Hostname format, truncation and support for multiple strings in one TXT record |
+| `spf=permerror` | Duplicate SPF records, syntax errors or exceeded evaluation limits |
+| SPF fails after forwarding | Whether an aligned DKIM signature survives the route |
+| `dmarc=fail` while DKIM passes | Alignment of every passing signature; a raw DKIM pass alone is insufficient |
 
 ## What next
 
-Give it a few days, then [read your aggregate
-reports](/guides/how-to-read-a-dmarc-aggregate-report/) and, once clean, follow
-the [path to enforcement](/guides/from-monitoring-to-enforcement/).
+[Read your aggregate reports](/guides/how-to-read-a-dmarc-aggregate-report/)
+and test legitimate sources before tightening policy. Include infrequent mail
+such as billing runs. Clean reports do not prove every route is safe.
+
+For a Workspace domain whose users may post to Internet mailing lists,
+`p=reject` is not a universal goal. If considering it despite that risk, monitor
+at the current applicable policy without weakening existing enforcement.
+For a domain starting at `p=none`, monitor for at least a month before moving
+to `p=quarantine`. Spend at least a month at `p=quarantine` and assess the
+effects on those users before considering `p=reject`. A domain already at
+`p=quarantine` can use its existing monitoring history; it does not need to
+return to `p=none`.
