@@ -77,8 +77,12 @@ record are joined in order without added spaces; they are not two records.
   record.
 
 The [DMARC record checker](/tools/dmarc-checker/) checks the record's syntax
-and external reporting authorization. When a subdomain has no record, it
-prompts you to check the parent; follow that check to investigate inheritance.
+and looks for external reporting authorization records. It does not determine
+organizational domains: sibling hosts such as `news.yourdomain.com` and
+`mail.yourdomain.com` can trigger an authorization warning even when they share
+one. That warning alone does not establish that reports will be withheld.
+When a subdomain has no record, the checker prompts you to check the parent;
+follow that check to investigate inheritance.
 
 If your control panel and the public answer disagree, find the authoritative
 nameservers:
@@ -86,6 +90,12 @@ nameservers:
 ```sh
 dig NS yourdomain.com
 ```
+
+For a subdomain, query its name first. If `dig NS news.yourdomain.com`
+returns no NS answer because the subdomain is not delegated, remove the
+leftmost label and query `dig NS yourdomain.com`. Continue toward the root
+until you find the enclosing zone's nameservers. Use those servers to query
+the original `_dmarc.news.yourdomain.com` name.
 
 Query one of the returned servers directly, using `dig @nameserver TXT`
 followed by `_dmarc.yourdomain.com`. A correct authoritative answer alongside
@@ -143,10 +153,12 @@ the record at the name with the fewest labels determines the organizational
 domain. A public-suffix policy can also apply when discovery finds no policy
 at the From or organizational domain.
 
-A sending subdomain can inherit a policy; it does not need a separate record
-unless you want different settings. Check the inherited policy before making
-that choice. See [what changed in the current DMARC
-standard](/guides/dmarc-rfc-9989/) for the discovery rules and
+A sending subdomain can inherit a policy even when it has more than eight
+labels. For those longer names, discovery checks the full name, then skips
+to the ancestor with seven labels; a policy at a skipped ancestor cannot
+supply the intended inheritance. Check which policy discovery actually finds. If it does not
+supply the settings you need, publish a record at the sending subdomain.
+See [what changed in the current DMARC standard](/guides/dmarc-rfc-9989/) for the discovery rules and
 [DMARC policy](/glossary/dmarc-policy/) for enforcement choices.
 
 ## "Please try a different email" on signup forms
@@ -179,8 +191,9 @@ yourdomain.com._report._dmarc.analyzer.example.   TXT   "v=DMARC1"
 
 Without authorization, receivers must ignore that external destination; the
 policy can still apply, and other valid destinations can still receive
-reports. There need not be a notification to the policy publisher. Use the
-record checker above to verify authorization before waiting for reports.
+reports. There need not be a notification to the policy publisher. Confirm
+that the destination is external before treating the checker's missing
+authorization warning as a reporting failure.
 
 Reporting is optional, and delayed or missing reports are not proof that the
 policy is absent. When reports arrive for many client domains,
