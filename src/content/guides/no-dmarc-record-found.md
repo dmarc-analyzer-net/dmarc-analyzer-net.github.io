@@ -77,8 +77,8 @@ record are joined in order without added spaces; they are not two records.
   record.
 
 The [DMARC record checker](/tools/dmarc-checker/) checks the record's syntax
-and external reporting authorization, and looks for an inherited policy when
-the exact name has no record.
+and external reporting authorization. When a subdomain has no record, it
+prompts you to check the parent; follow that check to investigate inheritance.
 
 If your control panel and the public answer disagree, find the authoritative
 nameservers:
