@@ -1,156 +1,194 @@
 ---
 title: What "No DMARC record found" means (and how to fix it)
 seoTitle: '"No DMARC record found": how to fix'
-description: Getting "No DMARC record found"? Nothing answered at _dmarc for the name you checked — why it happens, how to fix it, and why a subdomain can say it anyway.
+description: Getting "No DMARC record found"? Check the DNS name, TXT record and inherited policy, then publish or repair DMARC without weakening existing protection.
 publishDate: 2026-07-23
-updatedDate: 2026-11-07
+updatedDate: 2026-11-25
 ---
 
-**"No DMARC record found"** means a checker looked up `_dmarc.yourdomain.com` and
-got nothing back — your domain hasn't published a [DMARC](/glossary/dmarc/)
-policy. It's the most common starting point, and the fix takes five minutes.
+**"No DMARC record found"** means a checker did not find a DMARC policy record
+at the name it checked. For `yourdomain.com`, that name is
+`_dmarc.yourdomain.com`. Check the DNS name and any inherited policy before
+adding a record: a missing record on a subdomain does not necessarily mean
+DMARC is absent.
 
 ## Why it happens
 
-A DMARC record is a `TXT` record at the special host `_dmarc` under your domain.
-The message appears when:
+A **DMARC** policy record ([RFC 9989](/rfc/9989/)) is published as a `TXT`
+record under `_dmarc`. A missing-record warning can mean:
 
-- you've **never published** one (by far the most common reason);
-- it's on the **wrong host** — e.g. added to the root domain instead of `_dmarc`;
-- you're checking a **subdomain** that has no record of its own; or
-- the record was **just added** and DNS hasn't propagated yet.
+- you've **never published** one;
+- it's on the **wrong host**, such as the root domain instead of `_dmarc`;
+- you're checking a **subdomain** with no record of its own;
+- a resolver still has a **cached answer** from before the change; or
+- the lookup failed, or the checker discarded records it could not use.
+
+A DNS timeout or `SERVFAIL` is a lookup error, not proof that no policy exists.
+Check again and investigate the DNS error before adding another record.
 
 ## The fix
 
-Add a `TXT` record at `_dmarc.yourdomain.com` in monitoring mode:
+For a **new setup with no existing or inherited policy**, add one `TXT` record
+at `_dmarc.yourdomain.com` in monitoring mode:
 
-```
+```text
 v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
 ```
 
-- The **Name/Host** is `_dmarc` (your DNS host appends the domain).
-- `p=none` [monitors safely](/glossary/dmarc-policy/) — nothing is blocked.
-- `rua=` is the mailbox that receives [aggregate
-  reports](/glossary/dmarc-aggregate-report/).
+Create the report mailbox first, or replace the address with one that accepts
+reports. If a policy already exists, repair that record instead of adding a
+second one. Keep its policy and other valid tags when correcting the host or
+report address. Publishing `p=none` on a subdomain that inherits `p=reject`
+would weaken its protection.
 
-Provider-specific steps are under [DMARC setup](/dmarc-for/) (Google Workspace,
-Microsoft 365, GoDaddy). Full walkthrough: [publish your first DMARC
-record](/guides/publish-your-first-dmarc-record/).
+- The **Name/Host** is often `_dmarc`; check whether your DNS host appends the
+  domain or expects the full name.
+- `p=none` expresses no handling preference for mail that fails DMARC. Receivers
+  can still filter or reject mail under their own rules.
+- `rua=` requests [aggregate reports](/glossary/dmarc-aggregate-report/) from
+  participating receivers. It does not guarantee reports from every receiver.
+
+Use the DNS provider serving your domain's **authoritative nameservers**;
+editing a zone elsewhere has no effect. Provider-specific steps are under
+[DMARC setup](/dmarc-for/).
 
 ## Confirm it's actually there
 
-Check from outside your DNS provider's UI, which can show a record that isn't
-resolving the way you expect:
+Check outside your DNS provider's control panel:
 
+```sh
+dig TXT _dmarc.yourdomain.com
 ```
-dig +short TXT _dmarc.yourdomain.com
+
+Read the response status as well as the answer. `NXDOMAIN` means the queried
+name does not exist; `NOERROR` with no TXT answer can mean the name exists
+without a TXT record. Neither says whether a parent policy applies.
+
+You want **one DMARC TXT record**, beginning with `v=DMARC1`. Other unrelated
+TXT records can coexist at the name. Two quoted strings on the same TXT
+record are joined in order without added spaces; they are not two records.
+
+- **No DMARC answer** — check the authoritative zone, the exact name and any
+  cached negative answer.
+- **Two DMARC records** — receivers discard both at that name. Policy discovery
+  can still find an applicable policy above it. Combine the intended settings
+  into one record; keep the enforcement policy you intend to apply.
+- **A DNS error** — fix resolution rather than treating the result as an absent
+  record.
+
+The [DMARC record checker](/tools/dmarc-checker/) checks the record's syntax
+and external reporting authorization, and looks for an inherited policy when
+the exact name has no record.
+
+If your control panel and the public answer disagree, find the authoritative
+nameservers:
+
+```sh
+dig NS yourdomain.com
 ```
 
-No terminal to hand? Our [DMARC record checker](/tools/dmarc-checker/) runs the
-same lookup from your browser and names the problem it finds.
-
-You want exactly one string starting `v=DMARC1`. Three results worth
-recognising:
-
-- **Nothing at all** — the record isn't published, or hasn't propagated.
-- **Two `v=DMARC1` records** — receivers discard both, so the name reads as having
-  no record rather than as two policies. On your root domain that leaves no DMARC
-  at all; on a subdomain the receiver walks up and applies what it finds above.
-  Delete one.
-- **A record at the wrong name** — see below.
+Query one of the returned servers directly, using `dig @nameserver TXT`
+followed by `_dmarc.yourdomain.com`. A correct authoritative answer alongside
+an old recursive answer points to caching. Existing records can remain cached
+for their previous TTL; earlier missing-record answers can also be cached.
+There is no universal one-hour propagation deadline.
 
 ## The doubled-domain mistake
 
-Most DNS hosts append your domain to whatever you type in the *Name* field. Enter
-`_dmarc.yourdomain.com` and you create a record at
-`_dmarc.yourdomain.com.yourdomain.com`, which no checker will ever find. The
-record looks perfect in the control panel, which is what makes it hard to spot.
+Some DNS hosts append your domain to the *Name* field. If you enter
+`_dmarc.yourdomain.com` where only `_dmarc` is expected, the record can end up at
+`_dmarc.yourdomain.com.yourdomain.com`.
 
-Rule it out directly:
+Check that name directly:
 
-```
+```sh
 dig +short TXT _dmarc.yourdomain.com.yourdomain.com
 ```
 
-If that returns your record, fix the *Name* to just `_dmarc`. This is the single
-most common cause of "I published it and it still says not found."
+If it returns your record, correct the host according to your provider's
+instructions and confirm the answer at `_dmarc.yourdomain.com`.
 
-## Syntax that makes a record invisible
+## Missing policy versus invalid syntax
 
-A record that exists but is malformed reads as absent to most checkers:
+An unusable policy and a bad report address need different fixes. A checker
+may label them differently; inspect the returned TXT value.
 
-| Problem | Example |
+| Problem | Effect and fix |
 |---|---|
-| Wrong version case | `v=dmarc1` — must be `v=DMARC1`, exactly |
-| `v=` not first | `p=none; v=DMARC1` — the version tag must lead |
-| Smart quotes | A curly `"` pasted from a document |
-| Missing scheme in `rua` | `rua=dmarc@yourdomain.com` needs `mailto:` |
+| Wrong version case | `v=dmarc1` is not the required `v=DMARC1`. Correct the value. |
+| `v=` not first | `p=none; v=DMARC1` does not start with the version tag. Move `v=DMARC1` first. |
+| Literal curly quotes | Typographic quotes copied into the value can break syntax. Use plain text; distinguish literal characters from quotes the DNS tool uses to display a TXT string. |
+| Missing scheme in `rua` | `rua=dmarc@yourdomain.com` is not a valid reporting URI. Use `rua=mailto:dmarc@yourdomain.com`; a bad reporting URI does not by itself mean the policy is missing. |
 
 ## The subdomain case
 
-"Not found" on a subdomain usually means the tool and the receiver are looking in
-different places. A receiver starts at the exact name in the `From:` address and, if
-there is no record there, **walks up the DNS tree** to your organizational domain.
-Checkers report on the name you typed and stop.
+If `news.yourdomain.com` has no record at `_dmarc.news.yourdomain.com`, a
+receiver can still find an applicable policy at `yourdomain.com`. A checker
+that reports only on the exact name may say "not found" while a receiver
+applies that policy.
 
-So if `news.yourdomain.com` has no `_dmarc` record, a checker aimed at that subdomain
-says "not found", while at delivery time the receiver finds your root record and
-applies its `sp=`. A subdomain that doesn't resolve at all gets `np=` instead. When
-the tag that applies isn't published, an existing subdomain falls back to `p=`, while
-a name that doesn't exist falls back to `sp=` first and only then to `p=`. There is a
-policy in force; the tool simply isn't looking where the receiver looks.
+When `yourdomain.com` is the organizational domain, its `sp=` governs existing
+subdomains without their own policy, falling back to `p=` when absent.
+For a non-existent subdomain, `np=` applies, falling back to `sp=` and then
+`p=`. Non-existent means DNS returns `NXDOMAIN` for the domain, not merely
+that it lacks an A, MX or `_dmarc` record.
 
-That walk is newer than most of the advice written about it. The original DMARC
-specification worked out where your organizational domain began using a public suffix
-list, without mandating which one — so two receivers could disagree about it. The
-current specification ([RFC 9989](/rfc/9989/)) replaced that with the tree walk. It
-queries every name on the way up, but the policy it applies is still the one at the
-`From:` name itself or at your organizational domain — a record on an intermediate
-name does not govern the names below it by sitting there. Making it govern them takes
-`psd=n`, which declares the name an organizational domain in its own right: the tag
-to reach for when a subdomain delegated to a team or a customer needs its own policy
-and its own reports. See
-[what changed in the new DMARC standard](/guides/dmarc-rfc-9989/).
+The current specification discovers organizational domains through a **DNS tree
+walk**, replacing the older public-suffix-list method. The walk is bounded to
+eight queries, so deeply nested names can have intermediate labels skipped.
+A record at an intermediate name does not automatically govern everything
+below it. Publishing `psd=n` declares that name an organizational domain for
+itself and its subdomains; where none of the records establishes a boundary,
+the record at the name with the fewest labels determines the organizational
+domain. A public-suffix policy can also apply when discovery finds no policy
+at the From or organizational domain.
 
-If a subdomain sends mail, give it its own record, and set `sp=` on the root only if
-you want subdomains treated *differently* — see the
-[tag reference](/guides/dmarc-record-tags/).
+A sending subdomain can inherit a policy; it does not need a separate record
+unless you want different settings. Check the inherited policy before making
+that choice. See [what changed in the current DMARC
+standard](/guides/dmarc-rfc-9989/) for the discovery rules and
+[DMARC policy](/glossary/dmarc-policy/) for enforcement choices.
 
 ## "Please try a different email" on signup forms
 
-Some services reject signups from domains without DMARC, showing "no DMARC record
-found for this domain." Publishing the `p=none` record above resolves it once DNS
-propagates (usually minutes, up to ~an hour).
+A signup form may impose its own domain checks. If it specifically requires a
+DMARC record, publishing a valid one can satisfy that check after cached
+answers expire. It cannot guarantee acceptance: the service may also require
+an enforcement policy or apply unrelated restrictions. Follow its stated
+requirements rather than weakening an existing policy to `p=none`.
 
 ## Reports won't arrive if `rua=` is wrong
 
-Publishing the record is only half of it — a policy with an unreachable `rua=`
-mailbox gives you enforcement guidance you can never act on, because no data ever
-arrives. Make sure the address exists and accepts mail from outside.
+A working policy does not prove reports can reach you. Confirm that the
+mailbox accepts external mail and check filtering or attachment limits.
 
-One thing that surprises people: if the `rua=` mailbox is outside the organizational
-domain publishing the record, that domain has to authorise the arrangement with a
-record of its own ([RFC 9990](/rfc/9990/)). `dmarc@mail.yourdomain.com` under a record
-at `yourdomain.com` is inside that organizational domain and needs nothing. A second
-domain you also own is outside it, and still does:
+**External reporting authorization** ([RFC 9990](/rfc/9990/)) is required when
+the policy domain and reporting destination have different organizational
+domains. Assuming `yourdomain.com` is the organizational domain for both,
+`dmarc@mail.yourdomain.com` needs no external authorization for a policy at
+`yourdomain.com`. A destination on another organizational domain needs it even
+if you own both.
 
-```
+For a policy at `yourdomain.com` requesting reports at
+`reports@analyzer.example`, the destination's DNS operator can authorize it
+with:
+
+```text
 yourdomain.com._report._dmarc.analyzer.example.   TXT   "v=DMARC1"
 ```
 
-The check compares organizational domains, not owners, so owning both ends exempts
-you from nothing. Without the record, conforming receivers discard the reporting
-request silently — the policy still validates, nothing bounces, and the reports never
-come. Agencies centralising many clients' reports into one mailbox hit this
-constantly; [DMARC for many client domains](/guides/dmarc-multiple-client-domains/)
-covers the wildcard form and the trap that comes with it.
-The [record checker](/tools/dmarc-checker/) performs that second lookup for every
-external `rua=` address it finds, which is the fastest way to rule this out. Once
-they do arrive, something has to parse the XML and aggregate it across domains —
-that's what [DMARC Analyzer](/) does, self-hosted and without per-domain pricing.
+Without authorization, receivers must ignore that external destination; the
+policy can still apply, and other valid destinations can still receive
+reports. There need not be a notification to the policy publisher. Use the
+record checker above to verify authorization before waiting for reports.
+
+Reporting is optional, and delayed or missing reports are not proof that the
+policy is absent. When reports arrive for many client domains,
+[DMARC Analyzer](/) parses the XML into one self-hosted console without
+per-domain pricing.
 
 ## What next
 
-After it propagates, confirm the record is live, then learn to [read the
-reports](/guides/how-to-read-a-dmarc-aggregate-report/) that start arriving and
-plan your [path to enforcement](/guides/from-monitoring-to-enforcement/).
+Confirm the public answer and applicable policy, then learn to [read the
+reports](/guides/how-to-read-a-dmarc-aggregate-report/) before changing
+how failing mail should be handled.
