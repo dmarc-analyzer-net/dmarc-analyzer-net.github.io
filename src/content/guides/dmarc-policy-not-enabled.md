@@ -66,6 +66,12 @@ These examples show policy changes, not replacements for all your settings.
 Edit your existing single record, retaining other tags unless you intend to
 change them. Use a reporting mailbox you control.
 
+Changing `p` can also change the policy inherited by subdomains when no
+applicable `sp` or `np` overrides it. If only subdomain handling needs changing,
+leave the parent `p` unchanged: update `sp` on the organizational-domain record
+or publish a record for the specific subdomain. Check [subdomain
+inheritance](#not-enabled-but-you-meant-to-enable-it) before editing.
+
 **Don't rely on `pct=` as a precise rollout control.** The current standard
 removed it after inconsistent receiver behavior. Older implementations may
 still interpret it; others ignore it and evaluate the published policy without
