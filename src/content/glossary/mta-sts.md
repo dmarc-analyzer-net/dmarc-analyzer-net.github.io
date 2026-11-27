@@ -53,9 +53,11 @@ Serve the file as `text/plain`.
 v=STSv1; id=20260101000000
 ```
 
-When editing a policy, publish the HTTPS file **before** changing the TXT
-`id`. Use a new ID for each revision. Senders can use that change to discover an
-update without waiting for cache expiry, but DNS caching still delays visibility.
+When editing a policy, publish the HTTPS file, then fetch
+`https://mta-sts.yourdomain.com/.well-known/mta-sts.txt` and confirm it returns
+the updated policy **before** changing the TXT `id`. Use a new ID for each
+revision. Senders can use that change to discover an update without waiting for
+cache expiry, but DNS caching still delays visibility.
 They should also refresh proactively before expiry; an unchanged ID does not
 forbid a refetch. Keep old policies compatible with delivery during the change.
 
