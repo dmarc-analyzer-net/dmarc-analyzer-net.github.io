@@ -1,188 +1,219 @@
 ---
 title: Why your email is failing DMARC (and how to fix it)
 seoTitle: 'Why email fails DMARC & how to fix it'
-description: Email failing DMARC? Learn what a DMARC failure actually means, the handful of causes behind it, and exactly how to diagnose and fix each one.
+description: Email failing DMARC? Diagnose authentication and alignment failures, repair SPF and DKIM, and separate forwarding problems from unauthorized senders.
 publishDate: 2026-07-23
+updatedDate: 2026-11-28
 ---
 
-A DMARC failure looks alarming in a report, but it almost always comes down to
-one of a few well-understood causes. This guide explains what "failing DMARC"
-really means, then walks through each cause and its fix — in the order worth
-checking them.
+Email fails **DMARC** (Domain-based Message Authentication, Reporting, and
+Conformance, [RFC 9989](/rfc/9989/)) when neither SPF nor DKIM produces a pass
+aligned with the visible `From:` domain. Start with the failing message or
+report row: identify the authenticated domains, check alignment, then repair the
+legitimate sender. A failed check alone does not tell you whether mail was
+rejected or delivered.
 
 ## The one rule behind every DMARC failure
 
-A message **passes DMARC** when *either* [SPF](/glossary/spf/) *or*
-[DKIM](/glossary/dkim/) does two things at once:
+A message passes DMARC when either:
 
-1. **Authenticates** — the check itself passes, and
-2. **Aligns** — the domain it authenticated matches your `From:` domain.
+- **SPF passes** for the envelope-sender domain and that domain aligns with the
+  `From:` domain, or
+- **At least one DKIM signature verifies** and its `d=` domain aligns with the
+  `From:` domain.
 
-If neither SPF nor DKIM manages both, the message **fails DMARC**. That's it.
-Every "dmarc fail" you'll ever see is some version of *authentication broke*, or
-*authentication passed but didn't align*. The second one trips up almost
-everyone, so start there.
+By default, [alignment](/glossary/dmarc-alignment/) is relaxed: the domains must
+share an organizational domain. For example, `bounce.yourdomain.com` can align
+with `yourdomain.com`. Strict alignment (`aspf=s` or `adkim=s`) requires an exact
+domain match for that mechanism. An aligned name with a failed authentication
+check is not enough; neither is a passing check for an unrelated domain.
+
+A missing policy or a policy-lookup error is a different diagnosis from a
+message evaluated as `dmarc=fail`. Check the result reported by the receiver
+before changing authentication records. Receivers also apply local filtering:
+DMARC pass does not guarantee delivery, and DMARC fail does not guarantee
+rejection.
 
 ## "SPF pass but DMARC fail" — the alignment trap
 
-This is the single most common confusion. Your report shows SPF **pass**, yet
-DMARC **fails**. How?
+**SPF** (Sender Policy Framework, [RFC 7208](/rfc/7208/)) checks whether the
+connecting server may use the SMTP `MAIL FROM` domain. This envelope sender is
+normally recorded in `Return-Path` on delivery; it is separate from the visible
+`From:` address. With an empty envelope sender, SPF derives the identity from
+HELO/EHLO. An unrelated HELO pass does not rescue a failed non-empty envelope
+identity for DMARC.
 
-SPF authenticates the **envelope sender** — the [`MAIL FROM`](/rfc/5321/) address
-the sending server offers in the SMTP conversation, which reaches the mailbox as
-`Return-Path` if it is visible at all. It is not the `From:` address your
-recipients see. Send through a marketing platform or ESP and the envelope is
-usually a domain of the platform's own — `sendgrid.net`, say, until you set up a
-bounce domain of yours — while your `From:` stays `you@yourdomain.com`. SPF
-passes for *their* domain — but that domain doesn't
-[align](/glossary/dmarc-alignment/) with yours, so it earns you nothing under
-DMARC.
+A sending platform can pass SPF for its own envelope domain while using
+`you@yourdomain.com` in `From:`. That pass is unaligned. Adding the platform's
+SPF include to `yourdomain.com` does not change the envelope identity it uses.
 
-**Fix:** get alignment, not just authentication. Either
+**Fix:** configure the platform's custom bounce/Return-Path domain and publish
+its exact DNS instructions, or configure aligned DKIM. With relaxed alignment,
+`bounce.yourdomain.com` can provide SPF alignment for `you@yourdomain.com`;
+with strict SPF alignment, those two domains do not match. One aligned,
+passing DKIM signature is sufficient even if SPF remains unaligned.
 
-- configure a **custom Return-Path / bounce domain** on your sending platform
-  (usually a CNAME on a subdomain of yours), so SPF authenticates *your* domain, or
-- rely on **aligned DKIM** instead (below) — often the easier path with ESPs.
+## Cause 1 — a sending service you never configured
 
-You only need *one* aligned mechanism, so a correctly aligned DKIM signature
-makes the SPF-alignment problem moot.
+A CRM, help desk or newsletter service sending with your `From:` domain needs
+aligned authentication. First confirm that the source belongs to a service you
+actually use. A passing SPF or DKIM result for an unrelated domain can also
+appear on forged mail; it is not permission to authorize the source.
 
-## Cause 1 — a sending service you never authorized
-
-If a legitimate service (CRM, help desk, invoicing tool, newsletter) sends as
-your domain but you never set it up for authentication, it will fail. Every such
-source can appear in your [aggregate reports](/glossary/dmarc-aggregate-report/)
-when a participating receiver observes its mail.
-
-**Fix:** for each real source, add its SPF `include:` and publish its DKIM key
-(most providers give you a selector and a CNAME/TXT to add). Then confirm it
-aligns to your `From:` domain.
+**Fix:** enable custom-domain DKIM and/or an aligned envelope domain using the
+provider's instructions. Publish the requested TXT or CNAME records at the names
+it specifies. Add an SPF include only at the domain actually checked by SPF and
+only when the provider requires it. Keep existing authorized senders in the
+single SPF record there. Send a test message and confirm an aligned pass at the
+receiver.
 
 ## Cause 2 — SPF is broken
 
-Even when SPF *should* align, the record itself can fail:
+Check the record for the envelope domain the failing message used:
 
-- **Too many DNS lookups.** SPF allows a maximum of **10** terms that query DNS;
-  the eleventh is a `permerror`, which counts as a failure. Chained `include:`s
-  blow past this. [SPF record syntax](/guides/spf-record-syntax/) covers which
-  terms cost a lookup and how to total them, and the [SPF record
-  checker](/tools/spf-checker/) expands a record term by term.
-- **More than one SPF record.** A domain must have exactly **one** `TXT` SPF
-  record. Two records is also a `permerror`.
-- **A missing sender.** The sending IP simply isn't covered by any mechanism.
+- **Too many DNS-querying terms.** The limit is ten evaluated `include`, `a`,
+  `mx`, `ptr`, `exists` and `redirect` terms, including recursive evaluation.
+  An early match can pass while a later sender reaches an eleventh term and gets
+  `permerror`, so failures can be intermittent. This is not a count of DNS
+  packets. Other DNS limits also apply; [SPF record
+  syntax](/guides/spf-record-syntax/) explains them, and the [SPF record
+  checker](/tools/spf-checker/) helps inspect the expansion.
+- **Multiple SPF records or invalid syntax.** Multiple selected `v=spf1` TXT
+  records produce `permerror`. Multiple quoted strings within one TXT record
+  are different: DNS concatenates them into one value.
+- **No matching authorization.** The sending IP is missing, an include points
+  at the wrong name, or an earlier mechanism determines the result before the
+  intended rule is reached. `softfail`, `neutral` and `none` are not SPF pass.
+- **DNS errors.** A temporary lookup failure can produce `temperror`; retry and
+  investigate DNS availability rather than adding more includes.
 
-**Fix:** keep a single record, get the lookup count to ten or below, and make
-sure every real sender is represented. Prune the `include:`s for services you no
-longer send through first, then give a heavy sender its own subdomain, which
-comes with its own budget. A subdomain only buys you anything once that sender's
-`Return-Path` actually uses it — moving the `include:` by itself authorizes
-nothing — and it stays aligned because DMARC accepts any subdomain of yours by
-default; `aspf=s` turns that off and demands an exact match. Replacing an
-`include:` with the `ip4:` and `ip6:` ranges behind it — "flattening" — gets you
-under the limit too, but you have taken on the maintenance: those ranges are the
-provider's to renumber without telling you, and an IPv6 range you left out of
-the copy fails SPF for every message the provider sends from it — survivable on
-mail that also carries an aligned DKIM signature, not on mail that doesn't.
-Example of a clean record:
+**Fix:** correct syntax, keep one SPF record per checked domain, and remove
+unused includes before adding authorization. A sender can use a separate
+envelope subdomain with its own evaluation budget, but moving an include alone
+does not move the sender. Check alignment before changing its envelope domain.
 
+Replacing includes with `ip4:`/`ip6:` ranges (flattening) makes you responsible
+for tracking every provider range change. Missing or stale ranges can fail
+legitimate mail or authorize addresses the provider no longer uses. Prefer
+provider-managed records where feasible.
+
+For a server whose only sending address is `192.0.2.10`, the record shape is:
+
+```text
+v=spf1 ip4:192.0.2.10 -all
 ```
-v=spf1 include:_spf.google.com include:sendgrid.net -all
-```
+
+That is a documentation address. Replace it with your authorized sending IPs;
+do not copy it over a provider's working record. `-all` does not make an
+unaligned pass align.
 
 ## Cause 3 — DKIM isn't signing (or is signing wrong)
 
-DKIM fails when the signature can't be verified: the key isn't published, the
-**selector** is wrong, the provider isn't signing at all, or the message was
-modified in transit (some mailing lists rewrite bodies and break the signature).
+**DKIM** (DomainKeys Identified Mail, [RFC 6376](/rfc/6376/)) verifies a signature
+using the public key at `<selector>._domainkey.<signing-domain>`. Read `s=` and
+`d=` from the actual message's `DKIM-Signature`, rather than guessing the
+selector or looking under the `From:` domain automatically.
 
-**Fix:** publish the exact selector record your provider specifies — [find your
-DKIM selector](/guides/find-your-dkim-selector/) covers digging it out of a
-message you already have, and the [DKIM record checker](/tools/dkim-checker/)
-reads back what is published — confirm the provider has DKIM *enabled* (it's
-often off by default), and check that the
-signature's `d=` domain aligns with your `From:` domain. Aligned DKIM is the
-most robust way to pass DMARC because, unlike SPF, it survives most forwarding.
+**Fix:** enable signing for your domain, publish the exact provider key or CNAME,
+and verify the lookup with the [DKIM record checker](/tools/dkim-checker/).
+A published key alone does not prove the provider signs outgoing mail. Send a
+test and confirm both signature verification and `d=` alignment.
 
-## Cause 4 — forwarding
+If verification fails, check for a wrong selector, missing/revoked key, DNS error,
+or modification of signed headers or body content in transit. If verification
+passes but DMARC fails, check `d=` alignment and `adkim`. A message may have
+several signatures: one that verifies and aligns is enough, even if another
+fails or uses the platform's domain.
 
-Auto-forwarded mail — someone forwards from `@yourdomain` to a personal Gmail —
-**breaks SPF**, and it is worth being precise about why, because the usual
-explanation is backwards.
+## Cause 4 — forwarding or mailing-list changes
 
-Plain forwarding breaks SPF *because the envelope doesn't change.* The forwarder
-relays your original `MAIL FROM` from **its own** IP address, and
-that IP is not in your SPF record, so the check fails. Nothing was rewritten;
-that is the problem.
+Plain forwarding often retains the original envelope sender but connects from
+the forwarder's IP. If that IP is not authorized by the envelope domain's SPF
+record, SPF does not pass. Forwarding does not invariably break SPF; the result
+depends on the actual envelope and authorization.
 
-Forwarders that *do* rewrite the envelope — the technique is called SRS — make SPF
-**pass**, for their domain. Which then fails
-[alignment](/glossary/dmarc-alignment/), because the domain that passed is no
-longer yours. So SRS is not a fix for DMARC either; it just moves the failure one
-step along.
+SRS rewrites the envelope sender. It can let the forwarder pass SPF for its own
+domain, but that does not provide alignment with your original `From:` domain.
+Do not add arbitrary forwarders to your SPF record to compensate.
 
-Some forwarders also modify the message — a footer, a rewritten subject — which
-**can break DKIM** when it changes signed content. Forwarded mail fails DMARC
-when neither SPF nor any DKIM signature still passes with alignment.
+Aligned DKIM can survive forwarding that preserves signed content. Mailing-list
+footers, subject changes and other alterations can invalidate it. Test the
+actual path. **ARC** (Authenticated Received Chain,
+[RFC 8617](/rfc/8617/)) can carry earlier authentication assessments through an
+intermediary. A receiver that trusts that evidence may override a DMARC policy;
+ARC does not turn the underlying DMARC failure into a pass or guarantee delivery.
 
-**Fix:** there's no perfect fix, but aligned DKIM survives forwarding that doesn't
-modify the message, and [ARC](/glossary/arc/) lets participating receivers honor a
-prior "pass" — read what it does and doesn't buy before relying on it. Don't
-tighten your policy based on forwarding failures alone: they never reach zero, so
-waiting for them to is not a plan.
+**Fix:** sign legitimate outbound mail with aligned DKIM, identify paths that
+modify it, and test forwarding and list delivery before tightening policy. A
+path that still fails needs an explicit decision about delivery risk, rather
+than an assumption that all forwarded mail is safe or that every failure is
+repairable at your DNS.
 
-## Cause 5 — a subdomain with no record
+## Cause 5 — a subdomain with unexpected authentication or policy
 
-Mail from `news.yourdomain.com` is governed by that subdomain's DMARC — or, if
-it has none, by your organizational policy's subdomain tag (`sp=`), or by `p=`
-itself when no `sp=` is published. A forgotten subdomain sending unauthenticated
-mail will fail either way.
+A missing subdomain DMARC record does not itself cause authentication failure.
+Mail from `news.yourdomain.com` can pass using aligned SPF or DKIM under an
+inherited policy. SPF records, however, do not automatically inherit from the
+parent: check the actual envelope domain.
 
-**Fix:** publish DMARC (and SPF/DKIM) on active subdomains, and treat `sp=` on your
-main [policy](/glossary/dmarc-policy/) as the exception rather than the default —
-subdomains already inherit `p=`. For names that don't resolve at all, `np=` covers
-them specifically; the [tag reference](/guides/dmarc-record-tags/) has both.
+**Fix:** verify the `From:` subdomain, envelope domain and DKIM signing domain.
+Check `_dmarc.news.yourdomain.com` first. If there is no valid record there,
+policy discovery looks for the organizational-domain policy or, where
+applicable, a public-suffix policy. This is not arbitrary nearest-parent
+inheritance.
+
+For a policy inherited from `yourdomain.com`, existing subdomains use `sp`,
+falling back to `p`. Non-existent subdomains use `np`, then `sp`, then `p`.
+Non-existent means DNS returns NXDOMAIN for the domain itself, not merely that
+its `_dmarc` record is missing. Publish a separate DMARC record only when you
+need a distinct policy or reporting setup; it is not an authentication repair.
 
 ## How to diagnose which one it is
 
-Don't guess — the answer is in the data. DMARC
-[aggregate reports](/glossary/dmarc-aggregate-report/) list the sources observed
-by reporting receivers and show, per source, whether SPF and DKIM **authenticated** and
-whether they **aligned**. Read the DKIM column first: one aligned pass is the
-whole test, so a source whose SPF passes unaligned beside an aligned DKIM
-signature is not failing and is not a cause. For the sources that did fail, that
-two-by-two (auth × alignment) tells you which one applies:
+For an individual message, read the receiving system's authentication results
+and delivery/rejection details. For patterns, use **aggregate reports**
+([RFC 9990](/rfc/9990/)): participating receivers summarize the mail they
+observed over each reported interval. Reports are optional and incomplete;
+absence of a source is not proof it never sent mail.
 
-- SPF pass but not aligned → the alignment trap, above. Don't recognize the
-  source? Identify it before you authorize it — an unaligned pass fits someone
-  spoofing you as well as it fits a service a colleague signed up for, and only
-  the second one is Cause 1
-- SPF permerror → Cause 2
-- DKIM fail or no signature → Cause 3
-- Passes for known mail but fails only on forwarded paths → Cause 4
-- A `header_from` on a subdomain you weren't thinking about → Cause 5. Every
-  record carries the `From:` domain it was counted against, so a forgotten
-  subdomain names itself
+In a failing report row, compare `header_from` with the domains in
+`auth_results`. Those are raw authentication results. The `spf` and `dkim`
+fields in `policy_evaluated` are the DMARC alignment results. If either is
+`pass`, that row passes DMARC. `disposition` describes DMARC handling, not a
+receipt confirming final inbox delivery.
 
-Learn to read them in [how to read a DMARC aggregate
-report](/guides/how-to-read-a-dmarc-aggregate-report/).
+| Evidence in a failing row | Next check |
+|---|---|
+| Raw SPF or DKIM pass, both DMARC results fail | Domain alignment and strict/relaxed settings |
+| SPF `permerror` or `temperror` | Record syntax/limits or DNS availability |
+| DKIM failure or no signature | Signing enabled, selector/key and message changes |
+| Direct tests pass, forwarded/list mail fails | Envelope changes and signed-content modification |
+| Unexpected `header_from` subdomain | Sender identity, authentication and inherited policy |
 
-One report is one receiver's view of one day, and most of these causes only
-separate out over a run of them — a source failing everywhere looks nothing like
-a source failing on one path. Keeping that comparison going across every source
-and every domain is the job [DMARC Analyzer](/) does, self-hosted.
+One IP can carry both legitimate and abusive traffic. Identify the service and
+message path before authorizing it, and compare rows across reporters and dates.
+[How to read a DMARC aggregate report](/guides/how-to-read-a-dmarc-aggregate-report/)
+walks through the XML.
+
+Across many client domains, [DMARC Analyzer](/) keeps those comparisons in one
+self-hosted console. The [domain detail view](/docs/domain-detail/) separates
+raw authentication from DMARC evaluation so you can investigate a source
+without treating an unaligned pass as a success.
 
 ## Quick checklist
 
-- [ ] Is at least one of SPF or DKIM **aligned** to your `From:` domain?
-- [ ] Exactly **one** SPF record, at **10** DNS-querying terms or fewer?
-- [ ] DKIM **enabled** at every provider, with the correct selector published?
-- [ ] Every legitimate sender in your reports **accounted for**?
-- [ ] A deliberate **`sp=`** and records on active **subdomains**?
+- [ ] At least one SPF or DKIM result **passes and aligns** at the receiver?
+- [ ] SPF checked at the actual envelope domain, with one valid record and its
+      evaluation within DNS limits?
+- [ ] DKIM signing enabled, correct key published, and a verifying `d=` aligned?
+- [ ] Legitimate services identified independently of raw authentication passes?
+- [ ] Forwarding, mailing lists and subdomain policies tested?
 
 ## What next
 
-Once failures are down to only the sources you expect, you're ready to move from
-monitoring toward enforcement — safely, in stages. See
-[from monitoring to enforcement](/guides/from-monitoring-to-enforcement/), and if
-you haven't yet, [publish your first DMARC
-record](/guides/publish-your-first-dmarc-record/) in monitoring mode first.
+Move toward enforcement when you have inventoried legitimate senders, corrected
+aligned authentication and assessed the remaining indirect-mail risk. Include
+infrequent senders such as monthly billing; a quiet reporting window alone does
+not prove readiness. Follow [from monitoring to
+enforcement](/guides/from-monitoring-to-enforcement/), preserving any existing
+protection while you investigate individual sources.
