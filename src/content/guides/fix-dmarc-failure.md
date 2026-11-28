@@ -157,10 +157,16 @@ inherited policy. SPF records, however, do not automatically inherit from the
 parent: check the actual envelope domain.
 
 **Fix:** verify the `From:` subdomain, envelope domain and DKIM signing domain.
-Check `_dmarc.news.yourdomain.com` first. If there is no valid record there,
+Check `_dmarc.news.yourdomain.com` first. If no DMARC policy record exists there,
 policy discovery looks for the organizational-domain policy or, where
 applicable, a public-suffix policy. This is not arbitrary nearest-parent
 inheritance.
+
+A retrieved record with an invalid `p` value does not trigger a parent-policy
+search. If its `rua` contains at least one syntactically valid reporting URI,
+the receiver treats the policy as `p=none` and continues processing. Otherwise,
+it applies no DMARC processing to the message. Correct the invalid policy
+rather than assuming the parent policy protects the subdomain.
 
 For a policy inherited from `yourdomain.com`, existing subdomains use `sp`,
 falling back to `p`. Non-existent subdomains use `np`, then `sp`, then `p`.
